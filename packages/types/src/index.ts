@@ -81,9 +81,9 @@ export interface Plan {
 }
 
 export const PLANS: Record<PlanTier, Plan> = {
-  free: { tier: "free", monthlyFileLimit: 3, maxHouseholdMembers: 1 },
-  pro: { tier: "pro", monthlyFileLimit: 30, maxHouseholdMembers: 1 },
-  family: { tier: "family", monthlyFileLimit: 60, maxHouseholdMembers: 6 },
+  free: { tier: "free", monthlyFileLimit: 25, maxHouseholdMembers: 1 },
+  pro: { tier: "pro", monthlyFileLimit: 60, maxHouseholdMembers: 1 },
+  family: { tier: "family", monthlyFileLimit: 1000, maxHouseholdMembers: 6 },
 }
 
 // ─── API Responses ────────────────────────────────────────────────────────────

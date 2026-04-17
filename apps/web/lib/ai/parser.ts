@@ -1,10 +1,10 @@
 import Anthropic from "@anthropic-ai/sdk"
+import { ollamaChat } from "./ollama"
 import type { FileType } from "@expensable/types"
-
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
+import { sanitizeForAI } from "./sanitize"
 
 export interface ParsedTransaction {
-  date: string        // ISO date string
+  date: string
   description: string
   amount: number
   currency: string
@@ -20,8 +20,13 @@ export interface ParseResult {
   confidence: "high" | "medium" | "low"
 }
 
+type ParseInput =
+  | string
+  | { type: "image"; mediaType: string; data: string }
+  | { type: "pdf"; data: string }
+
 const SYSTEM_PROMPT = `You are a financial data extraction expert. Extract all transactions from the provided document.
-Return a JSON object with this structure:
+Return a JSON object with this exact structure:
 {
   "transactions": [
     {
@@ -32,46 +37,96 @@ Return a JSON object with this structure:
       "type": "debit" | "credit",
       "merchantName": "cleaned merchant name or null",
       "categoryHint": "one of: food, transport, utilities, entertainment, health, shopping, travel, subscription, income, transfer, other",
-      "needsReview": true/false
+      "needsReview": true | false
     }
   ],
   "confidence": "high" | "medium" | "low"
 }
-Set needsReview=true when date, amount, or merchant is ambiguous. Amounts should be positive numbers regardless of debit/credit.`
+Rules:
+- Set needsReview=true when date, amount, or merchant is ambiguous
+- Amounts are always positive numbers regardless of debit/credit
+- Use ISO 8601 date format (YYYY-MM-DD)
+- Return only the JSON object, no other text`
 
-export async function parseFileContent(
-  content: string | { type: "base64"; mediaType: string; data: string },
-  fileType: FileType
-): Promise<ParseResult> {
-  const userContent =
-    typeof content === "string"
-      ? `Parse all transactions from this ${fileType.toUpperCase()} content:\n\n${content}`
-      : `Parse all transactions from this receipt/document image.`
+function useOllama() {
+  return !process.env.ANTHROPIC_API_KEY
+}
+
+function extractJson(text: string): ParseResult {
+  const match = text.match(/\{[\s\S]*\}/)
+  if (!match) throw new Error("No parseable JSON in response")
+  return JSON.parse(match[0]) as ParseResult
+}
+
+async function parseWithOllama(content: ParseInput, fileType: FileType): Promise<ParseResult> {
+  if (content instanceof Object && content.type === "pdf") {
+    throw new Error("PDF parsing requires ANTHROPIC_API_KEY — Ollama cannot read PDFs natively")
+  }
+
+  if (typeof content === "string") {
+    const safe = sanitizeForAI(content)
+    const raw = await ollamaChat(
+      SYSTEM_PROMPT,
+      `Parse all transactions from this ${fileType.toUpperCase()} content:\n\n${safe}`
+    )
+    return extractJson(raw)
+  }
+
+  // image — gemma4 supports vision
+  const raw = await ollamaChat(
+    SYSTEM_PROMPT,
+    "Parse all transactions from this receipt/document image.",
+    content.data
+  )
+  return extractJson(raw)
+}
+
+async function parseWithClaude(content: ParseInput, fileType: FileType): Promise<ParseResult> {
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
+
+  let messageContent: Anthropic.MessageParam["content"]
+
+  if (typeof content === "string") {
+    const safe = sanitizeForAI(content)
+    messageContent = `Parse all transactions from this ${fileType.toUpperCase()} content:\n\n${safe}`
+  } else if (content.type === "pdf") {
+    messageContent = [
+      {
+        type: "document",
+        source: { type: "base64", media_type: "application/pdf", data: content.data },
+      },
+      { type: "text", text: "Parse all transactions from this PDF document." },
+    ]
+  } else {
+    messageContent = [
+      {
+        type: "image",
+        source: {
+          type: "base64",
+          media_type: content.mediaType as "image/jpeg" | "image/png" | "image/webp" | "image/gif",
+          data: content.data,
+        },
+      },
+      { type: "text", text: "Parse all transactions from this receipt/document image." },
+    ]
+  }
 
   const message = await client.messages.create({
     model: "claude-sonnet-4-6",
     max_tokens: 4096,
     system: SYSTEM_PROMPT,
-    messages: [
-      {
-        role: "user",
-        content:
-          typeof content === "string"
-            ? userContent
-            : [
-                {
-                  type: "image",
-                  source: { type: "base64", media_type: content.mediaType as "image/jpeg" | "image/png" | "image/webp", data: content.data },
-                },
-                { type: "text", text: "Parse all transactions from this receipt/document image." },
-              ],
-      },
-    ],
+    messages: [{ role: "user", content: messageContent }],
   })
 
   const text = message.content[0].type === "text" ? message.content[0].text : ""
-  const jsonMatch = text.match(/\{[\s\S]*\}/)
-  if (!jsonMatch) throw new Error("Claude returned no parseable JSON")
+  return extractJson(text)
+}
 
-  return JSON.parse(jsonMatch[0]) as ParseResult
+export async function parseFileContent(
+  content: ParseInput,
+  fileType: FileType
+): Promise<ParseResult> {
+  return useOllama()
+    ? parseWithOllama(content, fileType)
+    : parseWithClaude(content, fileType)
 }
