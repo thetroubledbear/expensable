@@ -1,0 +1,178 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Auth ─────────────────────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  image         String?
+  passwordHash  String?
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  memberships   HouseholdMember[]
+  uploadedFiles UploadedFile[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ─── Household ────────────────────────────────────────────────────────────────
+
+model Household {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members       HouseholdMember[]
+  uploadedFiles UploadedFile[]
+  transactions  Transaction[]
+  subscriptions DetectedSubscription[]
+  billing       HouseholdBilling?
+}
+
+model HouseholdMember {
+  id          String   @id @default(cuid())
+  householdId String
+  userId      String
+  role        String   @default("member") // owner | member
+  joinedAt    DateTime @default(now())
+
+  household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([householdId, userId])
+}
+
+// ─── Billing / Plans ──────────────────────────────────────────────────────────
+
+model HouseholdBilling {
+  id                   String    @id @default(cuid())
+  householdId          String    @unique
+  stripeCustomerId     String?   @unique
+  stripeSubscriptionId String?   @unique
+  tier                 String    @default("free") // free | pro | family
+  filesUploadedThisMonth Int     @default(0)
+  billingCycleStart    DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+}
+
+// ─── Files & Processing ───────────────────────────────────────────────────────
+
+model UploadedFile {
+  id          String    @id @default(cuid())
+  householdId String
+  uploadedBy  String
+  name        String
+  type        String    // csv | pdf | image
+  status      String    @default("pending") // pending | processing | done | failed
+  storageKey  String
+  errorMsg    String?
+  uploadedAt  DateTime  @default(now())
+  processedAt DateTime?
+
+  household    Household     @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  user         User          @relation(fields: [uploadedBy], references: [id])
+  transactions Transaction[]
+}
+
+// ─── Transactions ─────────────────────────────────────────────────────────────
+
+model Transaction {
+  id           String    @id @default(cuid())
+  householdId  String
+  fileId       String
+  date         DateTime
+  description  String
+  amount       Float
+  currency     String    @default("USD")
+  type         String    // debit | credit
+  categoryId   String?
+  merchantName String?
+  needsReview  Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  household Household    @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  file      UploadedFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  category  Category?    @relation(fields: [categoryId], references: [id])
+}
+
+// ─── Categories ───────────────────────────────────────────────────────────────
+
+model Category {
+  id       String  @id @default(cuid())
+  name     String  @unique
+  icon     String
+  color    String
+  isSystem Boolean @default(true)
+
+  transactions Transaction[]
+}
+
+// ─── Subscriptions ────────────────────────────────────────────────────────────
+
+model DetectedSubscription {
+  id           String   @id @default(cuid())
+  householdId  String
+  merchantName String
+  amount       Float
+  currency     String   @default("USD")
+  frequency    String   // monthly | annual | weekly
+  categoryId   String?
+  firstSeenAt  DateTime
+  lastSeenAt   DateTime
+  updatedAt    DateTime @updatedAt
+
+  household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+
+  @@unique([householdId, merchantName])
+}
