@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "Bash(npx --version)",
+      "Bash(git init *)",
+      "Bash(git config *)",
+      "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --no-src-dir --import-alias \"@/*\" --yes)",
+      "Bash(npx create-expo-app@latest . --template blank-typescript --yes)",
+      "Bash(npm install *)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('version:', d['version']\\)\")",
+      "Bash(node *)",
+      "Read(//c/Program Files/**)",
+      "Read(//c/Users/vtoto/AppData/Local/**)",
+      "Bash(npm run *)",
+      "Bash(npx prisma *)",
+      "Bash(docker-compose up *)",
+      "Bash(DATABASE_URL=\"postgresql://postgres:postgres@localhost:5432/expensable\" npx prisma *)",
+      "Bash(taskkill *)",
+      "Bash(cmd *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
+      "Bash(npx tsc *)",
+      "Bash(curl -s http://localhost:11434/api/tags)",
+      "Bash(curl -s -X POST http://localhost:11434/api/chat -H 'Content-Type: application/json' -d '{\"model\":\"gemma4:e4b\",\"messages\":[{\"role\":\"user\",\"content\":\"Return JSON: {ok:true}\"}],\"stream\":false,\"format\":\"json\"}')",
+      "Bash(sed -i 's/className=\"p-8 max-w-4xl\"/className=\"p-8 max-w-4xl mx-auto w-full\"/g' '/c/Users/vtoto/Desktop/Expensable/apps/web/app/\\(dashboard\\)/files/page.tsx' '/c/Users/vtoto/Desktop/Expensable/apps/web/app/\\(dashboard\\)/insights/page.tsx' '/c/Users/vtoto/Desktop/Expensable/apps/web/app/\\(dashboard\\)/subscriptions/page.tsx' '/c/Users/vtoto/Desktop/Expensable/apps/web/app/\\(dashboard\\)/transactions/page.tsx')",
+      "Bash(sed -i 's/className=\"p-8 max-w-2xl\"/className=\"p-8 max-w-2xl mx-auto w-full\"/g' '/c/Users/vtoto/Desktop/Expensable/apps/web/app/\\(dashboard\\)/upload/page.tsx')",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "sentry"
+  ],
+  "prefersReducedMotion": true
+}
