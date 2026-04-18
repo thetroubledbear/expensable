@@ -1,0 +1,161 @@
+"use client"
+
+import { useState } from "react"
+import { PLANS, type PlanTier } from "@expensable/types"
+import { Zap, Users, Check } from "lucide-react"
+
+const PLAN_META: Record<PlanTier, { label: string; price: string; badgeClass: string }> = {
+  free: { label: "Free", price: "$0/mo", badgeClass: "bg-slate-100 text-slate-700" },
+  pro: { label: "Pro", price: "$9/mo", badgeClass: "bg-emerald-100 text-emerald-700" },
+  family: { label: "Family", price: "$19/mo", badgeClass: "bg-violet-100 text-violet-700" },
+}
+
+interface Props {
+  tier: PlanTier
+  filesUsed: number
+  monthlyLimit: number
+}
+
+export function BillingSection({ tier, filesUsed, monthlyLimit }: Props) {
+  const [loading, setLoading] = useState<"pro" | "family" | "portal" | null>(null)
+  const meta = PLAN_META[tier]
+  const usagePct = Math.min((filesUsed / monthlyLimit) * 100, 100)
+
+  async function upgrade(targetTier: "pro" | "family") {
+    setLoading(targetTier)
+    try {
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tier: targetTier }),
+      })
+      const data = await res.json()
+      if (data.url) window.location.href = data.url
+    } finally {
+      setLoading(null)
+    }
+  }
+
+  async function manageSubscription() {
+    setLoading("portal")
+    try {
+      const res = await fetch("/api/stripe/portal", { method: "POST" })
+      const data = await res.json()
+      if (data.url) window.location.href = data.url
+    } finally {
+      setLoading(null)
+    }
+  }
+
+  return (
+    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+      <h2 className="text-sm font-semibold text-slate-700 mb-5">Plan &amp; Billing</h2>
+
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${meta.badgeClass}`}>
+            {meta.label}
+          </span>
+          <p className="text-xs text-slate-400 mt-1">{meta.price}</p>
+        </div>
+        {tier !== "free" && (
+          <button
+            onClick={manageSubscription}
+            disabled={loading === "portal"}
+            className="text-xs text-emerald-600 hover:underline disabled:opacity-50"
+          >
+            {loading === "portal" ? "Loading…" : "Manage subscription"}
+          </button>
+        )}
+      </div>
+
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-1.5">
+          <p className="text-xs text-slate-500">Files this month</p>
+          <p className="text-xs font-medium text-slate-700 tabular-nums">
+            {filesUsed} / {monthlyLimit}
+          </p>
+        </div>
+        <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+          <div
+            className={`h-full rounded-full transition-all ${usagePct >= 90 ? "bg-red-400" : "bg-emerald-400"}`}
+            style={{ width: `${usagePct}%` }}
+          />
+        </div>
+      </div>
+
+      {tier === "free" && (
+        <div className="grid grid-cols-2 gap-3">
+          <PlanCard
+            name="Pro"
+            price="$9/mo"
+            features={[`${PLANS.pro.monthlyFileLimit} files/mo`, "1 member"]}
+            icon={Zap}
+            iconColor="text-emerald-600"
+            iconBg="bg-emerald-50"
+            loading={loading === "pro"}
+            onUpgrade={() => upgrade("pro")}
+          />
+          <PlanCard
+            name="Family"
+            price="$19/mo"
+            features={[
+              `${PLANS.family.monthlyFileLimit} files/mo`,
+              `${PLANS.family.maxHouseholdMembers} members`,
+            ]}
+            icon={Users}
+            iconColor="text-violet-600"
+            iconBg="bg-violet-50"
+            loading={loading === "family"}
+            onUpgrade={() => upgrade("family")}
+          />
+        </div>
+      )}
+    </div>
+  )
+}
+
+function PlanCard({
+  name,
+  price,
+  features,
+  icon: Icon,
+  iconColor,
+  iconBg,
+  loading,
+  onUpgrade,
+}: {
+  name: string
+  price: string
+  features: string[]
+  icon: React.ElementType
+  iconColor: string
+  iconBg: string
+  loading: boolean
+  onUpgrade: () => void
+}) {
+  return (
+    <div className="rounded-xl border border-slate-100 p-4">
+      <div className={`w-8 h-8 rounded-lg ${iconBg} flex items-center justify-center mb-3`}>
+        <Icon className={`w-4 h-4 ${iconColor}`} />
+      </div>
+      <p className="text-sm font-semibold text-slate-900">{name}</p>
+      <p className="text-xs text-slate-400 mb-3">{price}</p>
+      <ul className="space-y-1 mb-4">
+        {features.map((f, i) => (
+          <li key={i} className="flex items-center gap-1.5 text-xs text-slate-600">
+            <Check className="w-3 h-3 text-emerald-500 shrink-0" />
+            {f}
+          </li>
+        ))}
+      </ul>
+      <button
+        onClick={onUpgrade}
+        disabled={loading}
+        className="w-full bg-slate-900 text-white text-xs font-semibold py-2 rounded-lg hover:bg-slate-700 transition-colors disabled:opacity-50"
+      >
+        {loading ? "Loading…" : `Upgrade to ${name}`}
+      </button>
+    </div>
+  )
+}

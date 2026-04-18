@@ -6,6 +6,7 @@ import { uploadFile, getFileBuffer, buildStorageKey } from "@/lib/storage"
 import { parseFileContent, type ParseResult } from "@/lib/ai/parser"
 import { PLANS, type FileType } from "@expensable/types"
 import { ensureCategories, HINT_TO_CATEGORY } from "@/lib/categories"
+import { detectSubscriptions } from "@/lib/subscriptions"
 
 const MIME_TO_TYPE: Record<string, FileType> = {
   "text/csv": "csv",
@@ -142,7 +143,21 @@ export async function POST(req: NextRequest) {
   const tier = (billing?.tier ?? "free") as keyof typeof PLANS
   const plan = PLANS[tier]
 
-  if ((billing?.filesUploadedThisMonth ?? 0) >= plan.monthlyFileLimit) {
+  // Reset monthly counter if calendar month has rolled over
+  const now = new Date()
+  let monthlyCount = billing?.filesUploadedThisMonth ?? 0
+  if (billing) {
+    const c = billing.billingCycleStart
+    if (c.getMonth() !== now.getMonth() || c.getFullYear() !== now.getFullYear()) {
+      await db.householdBilling.update({
+        where: { id: billing.id },
+        data: { filesUploadedThisMonth: 0, billingCycleStart: now },
+      })
+      monthlyCount = 0
+    }
+  }
+
+  if (monthlyCount >= plan.monthlyFileLimit) {
     return NextResponse.json(
       { error: `Monthly limit reached (${plan.monthlyFileLimit} files on ${tier} plan)` },
       { status: 429 }
@@ -290,6 +305,9 @@ async function processFile(
       where: { id: fileId },
       data: { status: "done", processedAt: new Date() },
     })
+
+    // Re-run subscription detection with updated transaction set
+    await detectSubscriptions(householdId)
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : String(err)
     await db.uploadedFile.update({
