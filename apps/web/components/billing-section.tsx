@@ -1,8 +1,9 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { PLANS, type PlanTier } from "@expensable/types"
-import { Zap, Users, Check } from "lucide-react"
+import { Zap, Users, Check, ArrowUpCircle, ArrowDownCircle } from "lucide-react"
 
 const PLAN_META: Record<PlanTier, { label: string; price: string; badgeClass: string }> = {
   free: { label: "Free", price: "$0/mo", badgeClass: "bg-slate-100 text-slate-700" },
@@ -19,10 +20,11 @@ interface Props {
 export function BillingSection({ tier, filesUsed, monthlyLimit }: Props) {
   const [loading, setLoading] = useState<"pro" | "family" | "portal" | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
   const meta = PLAN_META[tier]
   const usagePct = Math.min((filesUsed / monthlyLimit) * 100, 100)
 
-  async function upgrade(targetTier: "pro" | "family") {
+  async function startCheckout(targetTier: "pro" | "family") {
     setLoading(targetTier)
     setError(null)
     try {
@@ -34,6 +36,28 @@ export function BillingSection({ tier, filesUsed, monthlyLimit }: Props) {
       const data = await res.json()
       if (data.url) {
         window.location.href = data.url
+      } else {
+        setError(data.error ?? "Something went wrong")
+      }
+    } catch {
+      setError("Network error — please try again")
+    } finally {
+      setLoading(null)
+    }
+  }
+
+  async function changePlan(targetTier: "pro" | "family") {
+    setLoading(targetTier)
+    setError(null)
+    try {
+      const res = await fetch("/api/stripe/change-plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tier: targetTier }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        router.refresh()
       } else {
         setError(data.error ?? "Something went wrong")
       }
@@ -114,7 +138,7 @@ export function BillingSection({ tier, filesUsed, monthlyLimit }: Props) {
             iconColor="text-emerald-600"
             iconBg="bg-emerald-50"
             loading={loading === "pro"}
-            onUpgrade={() => upgrade("pro")}
+            onUpgrade={() => startCheckout("pro")}
           />
           <PlanCard
             name="Family"
@@ -127,8 +151,71 @@ export function BillingSection({ tier, filesUsed, monthlyLimit }: Props) {
             iconColor="text-violet-600"
             iconBg="bg-violet-50"
             loading={loading === "family"}
-            onUpgrade={() => upgrade("family")}
+            onUpgrade={() => startCheckout("family")}
           />
+        </div>
+      )}
+
+      {tier === "pro" && (
+        <div className="rounded-xl border border-slate-100 p-4">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-lg bg-violet-50 flex items-center justify-center shrink-0">
+              <Users className="w-4 h-4 text-violet-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-slate-900">Family</p>
+              <p className="text-xs text-slate-400 mb-2">$19/mo</p>
+              <ul className="space-y-1 mb-3">
+                {[
+                  `${PLANS.family.monthlyFileLimit} files/mo`,
+                  `${PLANS.family.maxHouseholdMembers} members`,
+                ].map((f) => (
+                  <li key={f} className="flex items-center gap-1.5 text-xs text-slate-600">
+                    <Check className="w-3 h-3 text-emerald-500 shrink-0" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={() => changePlan("family")}
+                disabled={loading === "family"}
+                className="flex items-center gap-1.5 text-xs font-semibold text-violet-600 hover:text-violet-800 disabled:opacity-50 transition-colors"
+              >
+                <ArrowUpCircle className="w-3.5 h-3.5" />
+                {loading === "family" ? "Upgrading…" : "Upgrade to Family"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {tier === "family" && (
+        <div className="rounded-xl border border-slate-100 p-4">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
+              <Zap className="w-4 h-4 text-emerald-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-slate-900">Pro</p>
+              <p className="text-xs text-slate-400 mb-2">$9/mo</p>
+              <ul className="space-y-1 mb-3">
+                {[`${PLANS.pro.monthlyFileLimit} files/mo`, "1 member"].map((f) => (
+                  <li key={f} className="flex items-center gap-1.5 text-xs text-slate-500">
+                    <Check className="w-3 h-3 text-slate-300 shrink-0" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={() => changePlan("pro")}
+                disabled={loading === "pro"}
+                className="flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-700 disabled:opacity-50 transition-colors"
+              >
+                <ArrowDownCircle className="w-3.5 h-3.5" />
+                {loading === "pro" ? "Downgrading…" : "Downgrade to Pro"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
