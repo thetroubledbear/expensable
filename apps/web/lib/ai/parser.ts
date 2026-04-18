@@ -46,7 +46,8 @@ Rules:
 - Set needsReview=true when date, amount, or merchant is ambiguous
 - Amounts are always positive numbers regardless of debit/credit
 - Use ISO 8601 date format (YYYY-MM-DD)
-- Return only the JSON object, no other text`
+- Return only the JSON object, no other text
+- CRITICAL for categoryHint: Use your world knowledge of real businesses, brands, and services to assign the most accurate category. Examples: "STARBUCKS", "BARKBOY", "EXKI", "PAIN QUOTIDIEN" → food; "UBER", "SNCB", "DE LIJN", "VILLO" → transport; "NETFLIX", "SPOTIFY", "AMAZON PRIME" → subscription; "IKEA", "ZARA", "H&M" → shopping; "BOOKING.COM", "AIRBNB" → travel; "DELHAIZE", "LIDL", "CARREFOUR" → food; "AMAZON" → shopping; "APPLE", "GOOGLE" charges → subscription or shopping based on context. For merchant names with city/location context (e.g. a bar name in a European city), use that context to identify the business type. Only use "other" when the merchant is truly unidentifiable (random alphanumeric codes like "REF 48291", internal bank transfers, or codes with no recognizable pattern).`
 
 function useOllama() {
   return !process.env.ANTHROPIC_API_KEY

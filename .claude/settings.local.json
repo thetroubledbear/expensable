@@ -25,7 +25,8 @@
       "Bash(sed -i 's/className=\"p-8 max-w-4xl\"/className=\"p-8 max-w-4xl mx-auto w-full\"/g' '/c/Users/vtoto/Desktop/Expensable/apps/web/app/\\(dashboard\\)/files/page.tsx' '/c/Users/vtoto/Desktop/Expensable/apps/web/app/\\(dashboard\\)/insights/page.tsx' '/c/Users/vtoto/Desktop/Expensable/apps/web/app/\\(dashboard\\)/subscriptions/page.tsx' '/c/Users/vtoto/Desktop/Expensable/apps/web/app/\\(dashboard\\)/transactions/page.tsx')",
       "Bash(sed -i 's/className=\"p-8 max-w-2xl\"/className=\"p-8 max-w-2xl mx-auto w-full\"/g' '/c/Users/vtoto/Desktop/Expensable/apps/web/app/\\(dashboard\\)/upload/page.tsx')",
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(where node *)"
     ]
   },
   "enableAllProjectMcpServers": true,
