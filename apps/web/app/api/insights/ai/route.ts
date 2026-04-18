@@ -1,13 +1,15 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth/config"
 import { db } from "@expensable/db"
 import { ollamaChat } from "@/lib/ai/ollama"
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   const session = await auth()
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
+
+  const force = req.nextUrl.searchParams.get("force") === "true"
 
   const membership = await db.householdMember.findFirst({
     where: { userId: session.user.id },
@@ -20,6 +22,25 @@ export async function GET() {
   const hid = membership.householdId
   const currency = membership.household.defaultCurrency ?? "USD"
   const now = new Date()
+  const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
+
+  // Count files successfully processed this month (stable proxy for "new data")
+  const doneFileCount = await db.uploadedFile.count({
+    where: { householdId: hid, status: "done" },
+  })
+
+  // Return cached insights if file count hasn't changed
+  if (!force) {
+    const cached = await db.aIInsightCache.findUnique({
+      where: { householdId_month: { householdId: hid, month: monthKey } },
+    })
+    if (cached && cached.fileCount === doneFileCount && cached.insights) {
+      const insights = JSON.parse(cached.insights) as string[]
+      return NextResponse.json({ insights, available: true, cached: true })
+    }
+  }
+
+  // Gather spending data for prompt
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
   const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
   const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59)
@@ -122,7 +143,23 @@ Return this exact JSON shape: {"insights":["insight 1","insight 2","insight 3","
       ? (parsed.insights as string[]).slice(0, 5)
       : []
 
-    return NextResponse.json({ insights, available: true })
+    // Persist to cache
+    await db.aIInsightCache.upsert({
+      where: { householdId_month: { householdId: hid, month: monthKey } },
+      create: {
+        householdId: hid,
+        month: monthKey,
+        insights: JSON.stringify(insights),
+        fileCount: doneFileCount,
+      },
+      update: {
+        insights: JSON.stringify(insights),
+        fileCount: doneFileCount,
+        generatedAt: new Date(),
+      },
+    })
+
+    return NextResponse.json({ insights, available: true, cached: false })
   } catch {
     return NextResponse.json({ insights: [], available: false, error: "Ollama not reachable" })
   }

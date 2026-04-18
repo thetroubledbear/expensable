@@ -6,6 +6,7 @@ import { Sparkles, RefreshCw, WifiOff } from "lucide-react"
 interface InsightsResponse {
   insights: string[]
   available: boolean
+  cached?: boolean
   empty?: boolean
   error?: string
 }
@@ -13,11 +14,12 @@ interface InsightsResponse {
 export function AIInsightsWidget() {
   const [state, setState] = useState<"loading" | "done" | "error" | "unavailable">("loading")
   const [insights, setInsights] = useState<string[]>([])
+  const [cached, setCached] = useState(false)
 
-  async function load() {
+  async function load(force = false) {
     setState("loading")
     try {
-      const res = await fetch("/api/insights/ai")
+      const res = await fetch(`/api/insights/ai${force ? "?force=true" : ""}`)
       const data: InsightsResponse = await res.json()
 
       if (!data.available) {
@@ -29,6 +31,7 @@ export function AIInsightsWidget() {
         return
       }
       setInsights(data.insights)
+      setCached(data.cached ?? false)
       setState("done")
     } catch {
       setState("unavailable")
@@ -87,13 +90,18 @@ export function AIInsightsWidget() {
           </li>
         ))}
       </ul>
-      <button
-        onClick={load}
-        className="mt-3 flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-600 transition-colors self-start"
-      >
-        <RefreshCw className="w-3 h-3" />
-        Regenerate
-      </button>
+      <div className="mt-3 flex items-center gap-3">
+        <button
+          onClick={() => load(true)}
+          className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-600 transition-colors"
+        >
+          <RefreshCw className="w-3 h-3" />
+          Regenerate
+        </button>
+        {cached && (
+          <span className="text-xs text-slate-300">· saved from last upload</span>
+        )}
+      </div>
     </div>
   )
 }

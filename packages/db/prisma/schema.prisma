@@ -71,11 +71,12 @@ model Household {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  members       HouseholdMember[]
-  uploadedFiles UploadedFile[]
-  transactions  Transaction[]
-  subscriptions DetectedSubscription[]
-  billing       HouseholdBilling?
+  members         HouseholdMember[]
+  uploadedFiles   UploadedFile[]
+  transactions    Transaction[]
+  subscriptions   DetectedSubscription[]
+  billing         HouseholdBilling?
+  aiInsightCaches AIInsightCache[]
 }
 
 model HouseholdMember {
@@ -176,4 +177,19 @@ model DetectedSubscription {
   household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
 
   @@unique([householdId, merchantName])
+}
+
+// ─── AI Insight Cache ─────────────────────────────────────────────────────────
+
+model AIInsightCache {
+  id          String   @id @default(cuid())
+  householdId String
+  month       String   // "YYYY-MM"
+  insights    String   // JSON-encoded string[]
+  fileCount   Int      @default(0)
+  generatedAt DateTime @default(now())
+
+  household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+
+  @@unique([householdId, month])
 }
