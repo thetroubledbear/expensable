@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth/config"
 import { db } from "@expensable/db"
-import { getStripe, PRICE_IDS } from "@/lib/stripe"
+import { getStripe, getPriceId } from "@/lib/stripe"
 import { z } from "zod"
 
 const schema = z.object({
@@ -21,9 +21,12 @@ export async function POST(req: NextRequest) {
   }
 
   const { tier } = parsed.data
-  const priceId = PRICE_IDS[tier]
+  const priceId = getPriceId(tier)
   if (!priceId) {
-    return NextResponse.json({ error: "Price not configured" }, { status: 500 })
+    return NextResponse.json(
+      { error: `STRIPE_${tier.toUpperCase()}_PRICE_ID is not set in env` },
+      { status: 500 }
+    )
   }
 
   const membership = await db.householdMember.findFirst({
@@ -58,13 +61,14 @@ export async function POST(req: NextRequest) {
       customer: customerId,
       mode: "subscription",
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: `${process.env.NEXTAUTH_URL}/settings?upgraded=1`,
+      success_url: `${process.env.NEXTAUTH_URL}/api/stripe/session-complete?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXTAUTH_URL}/settings`,
       metadata: { householdId: household.id },
     })
 
     return NextResponse.json({ url: checkoutSession.url })
-  } catch {
-    return NextResponse.json({ error: "Failed to create checkout session" }, { status: 500 })
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Failed to create checkout session"
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }

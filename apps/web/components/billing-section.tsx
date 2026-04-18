@@ -18,11 +18,13 @@ interface Props {
 
 export function BillingSection({ tier, filesUsed, monthlyLimit }: Props) {
   const [loading, setLoading] = useState<"pro" | "family" | "portal" | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const meta = PLAN_META[tier]
   const usagePct = Math.min((filesUsed / monthlyLimit) * 100, 100)
 
   async function upgrade(targetTier: "pro" | "family") {
     setLoading(targetTier)
+    setError(null)
     try {
       const res = await fetch("/api/stripe/checkout", {
         method: "POST",
@@ -30,7 +32,13 @@ export function BillingSection({ tier, filesUsed, monthlyLimit }: Props) {
         body: JSON.stringify({ tier: targetTier }),
       })
       const data = await res.json()
-      if (data.url) window.location.href = data.url
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        setError(data.error ?? "Something went wrong")
+      }
+    } catch {
+      setError("Network error — please try again")
     } finally {
       setLoading(null)
     }
@@ -38,10 +46,17 @@ export function BillingSection({ tier, filesUsed, monthlyLimit }: Props) {
 
   async function manageSubscription() {
     setLoading("portal")
+    setError(null)
     try {
       const res = await fetch("/api/stripe/portal", { method: "POST" })
       const data = await res.json()
-      if (data.url) window.location.href = data.url
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        setError(data.error ?? "Something went wrong")
+      }
+    } catch {
+      setError("Network error — please try again")
     } finally {
       setLoading(null)
     }
@@ -50,6 +65,11 @@ export function BillingSection({ tier, filesUsed, monthlyLimit }: Props) {
   return (
     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
       <h2 className="text-sm font-semibold text-slate-700 mb-5">Plan &amp; Billing</h2>
+      {error && (
+        <div className="mb-4 px-3 py-2 rounded-lg bg-red-50 border border-red-100 text-xs text-red-600">
+          {error}
+        </div>
+      )}
 
       <div className="flex items-center justify-between mb-5">
         <div>
