@@ -3,8 +3,14 @@ import { db } from "@expensable/db"
 import { SettingsForm } from "@/components/settings-form"
 import { BillingSection } from "@/components/billing-section"
 import { PLANS, type PlanTier } from "@expensable/types"
+import { CheckCircle2 } from "lucide-react"
 
-export default async function SettingsPage() {
+export default async function SettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ upgraded?: string }>
+}) {
+  const { upgraded } = await searchParams
   const session = await requireAuth()
 
   const membership = await db.householdMember.findFirst({
@@ -33,6 +39,14 @@ export default async function SettingsPage() {
         <h1 className="text-2xl font-semibold text-slate-900">Settings</h1>
         <p className="text-slate-500 mt-1 text-sm">Manage your household preferences</p>
       </div>
+      {upgraded && (
+        <div className="mb-6 flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-50 border border-emerald-100">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+          <p className="text-sm text-emerald-700 font-medium">
+            Plan upgraded successfully — welcome to {tier.charAt(0).toUpperCase() + tier.slice(1)}!
+          </p>
+        </div>
+      )}
       <div className="space-y-6">
         <SettingsForm
           initialName={household?.name ?? ""}

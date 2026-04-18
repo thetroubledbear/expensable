@@ -11,7 +11,10 @@ export function getStripe(): Stripe {
   return _stripe
 }
 
-export const PRICE_IDS: Record<"pro" | "family", string> = {
-  pro: process.env.STRIPE_PRO_PRICE_ID ?? "",
-  family: process.env.STRIPE_FAMILY_PRICE_ID ?? "",
+export function getPriceId(tier: "pro" | "family"): string {
+  const id =
+    tier === "pro"
+      ? process.env.STRIPE_PRO_PRICE_ID
+      : process.env.STRIPE_FAMILY_PRICE_ID
+  return id ?? ""
 }
