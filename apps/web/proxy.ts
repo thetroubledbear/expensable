@@ -2,11 +2,14 @@ import { auth } from "@/lib/auth/config"
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-const PUBLIC_PATHS = ["/", "/login", "/register", "/api/auth", "/invite", "/api/invite"]
+const PUBLIC_EXACT = ["/"]
+const PUBLIC_PREFIXES = ["/login", "/register", "/api/auth", "/invite", "/api/invite"]
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
-  const isPublic = PUBLIC_PATHS.some((p) => pathname.startsWith(p))
+  const isPublic =
+    PUBLIC_EXACT.includes(pathname) ||
+    PUBLIC_PREFIXES.some((p) => pathname.startsWith(p))
 
   if (isPublic) return NextResponse.next()
 
