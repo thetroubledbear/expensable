@@ -8,7 +8,6 @@ import {
   FolderOpen,
   Receipt,
   Repeat2,
-  TrendingUp,
   Settings,
   LogOut,
   Wallet,
@@ -21,12 +20,11 @@ const NAV = [
   { icon: FolderOpen,      label: "Files",     href: "/files" },
   { icon: Receipt,         label: "Transactions", href: "/transactions" },
   { icon: Repeat2,         label: "Subscriptions", href: "/subscriptions" },
-  { icon: TrendingUp,      label: "Insights",  href: "/insights" },
   { icon: Settings,        label: "Settings",  href: "/settings" },
 ]
 
 interface SidebarProps {
-  user: { name?: string | null; email?: string | null }
+  user: { name?: string | null; email?: string | null; avatarUrl?: string | null }
 }
 
 export function Sidebar({ user }: SidebarProps) {
@@ -68,10 +66,14 @@ export function Sidebar({ user }: SidebarProps) {
       {/* User */}
       <div className="px-3 py-4 border-t border-slate-800">
         <div className="flex items-center gap-3 px-3 py-2 mb-1">
-          <div className="w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center shrink-0">
-            <span className="text-xs text-slate-300 font-medium">
-              {(user.name ?? user.email ?? "?")[0].toUpperCase()}
-            </span>
+          <div className="w-7 h-7 rounded-full bg-slate-700 overflow-hidden flex items-center justify-center shrink-0">
+            {user.avatarUrl ? (
+              <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-xs text-slate-300 font-medium">
+                {(user.name ?? user.email ?? "?")[0].toUpperCase()}
+              </span>
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs font-medium text-slate-200 truncate">{user.name ?? "User"}</p>

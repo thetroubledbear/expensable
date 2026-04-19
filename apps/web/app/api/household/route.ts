@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { auth } from "@/lib/auth/config"
 import { db } from "@expensable/db"
+import { resolveHousehold } from "@/lib/auth/household"
 
 const SUPPORTED_CURRENCIES = ["USD","EUR","GBP","CHF","CAD","AUD","JPY","NOK","SEK","DKK","NZD","SGD","HKD"] as const
 
@@ -17,10 +18,7 @@ export async function GET() {
   }
 
   try {
-    const membership = await db.householdMember.findFirst({
-      where: { userId: session.user.id },
-      include: { household: true },
-    })
+    const membership = await resolveHousehold(session.user.id)
     if (!membership) return NextResponse.json({ error: "Not found" }, { status: 404 })
     return NextResponse.json(membership.household)
   } catch {
@@ -51,10 +49,8 @@ export async function PATCH(req: NextRequest) {
   }
 
   try {
-    const membership = await db.householdMember.findFirst({
-      where: { userId: session.user.id, role: "owner" },
-    })
-    if (!membership) {
+    const membership = await resolveHousehold(session.user.id)
+    if (!membership || membership.role !== "owner") {
       return NextResponse.json({ error: "Only the household owner can change settings" }, { status: 403 })
     }
 

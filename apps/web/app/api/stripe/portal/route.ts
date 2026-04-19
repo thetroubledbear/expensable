@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth/config"
 import { db } from "@expensable/db"
 import { getStripe } from "@/lib/stripe"
+import { resolveHousehold } from "@/lib/auth/household"
 
 export async function POST() {
   const session = await auth()
@@ -9,11 +10,11 @@ export async function POST() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  const membership = await db.householdMember.findFirst({
-    where: { userId: session.user.id },
-    include: { household: { include: { billing: true } } },
-  })
-  if (!membership?.household.billing?.stripeCustomerId) {
+  const membership = await resolveHousehold(session.user.id)
+  if (!membership || membership.role !== "owner") {
+    return NextResponse.json({ error: "Only the owner can manage billing" }, { status: 403 })
+  }
+  if (!membership.household.billing?.stripeCustomerId) {
     return NextResponse.json({ error: "No billing account found" }, { status: 400 })
   }
 

@@ -1,13 +1,12 @@
 "use client"
 
 import {
-  BarChart,
-  Bar,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from "recharts"
 
@@ -35,6 +34,23 @@ function formatAmount(v: number, currency: string) {
   }).format(v)
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function CustomTooltip({ active, payload, label, currency }: any) {
+  if (!active || !payload?.length) return null
+  return (
+    <div className="bg-white border border-slate-100 rounded-xl shadow-md px-3.5 py-2.5 text-xs">
+      <p className="font-semibold text-slate-500 mb-1.5">{formatMonth(String(label))}</p>
+      {payload.map((p: { dataKey: string; value: number; color: string }) => (
+        <div key={p.dataKey} className="flex items-center gap-2 mb-0.5">
+          <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: p.color }} />
+          <span className="text-slate-500">{p.dataKey === "spent" ? "Spent" : "Income"}:</span>
+          <span className="font-semibold text-slate-800 tabular-nums">{formatAmount(p.value, currency)}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export function SpendingTrendChart({ data, currency }: Props) {
   if (data.every((d) => d.spent === 0 && d.received === 0)) {
     return (
@@ -46,7 +62,17 @@ export function SpendingTrendChart({ data, currency }: Props) {
 
   return (
     <ResponsiveContainer width="100%" height={220}>
-      <BarChart data={data} barCategoryGap="30%" barGap={3}>
+      <AreaChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
+        <defs>
+          <linearGradient id="gradSpent" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="#f87171" stopOpacity={0.18} />
+            <stop offset="95%" stopColor="#f87171" stopOpacity={0} />
+          </linearGradient>
+          <linearGradient id="gradReceived" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="#34d399" stopOpacity={0.18} />
+            <stop offset="95%" stopColor="#34d399" stopOpacity={0} />
+          </linearGradient>
+        </defs>
         <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
         <XAxis
           dataKey="month"
@@ -62,28 +88,26 @@ export function SpendingTrendChart({ data, currency }: Props) {
           tickLine={false}
           width={72}
         />
-        <Tooltip
-          formatter={(v, name) => [
-            formatAmount(v as number, currency),
-            name === "spent" ? "Spent" : "Received",
-          ]}
-          labelFormatter={(label) => formatMonth(String(label))}
-          contentStyle={{
-            borderRadius: "0.75rem",
-            border: "1px solid #f1f5f9",
-            fontSize: 12,
-            boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.05)",
-          }}
+        <Tooltip content={<CustomTooltip currency={currency} />} />
+        <Area
+          type="monotone"
+          dataKey="received"
+          stroke="#34d399"
+          strokeWidth={2}
+          fill="url(#gradReceived)"
+          dot={false}
+          activeDot={{ r: 4, fill: "#34d399", strokeWidth: 0 }}
         />
-        <Legend
-          formatter={(v) => (v === "spent" ? "Spent" : "Received")}
-          iconType="circle"
-          iconSize={8}
-          wrapperStyle={{ fontSize: 11, paddingTop: 8 }}
+        <Area
+          type="monotone"
+          dataKey="spent"
+          stroke="#f87171"
+          strokeWidth={2}
+          fill="url(#gradSpent)"
+          dot={false}
+          activeDot={{ r: 4, fill: "#f87171", strokeWidth: 0 }}
         />
-        <Bar dataKey="spent" fill="#f87171" radius={[4, 4, 0, 0]} />
-        <Bar dataKey="received" fill="#34d399" radius={[4, 4, 0, 0]} />
-      </BarChart>
+      </AreaChart>
     </ResponsiveContainer>
   )
 }

@@ -28,6 +28,7 @@ interface Props {
   initialData: InitialData
   categories: Category[]
   defaultCurrency: string
+  isOwner: boolean
 }
 
 function fmt(amount: number, currency: string) {
@@ -43,7 +44,7 @@ function fmt(amount: number, currency: string) {
   }
 }
 
-export function TransactionsTable({ initialData, categories, defaultCurrency }: Props) {
+export function TransactionsTable({ initialData, categories, defaultCurrency, isOwner }: Props) {
   const [transactions, setTransactions] = useState<Transaction[]>(initialData.data)
   const [total, setTotal] = useState(initialData.total)
   const [totalPages, setTotalPages] = useState(initialData.totalPages)
@@ -254,7 +255,7 @@ export function TransactionsTable({ initialData, categories, defaultCurrency }: 
         </button>
 
         <div className="ml-auto flex items-center gap-3">
-          {selected.size > 0 ? (
+          {isOwner && selected.size > 0 ? (
             <>
               <span className="text-xs text-slate-500">{selected.size} selected</span>
               <button
@@ -294,14 +295,16 @@ export function TransactionsTable({ initialData, categories, defaultCurrency }: 
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-100">
-                <th className="px-4 py-3.5 w-10">
-                  <input
-                    type="checkbox"
-                    checked={allSelected}
-                    onChange={toggleAll}
-                    className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
-                  />
-                </th>
+                {isOwner && (
+                  <th className="px-4 py-3.5 w-10">
+                    <input
+                      type="checkbox"
+                      checked={allSelected}
+                      onChange={toggleAll}
+                      className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                    />
+                  </th>
+                )}
                 <th className="text-left px-4 py-3.5 text-xs font-medium text-slate-400 uppercase tracking-wide w-28">
                   Date
                 </th>
@@ -325,14 +328,16 @@ export function TransactionsTable({ initialData, categories, defaultCurrency }: 
                     key={tx.id}
                     className={`hover:bg-slate-50/70 transition-colors group ${isSelected ? "bg-emerald-50/40" : ""}`}
                   >
-                    <td className="px-4 py-3.5">
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => toggleSelect(tx.id)}
-                        className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
-                      />
-                    </td>
+                    {isOwner && (
+                      <td className="px-4 py-3.5">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleSelect(tx.id)}
+                          className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                        />
+                      </td>
+                    )}
                     <td className="px-4 py-3.5 text-xs text-slate-400 tabular-nums whitespace-nowrap">
                       {new Date(tx.date).toLocaleDateString("en", {
                         month: "short",

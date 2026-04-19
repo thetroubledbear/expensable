@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { after } from "next/server"
 import { auth } from "@/lib/auth/config"
 import { db } from "@expensable/db"
+import { resolveHousehold } from "@/lib/auth/household"
 import { uploadFile, getFileBuffer, buildStorageKey } from "@/lib/storage"
 import { parseFileContent, type ParseResult } from "@/lib/ai/parser"
 import { PLANS, type FileType } from "@expensable/types"
@@ -98,9 +99,7 @@ export async function GET() {
   }
 
   try {
-    const membership = await db.householdMember.findFirst({
-      where: { userId: session.user.id },
-    })
+    const membership = await resolveHousehold(session.user.id)
 
     if (!membership) return NextResponse.json([])
 
@@ -129,10 +128,7 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const membership = await db.householdMember.findFirst({
-    where: { userId: session.user.id },
-    include: { household: { include: { billing: true } } },
-  })
+  const membership = await resolveHousehold(session.user.id)
 
   if (!membership) {
     return NextResponse.json({ error: "No household found" }, { status: 400 })

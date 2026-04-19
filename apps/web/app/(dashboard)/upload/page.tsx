@@ -1,15 +1,12 @@
 import { requireAuth } from "@/lib/auth/session"
 import { UploadDropzone } from "@/components/upload-dropzone"
-import { db } from "@expensable/db"
+import { resolveHousehold } from "@/lib/auth/household"
 import { PLANS } from "@expensable/types"
 
 export default async function UploadPage() {
   const session = await requireAuth()
 
-  const membership = await db.householdMember.findFirst({
-    where: { userId: session.user?.id! },
-    include: { household: { include: { billing: true } } },
-  })
+  const membership = await resolveHousehold(session.user?.id!)
 
   const billing = membership?.household.billing
   const tier = (billing?.tier ?? "free") as keyof typeof PLANS

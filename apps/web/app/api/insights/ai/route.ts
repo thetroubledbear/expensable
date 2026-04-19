@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth/config"
 import { db } from "@expensable/db"
+import { resolveHousehold } from "@/lib/auth/household"
 import { ollamaChat } from "@/lib/ai/ollama"
 
 export async function GET(req: NextRequest) {
@@ -11,10 +12,7 @@ export async function GET(req: NextRequest) {
 
   const force = req.nextUrl.searchParams.get("force") === "true"
 
-  const membership = await db.householdMember.findFirst({
-    where: { userId: session.user.id },
-    include: { household: true },
-  })
+  const membership = await resolveHousehold(session.user.id)
   if (!membership) {
     return NextResponse.json({ insights: [], available: false })
   }
