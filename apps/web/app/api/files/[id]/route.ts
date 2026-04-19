@@ -73,6 +73,9 @@ export async function DELETE(
       where: { userId: session.user.id, householdId: file.householdId },
     })
     if (!membership) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    if (membership.role !== "owner") {
+      return NextResponse.json({ error: "Only household owners can delete files" }, { status: 403 })
+    }
   } catch {
     return NextResponse.json({ error: "Failed to verify access" }, { status: 500 })
   }

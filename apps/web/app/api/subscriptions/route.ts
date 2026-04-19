@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth/config"
 import { db } from "@expensable/db"
+import { resolveHousehold } from "@/lib/auth/household"
 
 export async function GET() {
   const session = await auth()
@@ -8,9 +9,7 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  const membership = await db.householdMember.findFirst({
-    where: { userId: session.user.id },
-  })
+  const membership = await resolveHousehold(session.user.id)
   if (!membership) return NextResponse.json([])
 
   try {

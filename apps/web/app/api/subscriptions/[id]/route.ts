@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth/config"
 import { db } from "@expensable/db"
+import { resolveHousehold } from "@/lib/auth/household"
 
 export async function DELETE(
   _req: NextRequest,
@@ -13,10 +14,11 @@ export async function DELETE(
 
   const { id } = await params
 
-  const membership = await db.householdMember.findFirst({
-    where: { userId: session.user.id },
-  })
+  const membership = await resolveHousehold(session.user.id)
   if (!membership) return NextResponse.json({ error: "Not found" }, { status: 404 })
+  if (membership.role !== "owner") {
+    return NextResponse.json({ error: "Only household owners can dismiss subscriptions" }, { status: 403 })
+  }
 
   try {
     // IDOR: verify subscription belongs to user's household

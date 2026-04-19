@@ -15,6 +15,7 @@ interface Props {
   frequency: "monthly" | "weekly" | "annual"
   lastSeenAt: string
   estimatedAnnual: number
+  isOwner: boolean
 }
 
 function fmt(amount: number, currency: string) {
@@ -34,6 +35,7 @@ export function SubscriptionCard({
   frequency,
   lastSeenAt,
   estimatedAnnual,
+  isOwner,
 }: Props) {
   const [dismissed, setDismissed] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -61,14 +63,16 @@ export function SubscriptionCard({
             {FREQ_BADGE[frequency]}
           </span>
         </div>
-        <button
-          onClick={dismiss}
-          disabled={loading}
-          className="w-6 h-6 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors disabled:opacity-50 shrink-0"
-          title="Dismiss"
-        >
-          <X className="w-3.5 h-3.5" />
-        </button>
+        {isOwner && (
+          <button
+            onClick={dismiss}
+            disabled={loading}
+            className="w-6 h-6 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors disabled:opacity-50 shrink-0"
+            title="Dismiss"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
 
       <div className="flex items-end justify-between">

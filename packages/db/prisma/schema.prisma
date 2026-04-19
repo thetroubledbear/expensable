@@ -77,6 +77,7 @@ model Household {
   subscriptions   DetectedSubscription[]
   billing         HouseholdBilling?
   aiInsightCaches AIInsightCache[]
+  invites         HouseholdInvite[]
 }
 
 model HouseholdMember {
@@ -131,7 +132,7 @@ model UploadedFile {
 model Transaction {
   id           String    @id @default(cuid())
   householdId  String
-  fileId       String
+  fileId       String?
   date         DateTime
   description  String
   amount       Float
@@ -143,9 +144,9 @@ model Transaction {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-  household Household    @relation(fields: [householdId], references: [id], onDelete: Cascade)
-  file      UploadedFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
-  category  Category?    @relation(fields: [categoryId], references: [id])
+  household Household     @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  file      UploadedFile? @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  category  Category?     @relation(fields: [categoryId], references: [id])
 }
 
 // ─── Categories ───────────────────────────────────────────────────────────────
@@ -192,4 +193,19 @@ model AIInsightCache {
   household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
 
   @@unique([householdId, month])
+}
+
+// ─── Household Invites ────────────────────────────────────────────────────────
+
+model HouseholdInvite {
+  id          String    @id @default(cuid())
+  householdId String
+  token       String    @unique @default(cuid())
+  createdBy   String
+  expiresAt   DateTime
+  usedAt      DateTime?
+  usedBy      String?
+  createdAt   DateTime  @default(now())
+
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
 }

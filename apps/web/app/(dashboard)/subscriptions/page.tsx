@@ -1,5 +1,6 @@
 import { requireAuth } from "@/lib/auth/session"
 import { db } from "@expensable/db"
+import { resolveHousehold } from "@/lib/auth/household"
 import { SubscriptionCard } from "@/components/subscription-card"
 import { Repeat2 } from "lucide-react"
 
@@ -28,13 +29,11 @@ function fmt(amount: number, currency: string) {
 export default async function SubscriptionsPage() {
   const session = await requireAuth()
 
-  const membership = await db.householdMember.findFirst({
-    where: { userId: session.user?.id! },
-    include: { household: true },
-  })
+  const membership = await resolveHousehold(session.user?.id!)
 
   const hid = membership?.householdId
   const currency = membership?.household.defaultCurrency ?? "USD"
+  const isOwner = membership?.role === "owner"
 
   const subs = hid
     ? await db.detectedSubscription.findMany({
@@ -87,6 +86,7 @@ export default async function SubscriptionsPage() {
                 frequency={sub.frequency as "monthly" | "weekly" | "annual"}
                 lastSeenAt={sub.lastSeenAt.toISOString()}
                 estimatedAnnual={estimateAnnual(sub.amount, sub.frequency)}
+                isOwner={isOwner}
               />
             ))}
           </div>

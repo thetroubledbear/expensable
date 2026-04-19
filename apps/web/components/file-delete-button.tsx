@@ -4,7 +4,8 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Trash2, Loader2 } from "lucide-react"
 
-export function FileDeleteButton({ fileId }: { fileId: string }) {
+export function FileDeleteButton({ fileId, isOwner }: { fileId: string; isOwner: boolean }) {
+  if (!isOwner) return null
   const router = useRouter()
   const [confirming, setConfirming] = useState(false)
   const [deleting, setDeleting] = useState(false)

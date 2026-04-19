@@ -1,10 +1,11 @@
-import { ArrowDownLeft, ArrowUpRight, Minus } from "lucide-react"
+import { ArrowDownLeft, ArrowUpRight, Minus, TrendingUp, TrendingDown } from "lucide-react"
 
 interface Props {
   variant: "out" | "in" | "net"
   amount: number
   currency: string
   monthName: string
+  momPct?: number | null
 }
 
 const CONFIG = {
@@ -40,7 +41,7 @@ function fmt(amount: number, currency: string) {
   }).format(amount)
 }
 
-export function MoneyCardWidget({ variant, amount, currency, monthName }: Props) {
+export function MoneyCardWidget({ variant, amount, currency, monthName, momPct }: Props) {
   const cfg = CONFIG[variant]
   const Icon = cfg.icon
   const iconBg =
@@ -64,6 +65,20 @@ export function MoneyCardWidget({ variant, amount, currency, monthName }: Props)
       <p className={`text-xl font-bold tabular-nums ${amountColor}`}>{fmt(amount, currency)}</p>
       <p className="text-sm text-slate-500 mt-0.5">{cfg.label}</p>
       <p className="text-xs text-slate-400">{monthName}</p>
+      {momPct !== null && momPct !== undefined && (
+        <div
+          className={`flex items-center gap-1 mt-2 text-xs font-medium ${
+            momPct > 0 ? "text-red-500" : "text-emerald-600"
+          }`}
+        >
+          {momPct > 0 ? (
+            <TrendingUp className="w-3 h-3" />
+          ) : (
+            <TrendingDown className="w-3 h-3" />
+          )}
+          {Math.abs(momPct)}% vs last month
+        </div>
+      )}
     </div>
   )
 }

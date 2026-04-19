@@ -1,5 +1,6 @@
 import { requireAuth } from "@/lib/auth/session"
 import { db } from "@expensable/db"
+import { resolveHousehold } from "@/lib/auth/household"
 import Link from "next/link"
 import { UploadCloud } from "lucide-react"
 import { DashboardGrid, type DashboardData } from "@/components/dashboard-grid"
@@ -21,10 +22,7 @@ function estimateMonthly(amount: number, frequency: string): number {
 export default async function DashboardPage() {
   const session = await requireAuth()
 
-  const membership = await db.householdMember.findFirst({
-    where: { userId: session.user?.id! },
-    include: { household: true },
-  })
+  const membership = await resolveHousehold(session.user?.id!)
 
   const hid = membership?.householdId
   const currency = membership?.household.defaultCurrency ?? "USD"
@@ -75,50 +73,113 @@ export default async function DashboardPage() {
     )
   }
 
-  const [moneyOut, moneyIn, recentTxRaw, topMerchantsRaw, subs] = await Promise.all([
-    db.transaction.aggregate({
-      where: { householdId: hid, type: "debit", date: { gte: startOfMonth } },
-      _sum: { amount: true },
-    }),
-    db.transaction.aggregate({
-      where: { householdId: hid, type: "credit", date: { gte: startOfMonth } },
-      _sum: { amount: true },
-    }),
-    db.transaction.findMany({
-      where: { householdId: hid },
-      orderBy: { date: "desc" },
-      take: 8,
-    }),
-    db.transaction.groupBy({
-      by: ["merchantName"],
-      where: {
-        householdId: hid,
-        type: "debit",
-        date: { gte: startOfMonth },
-        merchantName: { not: null },
-      },
-      _sum: { amount: true },
-      orderBy: { _sum: { amount: "desc" } },
-      take: 5,
-    }),
-    db.detectedSubscription.findMany({
-      where: { householdId: hid },
-    }),
-  ])
+  const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1)
+  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+  const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59)
+  const lastMonthName = new Date(now.getFullYear(), now.getMonth() - 1, 1).toLocaleString("en", { month: "long" })
+
+  const [moneyOut, moneyIn, recentTxRaw, topMerchantsRaw, subs, prevMonthAgg, trendTx, catTotals] =
+    await Promise.all([
+      db.transaction.aggregate({
+        where: { householdId: hid, type: "debit", date: { gte: startOfMonth } },
+        _sum: { amount: true },
+      }),
+      db.transaction.aggregate({
+        where: { householdId: hid, type: "credit", date: { gte: startOfMonth } },
+        _sum: { amount: true },
+      }),
+      db.transaction.findMany({
+        where: { householdId: hid },
+        orderBy: { date: "desc" },
+        take: 8,
+      }),
+      db.transaction.groupBy({
+        by: ["merchantName"],
+        where: {
+          householdId: hid,
+          type: "debit",
+          date: { gte: startOfMonth },
+          merchantName: { not: null },
+        },
+        _sum: { amount: true },
+        orderBy: { _sum: { amount: "desc" } },
+        take: 5,
+      }),
+      db.detectedSubscription.findMany({
+        where: { householdId: hid },
+      }),
+      db.transaction.aggregate({
+        where: {
+          householdId: hid,
+          type: "debit",
+          date: { gte: startOfLastMonth, lte: endOfLastMonth },
+        },
+        _sum: { amount: true },
+      }),
+      db.transaction.findMany({
+        where: { householdId: hid, date: { gte: sixMonthsAgo } },
+        select: { amount: true, type: true, date: true },
+      }),
+      db.transaction.groupBy({
+        by: ["categoryId"],
+        where: { householdId: hid, type: "debit", date: { gte: startOfMonth } },
+        _sum: { amount: true },
+      }),
+    ])
 
   const spent = moneyOut._sum.amount ?? 0
   const received = moneyIn._sum.amount ?? 0
+  const previousSpent = prevMonthAgg._sum.amount ?? 0
+  const momPct = previousSpent > 0 ? Math.round(((spent - previousSpent) / previousSpent) * 100) : null
+  const savingsRate = received > 0 ? Math.round(((received - spent) / received) * 100) : null
   const totalMonthlySubscriptions = subs.reduce(
     (acc, s) => acc + estimateMonthly(s.amount, s.frequency),
     0
   )
 
+  // 6-month trend
+  const monthMap = new Map<string, { spent: number; received: number }>()
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`
+    monthMap.set(key, { spent: 0, received: 0 })
+  }
+  for (const tx of trendTx) {
+    const key = `${tx.date.getFullYear()}-${String(tx.date.getMonth() + 1).padStart(2, "0")}`
+    const bucket = monthMap.get(key)
+    if (!bucket) continue
+    if (tx.type === "debit") bucket.spent += tx.amount
+    else bucket.received += tx.amount
+  }
+  const trend = Array.from(monthMap.entries()).map(([month, v]) => ({
+    month,
+    spent: Math.round(v.spent * 100) / 100,
+    received: Math.round(v.received * 100) / 100,
+  }))
+
+  // Category breakdown
+  const categoryIds = catTotals.flatMap((c) => (c.categoryId ? [c.categoryId] : []))
+  const cats = categoryIds.length > 0
+    ? await db.category.findMany({ where: { id: { in: categoryIds } } })
+    : []
+  const catById = new Map(cats.map((c) => [c.id, c]))
+  const categories = catTotals
+    .map((c) => ({
+      name: c.categoryId ? (catById.get(c.categoryId)?.name ?? "Other") : "Uncategorized",
+      color: c.categoryId ? (catById.get(c.categoryId)?.color ?? "#94a3b8") : "#94a3b8",
+      total: Math.round((c._sum.amount ?? 0) * 100) / 100,
+    }))
+    .sort((a, b) => b.total - a.total)
+
   const data: DashboardData = {
     spent,
     received,
     net: received - spent,
+    savingsRate,
     currency,
     monthName,
+    momPct,
+    lastMonthName,
     recentTx: recentTxRaw.map((tx) => ({
       id: tx.id,
       merchantName: tx.merchantName,
@@ -135,6 +196,17 @@ export default async function DashboardPage() {
     fileCount,
     subscriptionsCount: subs.length,
     totalMonthlySubscriptions,
+    subscriptions: subs
+      .sort((a, b) => estimateMonthly(b.amount, b.frequency) - estimateMonthly(a.amount, a.frequency))
+      .map((s) => ({
+        id: s.id,
+        merchantName: s.merchantName,
+        amount: s.amount,
+        frequency: s.frequency,
+        currency: s.currency,
+      })),
+    trend,
+    categories,
   }
 
   return (

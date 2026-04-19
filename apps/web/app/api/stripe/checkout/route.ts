@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth/config"
 import { db } from "@expensable/db"
+import { resolveHousehold } from "@/lib/auth/household"
 import { getStripe, getPriceId } from "@/lib/stripe"
 import { z } from "zod"
 
@@ -29,12 +30,12 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const membership = await db.householdMember.findFirst({
-    where: { userId: session.user.id },
-    include: { household: { include: { billing: true } } },
-  })
+  const membership = await resolveHousehold(session.user.id)
   if (!membership) {
     return NextResponse.json({ error: "No household found" }, { status: 400 })
+  }
+  if (membership.role !== "owner") {
+    return NextResponse.json({ error: "Only the owner can manage billing" }, { status: 403 })
   }
 
   const { household } = membership

@@ -15,6 +15,10 @@ import {
   AIInsightsWidget,
   AIInsightsWidgetHeader,
 } from "@/components/widgets/ai-insights-widget"
+import { SpendingTrendWidget } from "@/components/widgets/spending-trend-widget"
+import { CategoryPieWidget } from "@/components/widgets/category-pie-widget"
+import { CategoryBreakdownWidget } from "@/components/widgets/category-breakdown-widget"
+import { SavingsRateWidget } from "@/components/widgets/savings-rate-widget"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -22,16 +26,21 @@ export type WidgetId =
   | "money-out"
   | "money-in"
   | "net"
+  | "savings-rate"
   | "recent-tx"
   | "top-spending"
   | "ai-insights"
   | "subscriptions-summary"
   | "files-count"
+  | "spending-trend"
+  | "category-pie"
+  | "category-breakdown"
 
 export interface DashboardData {
   spent: number
   received: number
   net: number
+  savingsRate: number | null
   currency: string
   monthName: string
   recentTx: Array<{
@@ -46,6 +55,11 @@ export interface DashboardData {
   fileCount: number
   subscriptionsCount: number
   totalMonthlySubscriptions: number
+  subscriptions: Array<{ id: string; merchantName: string; amount: number; frequency: string; currency: string }>
+  trend: Array<{ month: string; spent: number; received: number }>
+  categories: Array<{ name: string; color: string; total: number }>
+  momPct: number | null
+  lastMonthName: string
 }
 
 // ─── Layout defaults ─────────────────────────────────────────────────────────
@@ -53,24 +67,32 @@ export interface DashboardData {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const DEFAULT_LAYOUTS: AnyLayouts = {
   lg: [
-    { i: "money-out",             x: 0, y: 0,  w: 4, h: 3, minW: 3, minH: 3 },
-    { i: "money-in",              x: 4, y: 0,  w: 4, h: 3, minW: 3, minH: 3 },
-    { i: "net",                   x: 8, y: 0,  w: 4, h: 3, minW: 3, minH: 3 },
+    { i: "money-out",             x: 0, y: 0,  w: 3, h: 3, minW: 2, minH: 3 },
+    { i: "money-in",              x: 3, y: 0,  w: 3, h: 3, minW: 2, minH: 3 },
+    { i: "net",                   x: 6, y: 0,  w: 3, h: 3, minW: 2, minH: 3 },
+    { i: "savings-rate",          x: 9, y: 0,  w: 3, h: 3, minW: 2, minH: 3 },
     { i: "recent-tx",             x: 0, y: 3,  w: 8, h: 7, minW: 4, minH: 4 },
     { i: "top-spending",          x: 8, y: 3,  w: 4, h: 7, minW: 3, minH: 4 },
     { i: "ai-insights",           x: 0, y: 10, w: 8, h: 6, minW: 4, minH: 4 },
     { i: "subscriptions-summary", x: 8, y: 10, w: 4, h: 6, minW: 3, minH: 4 },
-    { i: "files-count",           x: 0, y: 16, w: 3, h: 3, minW: 2, minH: 3 },
+    { i: "spending-trend",        x: 0, y: 16, w: 12, h: 6, minW: 6, minH: 5 },
+    { i: "category-pie",          x: 0, y: 22, w: 5,  h: 7, minW: 3, minH: 5 },
+    { i: "category-breakdown",    x: 5, y: 22, w: 7,  h: 7, minW: 4, minH: 5 },
+    { i: "files-count",           x: 0, y: 29, w: 3,  h: 3, minW: 2, minH: 3 },
   ],
   md: [
     { i: "money-out",             x: 0, y: 0,  w: 5, h: 3 },
     { i: "money-in",              x: 5, y: 0,  w: 5, h: 3 },
     { i: "net",                   x: 0, y: 3,  w: 5, h: 3 },
-    { i: "files-count",           x: 5, y: 3,  w: 5, h: 3 },
+    { i: "savings-rate",          x: 5, y: 3,  w: 5, h: 3 },
     { i: "recent-tx",             x: 0, y: 6,  w: 10, h: 7 },
     { i: "top-spending",          x: 0, y: 13, w: 10, h: 6 },
     { i: "ai-insights",           x: 0, y: 19, w: 10, h: 6 },
-    { i: "subscriptions-summary", x: 0, y: 25, w: 10, h: 5 },
+    { i: "subscriptions-summary", x: 0, y: 25, w: 10, h: 6 },
+    { i: "spending-trend",        x: 0, y: 31, w: 10, h: 6 },
+    { i: "category-pie",          x: 0, y: 37, w: 10, h: 7 },
+    { i: "category-breakdown",    x: 0, y: 44, w: 10, h: 7 },
+    { i: "files-count",           x: 0, y: 51, w: 5,  h: 3 },
   ],
 }
 
@@ -78,21 +100,26 @@ const WIDGET_LABELS: Record<WidgetId, string | React.ReactNode> = {
   "money-out":             "Money Out",
   "money-in":              "Money In",
   "net":                   "Net",
+  "savings-rate":          "Savings Rate",
   "recent-tx":             "Recent Transactions",
   "top-spending":          "Top Spending",
   "ai-insights":           <AIInsightsWidgetHeader />,
   "subscriptions-summary": "Subscriptions",
   "files-count":           "Files Processed",
+  "spending-trend":        "6-Month Trend",
+  "category-pie":          "Spending by Category",
+  "category-breakdown":    "Category Breakdown",
 }
 
 const ALL_WIDGETS: WidgetId[] = [
-  "money-out", "money-in", "net",
+  "money-out", "money-in", "net", "savings-rate",
   "recent-tx", "top-spending",
   "ai-insights", "subscriptions-summary",
+  "spending-trend", "category-pie", "category-breakdown",
   "files-count",
 ]
 
-const STORAGE_KEY = "expensable-dashboard-v1"
+const STORAGE_KEY = "expensable-dashboard-v2"
 
 // ─── Persistence ─────────────────────────────────────────────────────────────
 
@@ -316,6 +343,7 @@ function WidgetContent({ id, data }: { id: WidgetId; data: DashboardData }) {
           amount={data.spent}
           currency={data.currency}
           monthName={data.monthName}
+          momPct={data.momPct}
         />
       )
     case "money-in":
@@ -333,6 +361,16 @@ function WidgetContent({ id, data }: { id: WidgetId; data: DashboardData }) {
           variant="net"
           amount={data.net}
           currency={data.currency}
+          monthName={data.monthName}
+        />
+      )
+    case "savings-rate":
+      return (
+        <SavingsRateWidget
+          rate={data.savingsRate}
+          currency={data.currency}
+          spent={data.spent}
+          received={data.received}
           monthName={data.monthName}
         />
       )
@@ -359,10 +397,29 @@ function WidgetContent({ id, data }: { id: WidgetId; data: DashboardData }) {
           count={data.subscriptionsCount}
           totalMonthly={data.totalMonthlySubscriptions}
           currency={data.currency}
+          subscriptions={data.subscriptions}
         />
       )
     case "files-count":
       return <FilesCountWidget count={data.fileCount} />
+    case "spending-trend":
+      return <SpendingTrendWidget trend={data.trend} currency={data.currency} />
+    case "category-pie":
+      return (
+        <CategoryPieWidget
+          categories={data.categories}
+          currency={data.currency}
+          monthName={data.monthName}
+        />
+      )
+    case "category-breakdown":
+      return (
+        <CategoryBreakdownWidget
+          categories={data.categories}
+          currency={data.currency}
+          monthName={data.monthName}
+        />
+      )
     default:
       return null
   }
