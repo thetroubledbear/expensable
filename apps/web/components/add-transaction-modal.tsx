@@ -2,13 +2,20 @@
 
 import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { X, Loader2, Plus } from "lucide-react"
+import { X, Loader2, Plus, ArrowLeftRight } from "lucide-react"
 
 interface Category {
   id: string
   name: string
   icon: string
   color: string
+}
+
+interface FinancialAccount {
+  id: string
+  name: string
+  type: string
+  isDefault: boolean
 }
 
 interface Props {
@@ -25,11 +32,17 @@ function todayStr() {
   return new Date().toISOString().split("T")[0]
 }
 
+type TxMode = "debit" | "credit" | "transfer"
+
 export function AddTransactionModal({ categories, defaultCurrency }: Props) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
-  const [type, setType] = useState<"debit" | "credit">("debit")
+  const [mode, setMode] = useState<TxMode>("debit")
+  const [accounts, setAccounts] = useState<FinancialAccount[]>([])
+  const [fromAccountId, setFromAccountId] = useState("")
+  const [toAccountId, setToAccountId] = useState("")
+  const [accountId, setAccountId] = useState("")
   const router = useRouter()
   const dialogRef = useRef<HTMLDivElement>(null)
 
@@ -42,39 +55,95 @@ export function AddTransactionModal({ categories, defaultCurrency }: Props) {
     return () => window.removeEventListener("keydown", onKey)
   }, [open])
 
+  // Fetch accounts when modal opens
+  useEffect(() => {
+    if (!open || accounts.length > 0) return
+    fetch("/api/accounts")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data: FinancialAccount[]) => {
+        setAccounts(data)
+        const def = data.find((a) => a.isDefault) ?? data[0]
+        if (def) {
+          setAccountId(def.id)
+          setFromAccountId(def.id)
+          // Set toAccountId to a different account if possible
+          const other = data.find((a) => a.id !== def.id)
+          setToAccountId(other?.id ?? "")
+        }
+      })
+      .catch(() => {})
+  }, [open, accounts.length])
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError("")
     setLoading(true)
 
     const form = new FormData(e.currentTarget)
-    const body = {
-      date: form.get("date") as string,
-      description: (form.get("description") as string).trim(),
-      merchantName: (form.get("merchantName") as string).trim() || null,
-      amount: parseFloat(form.get("amount") as string),
-      type,
-      currency: form.get("currency") as string,
-      categoryId: (form.get("categoryId") as string) || null,
-    }
 
-    const res = await fetch("/api/transactions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    })
+    if (mode === "transfer") {
+      if (!fromAccountId || !toAccountId) {
+        setError("Select both accounts for a transfer")
+        setLoading(false)
+        return
+      }
+      if (fromAccountId === toAccountId) {
+        setError("From and to accounts must be different")
+        setLoading(false)
+        return
+      }
 
-    if (!res.ok) {
-      const data = await res.json()
-      setError(data.error ?? "Failed to save transaction")
-      setLoading(false)
-      return
+      const res = await fetch("/api/transactions/transfer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          date: form.get("date") as string,
+          description: (form.get("description") as string).trim(),
+          amount: parseFloat(form.get("amount") as string),
+          currency: form.get("currency") as string,
+          fromAccountId,
+          toAccountId,
+        }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        setError(data.error ?? "Failed to save transfer")
+        setLoading(false)
+        return
+      }
+    } else {
+      const body: Record<string, unknown> = {
+        date: form.get("date") as string,
+        description: (form.get("description") as string).trim(),
+        merchantName: (form.get("merchantName") as string).trim() || null,
+        amount: parseFloat(form.get("amount") as string),
+        type: mode,
+        currency: form.get("currency") as string,
+        categoryId: (form.get("categoryId") as string) || null,
+        financialAccountId: accountId || null,
+      }
+
+      const res = await fetch("/api/transactions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        setError(data.error ?? "Failed to save transaction")
+        setLoading(false)
+        return
+      }
     }
 
     setOpen(false)
     setLoading(false)
     router.refresh()
   }
+
+  const hasMultipleAccounts = accounts.length > 1
 
   return (
     <>
@@ -91,15 +160,12 @@ export function AddTransactionModal({ categories, defaultCurrency }: Props) {
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
           onClick={(e) => { if (e.target === e.currentTarget) setOpen(false) }}
         >
-          {/* Backdrop */}
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
 
-          {/* Modal */}
           <div
             ref={dialogRef}
-            className="relative z-10 w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100"
+            className="relative z-10 w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-100 max-h-[90vh] overflow-y-auto"
           >
-            {/* Header */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
               <h2 className="text-base font-semibold text-slate-900">Add transaction</h2>
               <button
@@ -110,68 +176,123 @@ export function AddTransactionModal({ categories, defaultCurrency }: Props) {
               </button>
             </div>
 
-            {/* Form */}
             <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
-              {/* Type toggle */}
+              {/* Mode toggle */}
               <div className="flex rounded-xl overflow-hidden border border-slate-200">
                 <button
                   type="button"
-                  onClick={() => setType("debit")}
-                  className={`flex-1 py-2 text-sm font-semibold transition-colors ${
-                    type === "debit"
-                      ? "bg-red-50 text-red-600 border-r border-slate-200"
-                      : "text-slate-400 hover:text-slate-600 border-r border-slate-200"
+                  onClick={() => setMode("debit")}
+                  className={`flex-1 py-2 text-sm font-semibold transition-colors border-r border-slate-200 ${
+                    mode === "debit" ? "bg-red-50 text-red-600" : "text-slate-400 hover:text-slate-600"
                   }`}
                 >
                   Expense
                 </button>
                 <button
                   type="button"
-                  onClick={() => setType("credit")}
+                  onClick={() => setMode("credit")}
                   className={`flex-1 py-2 text-sm font-semibold transition-colors ${
-                    type === "credit"
-                      ? "bg-emerald-50 text-emerald-600"
-                      : "text-slate-400 hover:text-slate-600"
-                  }`}
+                    hasMultipleAccounts ? "border-r border-slate-200" : ""
+                  } ${mode === "credit" ? "bg-emerald-50 text-emerald-600" : "text-slate-400 hover:text-slate-600"}`}
                 >
                   Income
                 </button>
+                {hasMultipleAccounts && (
+                  <button
+                    type="button"
+                    onClick={() => setMode("transfer")}
+                    className={`flex-1 py-2 text-sm font-semibold transition-colors flex items-center justify-center gap-1 ${
+                      mode === "transfer" ? "bg-blue-50 text-blue-600" : "text-slate-400 hover:text-slate-600"
+                    }`}
+                  >
+                    <ArrowLeftRight className="w-3.5 h-3.5" />
+                    Transfer
+                  </button>
+                )}
               </div>
+
+              {/* Transfer: from/to accounts */}
+              {mode === "transfer" ? (
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1.5">From account</label>
+                    <select
+                      value={fromAccountId}
+                      onChange={(e) => setFromAccountId(e.target.value)}
+                      className={inputCls}
+                      required
+                    >
+                      {accounts.map((a) => (
+                        <option key={a.id} value={a.id} disabled={a.id === toAccountId}>{a.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1.5">To account</label>
+                    <select
+                      value={toAccountId}
+                      onChange={(e) => setToAccountId(e.target.value)}
+                      className={inputCls}
+                      required
+                    >
+                      <option value="">Select account…</option>
+                      {accounts.map((a) => (
+                        <option key={a.id} value={a.id} disabled={a.id === fromAccountId}>{a.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              ) : (
+                /* Regular transaction: account selector */
+                accounts.length > 0 && (
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1.5">Account</label>
+                    <select
+                      value={accountId}
+                      onChange={(e) => setAccountId(e.target.value)}
+                      className={inputCls}
+                    >
+                      <option value="">No account</option>
+                      {accounts.map((a) => (
+                        <option key={a.id} value={a.id}>{a.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                )
+              )}
 
               {/* Date */}
               <div>
                 <label className="block text-xs font-medium text-slate-500 mb-1.5">Date</label>
-                <input
-                  name="date"
-                  type="date"
-                  required
-                  defaultValue={todayStr()}
-                  className={inputCls}
-                />
+                <input name="date" type="date" required defaultValue={todayStr()} className={inputCls} />
               </div>
 
-              {/* Merchant */}
-              <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1.5">
-                  Merchant <span className="text-slate-300">(optional)</span>
-                </label>
-                <input
-                  name="merchantName"
-                  type="text"
-                  placeholder="e.g. Netflix, Whole Foods"
-                  maxLength={200}
-                  className={inputCls}
-                />
-              </div>
+              {/* Merchant (not for transfers) */}
+              {mode !== "transfer" && (
+                <div>
+                  <label className="block text-xs font-medium text-slate-500 mb-1.5">
+                    Merchant <span className="text-slate-300">(optional)</span>
+                  </label>
+                  <input
+                    name="merchantName"
+                    type="text"
+                    placeholder="e.g. Netflix, Whole Foods"
+                    maxLength={200}
+                    className={inputCls}
+                  />
+                </div>
+              )}
 
               {/* Description */}
               <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1.5">Description</label>
+                <label className="block text-xs font-medium text-slate-500 mb-1.5">
+                  {mode === "transfer" ? "Note" : "Description"}
+                </label>
                 <input
                   name="description"
                   type="text"
                   required
-                  placeholder="What was this for?"
+                  placeholder={mode === "transfer" ? "e.g. Monthly savings transfer" : "What was this for?"}
                   maxLength={500}
                   className={inputCls}
                 />
@@ -201,8 +322,8 @@ export function AddTransactionModal({ categories, defaultCurrency }: Props) {
                 </div>
               </div>
 
-              {/* Category */}
-              {categories.length > 0 && (
+              {/* Category (not for transfers) */}
+              {mode !== "transfer" && categories.length > 0 && (
                 <div>
                   <label className="block text-xs font-medium text-slate-500 mb-1.5">
                     Category <span className="text-slate-300">(optional)</span>
@@ -214,6 +335,12 @@ export function AddTransactionModal({ categories, defaultCurrency }: Props) {
                     ))}
                   </select>
                 </div>
+              )}
+
+              {mode === "transfer" && (
+                <p className="text-xs text-slate-400 -mt-1">
+                  Creates a debit on the source account and a credit on the destination, linked as a transfer pair.
+                </p>
               )}
 
               {error && <p className="text-sm text-red-500">{error}</p>}
@@ -231,7 +358,13 @@ export function AddTransactionModal({ categories, defaultCurrency }: Props) {
                   disabled={loading}
                   className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 disabled:opacity-50 transition-colors"
                 >
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Save"}
+                  {loading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : mode === "transfer" ? (
+                    "Record transfer"
+                  ) : (
+                    "Save"
+                  )}
                 </button>
               </div>
             </form>

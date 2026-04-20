@@ -18,7 +18,7 @@ export default async function TransactionsPage() {
 
   await ensureCategories()
 
-  const [transactions, total, categories] = hid
+  const [transactions, total, categories, accounts] = hid
     ? await Promise.all([
         db.transaction.findMany({
           where: { householdId: hid },
@@ -26,12 +26,18 @@ export default async function TransactionsPage() {
           take: 25,
           include: {
             category: { select: { id: true, name: true, icon: true, color: true } },
+            financialAccount: { select: { id: true, name: true, type: true } },
           },
         }),
         db.transaction.count({ where: { householdId: hid } }),
         db.category.findMany({ orderBy: { name: "asc" } }),
+        db.financialAccount.findMany({
+          where: { householdId: hid },
+          orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
+          select: { id: true, name: true, type: true },
+        }),
       ])
-    : [[], 0, []]
+    : [[], 0, [], []]
 
   const initialData = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -56,6 +62,7 @@ export default async function TransactionsPage() {
       <TransactionsTable
         initialData={initialData}
         categories={categories}
+        accounts={accounts as { id: string; name: string; type: string }[]}
         defaultCurrency={currency}
         isOwner={isOwner}
       />

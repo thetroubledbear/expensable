@@ -96,6 +96,7 @@ export default async function SettingsPage({
             tier={tier}
             filesUsed={filesUsed}
             monthlyLimit={plan.monthlyFileLimit}
+            displayCurrency={household?.defaultCurrency ?? "USD"}
           />
         ) : (
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">

@@ -168,6 +168,7 @@ export async function POST(req: NextRequest) {
   }
 
   const file = formData.get("file") as File | null
+  const accountId = (formData.get("accountId") as string | null)?.trim() || null
 
   if (!file) return NextResponse.json({ error: "No file provided" }, { status: 400 })
   if (file.size > MAX_BYTES) return NextResponse.json({ error: "File too large (max 20 MB)" }, { status: 413 })
@@ -196,6 +197,16 @@ export async function POST(req: NextRequest) {
     )
   }
 
+  // Validate accountId belongs to this household if provided
+  if (accountId) {
+    const acct = await db.financialAccount.findFirst({
+      where: { id: accountId, householdId: household.id },
+    })
+    if (!acct) {
+      return NextResponse.json({ error: "Invalid account" }, { status: 400 })
+    }
+  }
+
   let record: { id: string }
   try {
     record = await db.uploadedFile.create({
@@ -206,6 +217,7 @@ export async function POST(req: NextRequest) {
         type: fileType,
         status: "pending",
         storageKey: "",
+        financialAccountId: accountId,
       },
     })
   } catch {
@@ -240,7 +252,7 @@ export async function POST(req: NextRequest) {
   }
 
   after(async () => {
-    await processFile(record.id, storageKey, fileType, mimeType, household.id)
+    await processFile(record.id, storageKey, fileType, mimeType, household.id, accountId)
   })
 
   return NextResponse.json(updated, { status: 201 })
@@ -251,7 +263,8 @@ async function processFile(
   storageKey: string,
   fileType: FileType,
   mimeType: string,
-  householdId: string
+  householdId: string,
+  financialAccountId: string | null = null
 ) {
   try {
     await db.uploadedFile.update({ where: { id: fileId }, data: { status: "processing" } })
@@ -291,6 +304,7 @@ async function processFile(
             type: (t.type === "credit" ? "credit" : "debit") as "debit" | "credit",
             merchantName: t.merchantName ?? null,
             categoryId,
+            financialAccountId,
             needsReview: Boolean(uncertain || t.needsReview || !t.date || !t.currency),
           }
         }),

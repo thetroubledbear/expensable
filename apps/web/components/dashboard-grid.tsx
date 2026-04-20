@@ -19,6 +19,7 @@ import { SpendingTrendWidget } from "@/components/widgets/spending-trend-widget"
 import { CategoryPieWidget } from "@/components/widgets/category-pie-widget"
 import { CategoryBreakdownWidget } from "@/components/widgets/category-breakdown-widget"
 import { SavingsRateWidget } from "@/components/widgets/savings-rate-widget"
+import { AccountBalancesWidget, type AccountBalance } from "@/components/widgets/account-balances-widget"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -35,6 +36,7 @@ export type WidgetId =
   | "spending-trend"
   | "category-pie"
   | "category-breakdown"
+  | "account-balances"
 
 export interface DashboardData {
   spent: number
@@ -60,6 +62,7 @@ export interface DashboardData {
   categories: Array<{ name: string; color: string; total: number }>
   momPct: number | null
   lastMonthName: string
+  accountBalances: AccountBalance[]
 }
 
 // ─── Layout defaults ─────────────────────────────────────────────────────────
@@ -78,7 +81,8 @@ const DEFAULT_LAYOUTS: AnyLayouts = {
     { i: "spending-trend",        x: 0, y: 16, w: 12, h: 6, minW: 6, minH: 5 },
     { i: "category-pie",          x: 0, y: 22, w: 5,  h: 7, minW: 3, minH: 5 },
     { i: "category-breakdown",    x: 5, y: 22, w: 7,  h: 7, minW: 4, minH: 5 },
-    { i: "files-count",           x: 0, y: 29, w: 3,  h: 3, minW: 2, minH: 3 },
+    { i: "account-balances",      x: 0, y: 29, w: 5,  h: 6, minW: 3, minH: 4 },
+    { i: "files-count",           x: 5, y: 29, w: 3,  h: 3, minW: 2, minH: 3 },
   ],
   md: [
     { i: "money-out",             x: 0, y: 0,  w: 5, h: 3 },
@@ -92,7 +96,8 @@ const DEFAULT_LAYOUTS: AnyLayouts = {
     { i: "spending-trend",        x: 0, y: 31, w: 10, h: 6 },
     { i: "category-pie",          x: 0, y: 37, w: 10, h: 7 },
     { i: "category-breakdown",    x: 0, y: 44, w: 10, h: 7 },
-    { i: "files-count",           x: 0, y: 51, w: 5,  h: 3 },
+    { i: "account-balances",      x: 0, y: 51, w: 10, h: 6 },
+    { i: "files-count",           x: 0, y: 57, w: 5,  h: 3 },
   ],
 }
 
@@ -109,6 +114,7 @@ const WIDGET_LABELS: Record<WidgetId, string | React.ReactNode> = {
   "spending-trend":        "6-Month Trend",
   "category-pie":          "Spending by Category",
   "category-breakdown":    "Category Breakdown",
+  "account-balances":      "Account Balances",
 }
 
 const ALL_WIDGETS: WidgetId[] = [
@@ -116,25 +122,49 @@ const ALL_WIDGETS: WidgetId[] = [
   "recent-tx", "top-spending",
   "ai-insights", "subscriptions-summary",
   "spending-trend", "category-pie", "category-breakdown",
-  "files-count",
+  "account-balances", "files-count",
 ]
 
 const STORAGE_KEY = "expensable-dashboard-v2"
 
 // ─── Persistence ─────────────────────────────────────────────────────────────
 
-function loadState(): { layouts: AnyLayouts; hidden: WidgetId[] } {
+function loadLocalState(): { layouts: AnyLayouts; hidden: WidgetId[] } | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (raw) return JSON.parse(raw)
   } catch {}
-  return { layouts: DEFAULT_LAYOUTS, hidden: [] }
+  return null
 }
 
-function saveState(layouts: AnyLayouts, hidden: WidgetId[]) {
+function saveLocalState(layouts: AnyLayouts, hidden: WidgetId[]) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ layouts, hidden }))
   } catch {}
+}
+
+async function fetchRemoteLayout(): Promise<{ layouts: AnyLayouts; hidden: WidgetId[] } | null> {
+  try {
+    const res = await fetch("/api/dashboard/layout")
+    if (!res.ok) return null
+    const data = await res.json()
+    return data ?? null
+  } catch {
+    return null
+  }
+}
+
+let saveTimer: ReturnType<typeof setTimeout> | null = null
+
+function scheduleSaveRemote(layouts: AnyLayouts, hidden: WidgetId[]) {
+  if (saveTimer) clearTimeout(saveTimer)
+  saveTimer = setTimeout(() => {
+    fetch("/api/dashboard/layout", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ layouts, hidden }),
+    }).catch(() => {})
+  }, 1500)
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -163,36 +193,53 @@ export function DashboardGrid({ data }: Props) {
     return () => ro.disconnect()
   }, [])
 
-  // Load from localStorage (client-only)
+  // Load layout: remote first, fall back to localStorage, fall back to defaults
   useEffect(() => {
-    const stored = loadState()
-    setLayouts(stored.layouts)
-    setHidden(stored.hidden)
-    setMounted(true)
+    async function load() {
+      const local = loadLocalState()
+      // Show local immediately so there's no blank flash
+      if (local) {
+        setLayouts(local.layouts)
+        setHidden(local.hidden)
+      }
+      setMounted(true)
+
+      const remote = await fetchRemoteLayout()
+      if (remote) {
+        setLayouts(remote.layouts)
+        setHidden(remote.hidden)
+        saveLocalState(remote.layouts, remote.hidden)
+      }
+    }
+    load()
   }, [])
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onLayoutChange = useCallback((_current: any, all: AnyLayouts) => {
     setLayouts(all)
-    saveState(all, hidden)
+    saveLocalState(all, hidden)
+    scheduleSaveRemote(all, hidden)
   }, [hidden])
 
   function hideWidget(id: WidgetId) {
     const next = [...hidden, id]
     setHidden(next)
-    saveState(layouts, next)
+    saveLocalState(layouts, next)
+    scheduleSaveRemote(layouts, next)
   }
 
   function showWidget(id: WidgetId) {
     const next = hidden.filter((h) => h !== id)
     setHidden(next)
-    saveState(layouts, next)
+    saveLocalState(layouts, next)
+    scheduleSaveRemote(layouts, next)
   }
 
   function resetLayout() {
     setLayouts(DEFAULT_LAYOUTS)
     setHidden([])
-    saveState(DEFAULT_LAYOUTS, [])
+    saveLocalState(DEFAULT_LAYOUTS, [])
+    scheduleSaveRemote(DEFAULT_LAYOUTS, [])
   }
 
   const visible = ALL_WIDGETS.filter((id) => !hidden.includes(id))
@@ -400,6 +447,8 @@ function WidgetContent({ id, data }: { id: WidgetId; data: DashboardData }) {
           subscriptions={data.subscriptions}
         />
       )
+    case "account-balances":
+      return <AccountBalancesWidget accounts={data.accountBalances} currency={data.currency} />
     case "files-count":
       return <FilesCountWidget count={data.fileCount} />
     case "spending-trend":

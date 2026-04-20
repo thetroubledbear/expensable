@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useState } from "react"
+import { useCallback, useState, useEffect } from "react"
 import { useDropzone } from "react-dropzone"
 import { useRouter } from "next/navigation"
 import {
@@ -12,6 +12,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Loader2,
+  ChevronDown,
 } from "lucide-react"
 
 type UploadStatus = "idle" | "uploading" | "done" | "error"
@@ -23,6 +24,13 @@ interface PendingFile {
   error?: string
 }
 
+interface FinancialAccount {
+  id: string
+  name: string
+  type: string
+  isDefault: boolean
+}
+
 const ACCEPT = {
   "text/csv": [".csv"],
   "application/csv": [".csv"],
@@ -30,6 +38,14 @@ const ACCEPT = {
   "image/jpeg": [".jpg", ".jpeg"],
   "image/png": [".png"],
   "image/webp": [".webp"],
+}
+
+const ACCOUNT_TYPE_LABELS: Record<string, string> = {
+  checking: "Checking",
+  savings: "Savings",
+  credit: "Credit Card",
+  cash: "Cash",
+  investment: "Investment",
 }
 
 function fileIcon(mime: string) {
@@ -48,6 +64,19 @@ export function UploadDropzone() {
   const router = useRouter()
   const [files, setFiles] = useState<PendingFile[]>([])
   const [uploading, setUploading] = useState(false)
+  const [accounts, setAccounts] = useState<FinancialAccount[]>([])
+  const [selectedAccountId, setSelectedAccountId] = useState<string>("")
+
+  useEffect(() => {
+    fetch("/api/accounts")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data: FinancialAccount[]) => {
+        setAccounts(data)
+        const def = data.find((a) => a.isDefault) ?? data[0]
+        if (def) setSelectedAccountId(def.id)
+      })
+      .catch(() => {})
+  }, [])
 
   const onDrop = useCallback((accepted: File[]) => {
     setFiles((prev) => [
@@ -80,6 +109,7 @@ export function UploadDropzone() {
 
       const body = new FormData()
       body.append("file", pf.file)
+      if (selectedAccountId) body.append("accountId", selectedAccountId)
 
       const res = await fetch("/api/files", { method: "POST", body })
 
@@ -101,9 +131,37 @@ export function UploadDropzone() {
   }
 
   const pendingCount = files.filter((f) => f.status === "idle").length
+  const selectedAccount = accounts.find((a) => a.id === selectedAccountId)
 
   return (
     <div className="space-y-4">
+      {/* Account selector */}
+      {accounts.length > 0 && (
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm px-4 py-3">
+          <p className="text-xs font-medium text-slate-500 mb-2">Upload to account</p>
+          <div className="relative">
+            <select
+              value={selectedAccountId}
+              onChange={(e) => setSelectedAccountId(e.target.value)}
+              className="w-full appearance-none bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent cursor-pointer pr-8"
+            >
+              {accounts.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.name} — {ACCOUNT_TYPE_LABELS[a.type] ?? a.type}
+                  {a.isDefault ? " (default)" : ""}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+          </div>
+          {selectedAccount && (
+            <p className="text-xs text-slate-400 mt-1.5">
+              Transactions will be assigned to <span className="font-medium text-slate-600">{selectedAccount.name}</span>
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Drop zone */}
       <div
         {...getRootProps()}
@@ -201,6 +259,7 @@ export function UploadDropzone() {
             <>
               <UploadCloud className="w-4 h-4" />
               Upload {pendingCount} {pendingCount === 1 ? "file" : "files"}
+              {selectedAccount ? ` → ${selectedAccount.name}` : ""}
             </>
           )}
         </button>

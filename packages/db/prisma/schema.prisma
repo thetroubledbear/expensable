@@ -11,14 +11,15 @@ datasource db {
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
 model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  name          String?
-  image         String?
-  passwordHash  String?
-  emailVerified DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id              String    @id @default(cuid())
+  email           String    @unique
+  name            String?
+  image           String?
+  passwordHash    String?
+  emailVerified   DateTime?
+  dashboardLayout String?   // JSON: { layouts, hidden }
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   accounts      Account[]
   sessions      Session[]
@@ -71,13 +72,14 @@ model Household {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  members         HouseholdMember[]
-  uploadedFiles   UploadedFile[]
-  transactions    Transaction[]
-  subscriptions   DetectedSubscription[]
-  billing         HouseholdBilling?
-  aiInsightCaches AIInsightCache[]
-  invites         HouseholdInvite[]
+  members           HouseholdMember[]
+  uploadedFiles     UploadedFile[]
+  transactions      Transaction[]
+  subscriptions     DetectedSubscription[]
+  billing           HouseholdBilling?
+  aiInsightCaches   AIInsightCache[]
+  invites           HouseholdInvite[]
+  financialAccounts FinancialAccount[]
 }
 
 model HouseholdMember {
@@ -111,42 +113,47 @@ model HouseholdBilling {
 // ─── Files & Processing ───────────────────────────────────────────────────────
 
 model UploadedFile {
-  id          String    @id @default(cuid())
-  householdId String
-  uploadedBy  String
-  name        String
-  type        String    // csv | pdf | image
-  status      String    @default("pending") // pending | processing | done | failed
-  storageKey  String
-  errorMsg    String?
-  uploadedAt  DateTime  @default(now())
-  processedAt DateTime?
+  id                 String    @id @default(cuid())
+  householdId        String
+  uploadedBy         String
+  name               String
+  type               String    // csv | pdf | image
+  status             String    @default("pending") // pending | processing | done | failed
+  storageKey         String
+  errorMsg           String?
+  uploadedAt         DateTime  @default(now())
+  processedAt        DateTime?
+  financialAccountId String?
 
-  household    Household     @relation(fields: [householdId], references: [id], onDelete: Cascade)
-  user         User          @relation(fields: [uploadedBy], references: [id])
-  transactions Transaction[]
+  household         Household         @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  user              User              @relation(fields: [uploadedBy], references: [id])
+  transactions      Transaction[]
+  financialAccount  FinancialAccount? @relation(fields: [financialAccountId], references: [id], onDelete: SetNull)
 }
 
 // ─── Transactions ─────────────────────────────────────────────────────────────
 
 model Transaction {
-  id           String    @id @default(cuid())
-  householdId  String
-  fileId       String?
-  date         DateTime
-  description  String
-  amount       Float
-  currency     String    @default("USD")
-  type         String    // debit | credit
-  categoryId   String?
-  merchantName String?
-  needsReview  Boolean   @default(false)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id                 String    @id @default(cuid())
+  householdId        String
+  fileId             String?
+  date               DateTime
+  description        String
+  amount             Float
+  currency           String    @default("USD")
+  type               String    // debit | credit
+  categoryId         String?
+  merchantName       String?
+  needsReview        Boolean   @default(false)
+  financialAccountId String?
+  transferPairId     String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
-  household Household     @relation(fields: [householdId], references: [id], onDelete: Cascade)
-  file      UploadedFile? @relation(fields: [fileId], references: [id], onDelete: Cascade)
-  category  Category?     @relation(fields: [categoryId], references: [id])
+  household        Household         @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  file             UploadedFile?     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  category         Category?         @relation(fields: [categoryId], references: [id])
+  financialAccount FinancialAccount? @relation(fields: [financialAccountId], references: [id], onDelete: SetNull)
 }
 
 // ─── Categories ───────────────────────────────────────────────────────────────
@@ -193,6 +200,25 @@ model AIInsightCache {
   household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
 
   @@unique([householdId, month])
+}
+
+// ─── Financial Accounts ───────────────────────────────────────────────────────
+
+model FinancialAccount {
+  id          String   @id @default(cuid())
+  householdId String
+  name        String
+  type        String   @default("checking") // checking | savings | credit | cash | investment
+  isDefault   Boolean  @default(false)
+  currency    String   @default("USD")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  household     Household      @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  transactions  Transaction[]
+  uploadedFiles UploadedFile[]
+
+  @@unique([householdId, name])
 }
 
 // ─── Household Invites ────────────────────────────────────────────────────────

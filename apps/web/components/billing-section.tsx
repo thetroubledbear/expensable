@@ -5,23 +5,64 @@ import { useRouter } from "next/navigation"
 import { PLANS, type PlanTier } from "@expensable/types"
 import { Zap, Users, Check, ArrowUpCircle, ArrowDownCircle } from "lucide-react"
 
-const PLAN_META: Record<PlanTier, { label: string; price: string; badgeClass: string }> = {
-  free: { label: "Free", price: "$0/mo", badgeClass: "bg-slate-100 text-slate-700" },
-  pro: { label: "Pro", price: "$9/mo", badgeClass: "bg-emerald-100 text-emerald-700" },
-  family: { label: "Family", price: "$19/mo", badgeClass: "bg-violet-100 text-violet-700" },
+// Approximate monthly display amounts per currency (USD base: pro=$9, family=$19)
+const DISPLAY_PRICES: Record<string, { pro: number; family: number }> = {
+  USD: { pro: 9,    family: 19   },
+  EUR: { pro: 8,    family: 17   },
+  GBP: { pro: 7,    family: 15   },
+  CHF: { pro: 8,    family: 17   },
+  CAD: { pro: 12,   family: 26   },
+  AUD: { pro: 14,   family: 30   },
+  JPY: { pro: 1350, family: 2850 },
+  NOK: { pro: 95,   family: 200  },
+  SEK: { pro: 100,  family: 210  },
+  DKK: { pro: 62,   family: 130  },
+  NZD: { pro: 15,   family: 32   },
+  SGD: { pro: 12,   family: 25   },
+  HKD: { pro: 70,   family: 148  },
+}
+
+function fmtPrice(amount: number, currency: string): string {
+  try {
+    return new Intl.NumberFormat("en", {
+      style: "currency",
+      currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount) + "/mo"
+  } catch {
+    return `${currency} ${amount}/mo`
+  }
+}
+
+function getPlanMeta(tier: PlanTier, currency: string) {
+  const prices = DISPLAY_PRICES[currency] ?? DISPLAY_PRICES.USD
+  const isNonUSD = currency !== "USD"
+  const approxNote = isNonUSD ? "~" : ""
+  return {
+    free:   { label: "Free",   price: "Free",                                    badgeClass: "bg-slate-100 text-slate-700"  },
+    pro:    { label: "Pro",    price: `${approxNote}${fmtPrice(prices.pro, currency)}`,    badgeClass: "bg-emerald-100 text-emerald-700" },
+    family: { label: "Family", price: `${approxNote}${fmtPrice(prices.family, currency)}`, badgeClass: "bg-violet-100 text-violet-700"  },
+  }[tier]
 }
 
 interface Props {
   tier: PlanTier
   filesUsed: number
   monthlyLimit: number
+  displayCurrency?: string
 }
 
-export function BillingSection({ tier, filesUsed, monthlyLimit }: Props) {
+export function BillingSection({ tier, filesUsed, monthlyLimit, displayCurrency = "USD" }: Props) {
   const [loading, setLoading] = useState<"pro" | "family" | "portal" | null>(null)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
-  const meta = PLAN_META[tier]
+  const meta = getPlanMeta(tier, displayCurrency)
+  const prices = DISPLAY_PRICES[displayCurrency] ?? DISPLAY_PRICES.USD
+  const isNonUSD = displayCurrency !== "USD"
+  const approx = isNonUSD ? "~" : ""
+  const proPrice = `${approx}${fmtPrice(prices.pro, displayCurrency)}`
+  const familyPrice = `${approx}${fmtPrice(prices.family, displayCurrency)}`
   const usagePct = Math.min((filesUsed / monthlyLimit) * 100, 100)
 
   async function startCheckout(targetTier: "pro" | "family") {
@@ -89,6 +130,11 @@ export function BillingSection({ tier, filesUsed, monthlyLimit }: Props) {
   return (
     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
       <h2 className="text-sm font-semibold text-slate-700 mb-5">Plan &amp; Billing</h2>
+      {isNonUSD && (
+        <p className="mb-4 text-xs text-slate-400">
+          Prices shown in {displayCurrency} are approximate. Billing is processed in USD by Stripe.
+        </p>
+      )}
       {error && (
         <div className="mb-4 px-3 py-2 rounded-lg bg-red-50 border border-red-100 text-xs text-red-600">
           {error}
@@ -132,7 +178,7 @@ export function BillingSection({ tier, filesUsed, monthlyLimit }: Props) {
         <div className="grid grid-cols-2 gap-3">
           <PlanCard
             name="Pro"
-            price="$9/mo"
+            price={proPrice}
             features={[`${PLANS.pro.monthlyFileLimit} files/mo`, "1 member"]}
             icon={Zap}
             iconColor="text-emerald-600"
@@ -142,7 +188,7 @@ export function BillingSection({ tier, filesUsed, monthlyLimit }: Props) {
           />
           <PlanCard
             name="Family"
-            price="$19/mo"
+            price={familyPrice}
             features={[
               `${PLANS.family.monthlyFileLimit} files/mo`,
               `${PLANS.family.maxHouseholdMembers} members`,
@@ -164,7 +210,7 @@ export function BillingSection({ tier, filesUsed, monthlyLimit }: Props) {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-slate-900">Family</p>
-              <p className="text-xs text-slate-400 mb-2">$19/mo</p>
+              <p className="text-xs text-slate-400 mb-2">{familyPrice}</p>
               <ul className="space-y-1 mb-3">
                 {[
                   `${PLANS.family.monthlyFileLimit} files/mo`,
@@ -197,7 +243,7 @@ export function BillingSection({ tier, filesUsed, monthlyLimit }: Props) {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-slate-900">Pro</p>
-              <p className="text-xs text-slate-400 mb-2">$9/mo</p>
+              <p className="text-xs text-slate-400 mb-2">{proPrice}</p>
               <ul className="space-y-1 mb-3">
                 {[`${PLANS.pro.monthlyFileLimit} files/mo`, "1 member"].map((f) => (
                   <li key={f} className="flex items-center gap-1.5 text-xs text-slate-500">
