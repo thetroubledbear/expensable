@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useState, useEffect } from "react"
+import { useCallback, useRef, useState, useEffect } from "react"
 import { useDropzone } from "react-dropzone"
 import { useRouter } from "next/navigation"
 import {
@@ -13,6 +13,7 @@ import {
   AlertCircle,
   Loader2,
   ChevronDown,
+  Camera,
 } from "lucide-react"
 
 type UploadStatus = "idle" | "uploading" | "done" | "error"
@@ -66,6 +67,7 @@ export function UploadDropzone() {
   const [uploading, setUploading] = useState(false)
   const [accounts, setAccounts] = useState<FinancialAccount[]>([])
   const [selectedAccountId, setSelectedAccountId] = useState<string>("")
+  const snapInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     fetch("/api/accounts")
@@ -130,6 +132,20 @@ export function UploadDropzone() {
     if (!anyFailed) setTimeout(() => router.push("/files"), 600)
   }
 
+  function handleSnapChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const picked = Array.from(e.target.files ?? [])
+    if (picked.length === 0) return
+    setFiles((prev) => [
+      ...prev,
+      ...picked.map((f) => ({
+        id: Math.random().toString(36).slice(2),
+        file: f,
+        status: "idle" as const,
+      })),
+    ])
+    e.target.value = ""
+  }
+
   const pendingCount = files.filter((f) => f.status === "idle").length
   const selectedAccount = accounts.find((a) => a.id === selectedAccountId)
 
@@ -161,6 +177,32 @@ export function UploadDropzone() {
           )}
         </div>
       )}
+
+      {/* Snap Receipt shortcut */}
+      <div>
+        <input
+          ref={snapInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          multiple
+          className="hidden"
+          onChange={handleSnapChange}
+        />
+        <button
+          onClick={() => snapInputRef.current?.click()}
+          className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold py-3 rounded-2xl transition-colors"
+        >
+          <Camera className="w-4 h-4" />
+          Snap a Receipt
+        </button>
+      </div>
+
+      <div className="flex items-center gap-3 text-xs text-slate-300">
+        <div className="flex-1 h-px bg-slate-100" />
+        <span>or</span>
+        <div className="flex-1 h-px bg-slate-100" />
+      </div>
 
       {/* Drop zone */}
       <div

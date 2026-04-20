@@ -1,0 +1,118 @@
+import { NextRequest, NextResponse } from "next/server"
+import { z } from "zod"
+import { auth } from "@/lib/auth/config"
+import { db } from "@expensable/db"
+import { resolveHousehold } from "@/lib/auth/household"
+import Anthropic from "@anthropic-ai/sdk"
+
+const bodySchema = z.object({
+  question: z.string().min(1).max(500),
+})
+
+export async function POST(req: NextRequest) {
+  const session = await auth()
+  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+  let body: unknown
+  try { body = await req.json() } catch { return NextResponse.json({ error: "Invalid body" }, { status: 400 }) }
+
+  const parsed = bodySchema.safeParse(body)
+  if (!parsed.success) return NextResponse.json({ error: "Invalid input" }, { status: 400 })
+
+  const membership = await resolveHousehold(session.user.id)
+  if (!membership) return NextResponse.json({ error: "No household" }, { status: 404 })
+
+  const { householdId } = membership
+  const currency = membership.household.defaultCurrency
+
+  // Build a spending summary for context
+  const [catTotals, topMerchants, recentTx, subscriptions] = await Promise.all([
+    db.transaction.groupBy({
+      by: ["categoryId"],
+      where: { householdId, type: "debit" },
+      _sum: { amount: true },
+      orderBy: { _sum: { amount: "desc" } },
+      take: 10,
+    }),
+    db.transaction.groupBy({
+      by: ["merchantName"],
+      where: { householdId, type: "debit", merchantName: { not: null } },
+      _sum: { amount: true },
+      orderBy: { _sum: { amount: "desc" } },
+      take: 10,
+    }),
+    db.transaction.findMany({
+      where: { householdId },
+      orderBy: { date: "desc" },
+      take: 20,
+      select: { date: true, description: true, amount: true, type: true, merchantName: true, currency: true },
+    }),
+    db.detectedSubscription.findMany({
+      where: { householdId },
+      select: { merchantName: true, amount: true, currency: true, frequency: true },
+    }),
+  ])
+
+  const catIds = catTotals.map((c) => c.categoryId).filter(Boolean) as string[]
+  const cats = catIds.length > 0
+    ? await db.category.findMany({ where: { id: { in: catIds } }, select: { id: true, name: true } })
+    : []
+  const catById = new Map(cats.map((c) => [c.id, c.name]))
+
+  const spendingByCategory = catTotals
+    .map((c) => `${catById.get(c.categoryId ?? "") ?? "Uncategorized"}: ${currency} ${(c._sum.amount ?? 0).toFixed(2)}`)
+    .join("\n")
+
+  const topMerchantsText = topMerchants
+    .map((m) => `${m.merchantName}: ${currency} ${(m._sum.amount ?? 0).toFixed(2)}`)
+    .join("\n")
+
+  const recentTxText = recentTx
+    .map((t) => `${t.date.toISOString().slice(0, 10)} | ${t.type} | ${t.merchantName ?? t.description} | ${t.currency} ${t.amount.toFixed(2)}`)
+    .join("\n")
+
+  const subsText = subscriptions
+    .map((s) => `${s.merchantName}: ${s.currency} ${s.amount.toFixed(2)}/${s.frequency}`)
+    .join("\n")
+
+  const context = `Household financial data (currency: ${currency}):
+
+ALL-TIME SPENDING BY CATEGORY:
+${spendingByCategory || "No data"}
+
+TOP MERCHANTS ALL-TIME:
+${topMerchantsText || "No data"}
+
+RECENT TRANSACTIONS (last 20):
+${recentTxText || "No data"}
+
+DETECTED SUBSCRIPTIONS:
+${subsText || "None"}
+`
+
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return NextResponse.json({
+      answer: "Natural language queries require an Anthropic API key. Set ANTHROPIC_API_KEY in your environment.",
+    })
+  }
+
+  try {
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
+    const message = await client.messages.create({
+      model: "claude-sonnet-4-6",
+      max_tokens: 512,
+      system: `You are a personal finance assistant. Answer questions about the user's spending based on the data provided. Be concise (2-4 sentences max). Use the same currency shown in the data. If the data doesn't support a precise answer, give your best estimate and say so.`,
+      messages: [
+        {
+          role: "user",
+          content: `${context}\n\nQuestion: ${parsed.data.question}`,
+        },
+      ],
+    })
+
+    const answer = message.content[0].type === "text" ? message.content[0].text : "Unable to generate answer."
+    return NextResponse.json({ answer })
+  } catch {
+    return NextResponse.json({ error: "Failed to process query" }, { status: 500 })
+  }
+}

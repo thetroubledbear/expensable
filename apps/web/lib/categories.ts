@@ -1,5 +1,19 @@
 import { db } from "@expensable/db"
 
+export const CATEGORY_COLOR_MAP: Record<string, string> = {
+  amber:  "#f59e0b",
+  slate:  "#64748b",
+  indigo: "#6366f1",
+  pink:   "#ec4899",
+  emerald:"#10b981",
+  rose:   "#f43f5e",
+  green:  "#22c55e",
+  zinc:   "#71717a",
+  violet: "#8b5cf6",
+  blue:   "#3b82f6",
+  sky:    "#0ea5e9",
+}
+
 export const HINT_TO_CATEGORY: Record<string, string> = {
   food: "Food & Drink",
   transport: "Transport",

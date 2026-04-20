@@ -8,6 +8,8 @@ import { parseFileContent, type ParseResult } from "@/lib/ai/parser"
 import { PLANS, type FileType } from "@expensable/types"
 import { ensureCategories, HINT_TO_CATEGORY } from "@/lib/categories"
 import { detectSubscriptions } from "@/lib/subscriptions"
+import { detectAnomalies } from "@/lib/anomalies"
+import { normalizeMerchant } from "@/lib/merchant-normalize"
 
 const MIME_TO_TYPE: Record<string, FileType> = {
   "text/csv": "csv",
@@ -310,13 +312,20 @@ async function processFile(
             amount: t.amount ?? 0,
             currency: t.currency ?? "USD",
             type: (t.type === "credit" ? "credit" : "debit") as "debit" | "credit",
-            merchantName: t.merchantName ?? null,
+            merchantName: normalizeMerchant(t.merchantName) ?? null,
             categoryId,
             financialAccountId,
             needsReview: Boolean(uncertain || t.needsReview || !t.date || !t.currency),
           }
         }),
       })
+
+      // Fetch created IDs for anomaly detection
+      const createdIds = await db.transaction.findMany({
+        where: { fileId },
+        select: { id: true },
+      })
+      await detectAnomalies(householdId, createdIds.map((t) => t.id))
     }
 
     await db.uploadedFile.update({
