@@ -4,6 +4,12 @@ import { useState, useEffect, useRef } from "react"
 import { Search, AlertTriangle, ChevronLeft, ChevronRight, Loader2, X, Receipt, Trash2 } from "lucide-react"
 import { CategoryPicker, type Category } from "./category-picker"
 
+type FinancialAccount = {
+  id: string
+  name: string
+  type: string
+}
+
 type Transaction = {
   id: string
   date: string
@@ -15,6 +21,8 @@ type Transaction = {
   categoryId: string | null
   category: Category | null
   needsReview: boolean
+  financialAccountId: string | null
+  financialAccount: FinancialAccount | null
 }
 
 interface InitialData {
@@ -27,6 +35,7 @@ interface InitialData {
 interface Props {
   initialData: InitialData
   categories: Category[]
+  accounts: FinancialAccount[]
   defaultCurrency: string
   isOwner: boolean
 }
@@ -44,7 +53,7 @@ function fmt(amount: number, currency: string) {
   }
 }
 
-export function TransactionsTable({ initialData, categories, defaultCurrency, isOwner }: Props) {
+export function TransactionsTable({ initialData, categories, accounts, defaultCurrency, isOwner }: Props) {
   const [transactions, setTransactions] = useState<Transaction[]>(initialData.data)
   const [total, setTotal] = useState(initialData.total)
   const [totalPages, setTotalPages] = useState(initialData.totalPages)
@@ -55,6 +64,7 @@ export function TransactionsTable({ initialData, categories, defaultCurrency, is
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [typeFilter, setTypeFilter] = useState<"" | "debit" | "credit">("")
   const [categoryFilter, setCategoryFilter] = useState("")
+  const [accountFilter, setAccountFilter] = useState("")
   const [reviewOnly, setReviewOnly] = useState(false)
 
   const [selected, setSelected] = useState<Set<string>>(new Set())
@@ -84,6 +94,7 @@ export function TransactionsTable({ initialData, categories, defaultCurrency, is
     if (debouncedSearch) p.set("search", debouncedSearch)
     if (typeFilter) p.set("type", typeFilter)
     if (categoryFilter) p.set("categoryId", categoryFilter)
+    if (accountFilter) p.set("accountId", accountFilter)
     if (reviewOnly) p.set("needsReview", "true")
 
     fetch(`/api/transactions?${p}`)
@@ -100,13 +111,14 @@ export function TransactionsTable({ initialData, categories, defaultCurrency, is
       .finally(() => { if (alive) setLoading(false) })
 
     return () => { alive = false }
-  }, [page, debouncedSearch, typeFilter, categoryFilter, reviewOnly])
+  }, [page, debouncedSearch, typeFilter, categoryFilter, accountFilter, reviewOnly])
 
   function setInstantFilter(
-    updates: Partial<{ typeFilter: "" | "debit" | "credit"; categoryFilter: string; reviewOnly: boolean }>
+    updates: Partial<{ typeFilter: "" | "debit" | "credit"; categoryFilter: string; accountFilter: string; reviewOnly: boolean }>
   ) {
     if ("typeFilter" in updates) setTypeFilter(updates.typeFilter!)
     if ("categoryFilter" in updates) setCategoryFilter(updates.categoryFilter!)
+    if ("accountFilter" in updates) setAccountFilter(updates.accountFilter!)
     if ("reviewOnly" in updates) setReviewOnly(updates.reviewOnly!)
     setPage(1)
   }
@@ -237,6 +249,20 @@ export function TransactionsTable({ initialData, categories, defaultCurrency, is
           ))}
         </select>
 
+        {accounts.length > 1 && (
+          <select
+            value={accountFilter}
+            onChange={(e) => setInstantFilter({ accountFilter: e.target.value })}
+            className="text-sm rounded-xl border border-slate-200 px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+          >
+            <option value="">All accounts</option>
+            <option value="none">No account</option>
+            {accounts.map((a) => (
+              <option key={a.id} value={a.id}>{a.name}</option>
+            ))}
+          </select>
+        )}
+
         <button
           onClick={() => setInstantFilter({ reviewOnly: !reviewOnly })}
           className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium border transition-colors ${
@@ -317,6 +343,11 @@ export function TransactionsTable({ initialData, categories, defaultCurrency, is
                 <th className="text-left px-4 py-3.5 text-xs font-medium text-slate-400 uppercase tracking-wide w-44">
                   Category
                 </th>
+                {accounts.length > 1 && (
+                  <th className="text-left px-4 py-3.5 text-xs font-medium text-slate-400 uppercase tracking-wide w-32">
+                    Account
+                  </th>
+                )}
                 <th className="px-4 py-3.5 w-10" />
               </tr>
             </thead>
@@ -371,6 +402,17 @@ export function TransactionsTable({ initialData, categories, defaultCurrency, is
                         onUpdate={handleCategoryUpdate}
                       />
                     </td>
+                    {accounts.length > 1 && (
+                      <td className="px-4 py-3.5">
+                        {tx.financialAccount ? (
+                          <span className="px-2 py-1 rounded-lg bg-slate-100 text-slate-600 text-xs font-medium truncate max-w-[120px] block">
+                            {tx.financialAccount.name}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-slate-300">—</span>
+                        )}
+                      </td>
+                    )}
                     <td className="px-4 py-3.5 text-right">
                       <button
                         onClick={() => toggleReview(tx)}

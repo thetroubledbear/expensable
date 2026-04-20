@@ -11,16 +11,18 @@ import {
   Settings,
   LogOut,
   Wallet,
+  Landmark,
 } from "lucide-react"
 import { signOut } from "next-auth/react"
 
 const NAV = [
-  { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
-  { icon: UploadCloud,     label: "Upload",    href: "/upload" },
-  { icon: FolderOpen,      label: "Files",     href: "/files" },
-  { icon: Receipt,         label: "Transactions", href: "/transactions" },
+  { icon: LayoutDashboard, label: "Dashboard",     href: "/dashboard" },
+  { icon: UploadCloud,     label: "Upload",        href: "/upload" },
+  { icon: FolderOpen,      label: "Files",         href: "/files" },
+  { icon: Receipt,         label: "Transactions",  href: "/transactions" },
+  { icon: Landmark,        label: "Accounts",      href: "/accounts" },
   { icon: Repeat2,         label: "Subscriptions", href: "/subscriptions" },
-  { icon: Settings,        label: "Settings",  href: "/settings" },
+  { icon: Settings,        label: "Settings",      href: "/settings" },
 ]
 
 interface SidebarProps {

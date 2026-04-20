@@ -17,6 +17,7 @@ export async function GET(req: NextRequest) {
   const type = sp.get("type")
   const categoryId = sp.get("categoryId")
   const needsReview = sp.get("needsReview") === "true"
+  const accountId = sp.get("accountId")
 
   try {
     const membership = await resolveHousehold(session.user.id)
@@ -30,6 +31,8 @@ export async function GET(req: NextRequest) {
     if (needsReview) where.needsReview = true
     if (categoryId === "uncategorized") where.categoryId = null
     else if (categoryId) where.categoryId = categoryId
+    if (accountId === "none") where.financialAccountId = null
+    else if (accountId) where.financialAccountId = accountId
     if (search) {
       where.OR = [
         { merchantName: { contains: search, mode: "insensitive" } },
@@ -45,6 +48,7 @@ export async function GET(req: NextRequest) {
         take: limit,
         include: {
           category: { select: { id: true, name: true, icon: true, color: true } },
+          financialAccount: { select: { id: true, name: true, type: true } },
         },
       }),
       db.transaction.count({ where }),
@@ -66,6 +70,7 @@ const createSchema = z.object({
   type: z.enum(["debit", "credit"]),
   currency: z.enum(SUPPORTED_CURRENCIES),
   categoryId: z.string().cuid().optional().nullable(),
+  financialAccountId: z.string().cuid().optional().nullable(),
 })
 
 export async function POST(req: NextRequest) {
@@ -89,7 +94,15 @@ export async function POST(req: NextRequest) {
   const membership = await resolveHousehold(session.user.id)
   if (!membership) return NextResponse.json({ error: "No household" }, { status: 404 })
 
-  const { date, description, merchantName, amount, type, currency, categoryId } = parsed.data
+  const { date, description, merchantName, amount, type, currency, categoryId, financialAccountId } = parsed.data
+
+  // Validate account belongs to household if provided
+  if (financialAccountId) {
+    const acct = await db.financialAccount.findFirst({
+      where: { id: financialAccountId, householdId: membership.householdId },
+    })
+    if (!acct) return NextResponse.json({ error: "Invalid account" }, { status: 400 })
+  }
 
   try {
     const tx = await db.transaction.create({
@@ -102,6 +115,7 @@ export async function POST(req: NextRequest) {
         type,
         currency,
         categoryId: categoryId ?? null,
+        financialAccountId: financialAccountId ?? null,
         needsReview: false,
       },
       include: { category: { select: { id: true, name: true, icon: true, color: true } } },

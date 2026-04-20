@@ -78,7 +78,7 @@ export default async function DashboardPage() {
   const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59)
   const lastMonthName = new Date(now.getFullYear(), now.getMonth() - 1, 1).toLocaleString("en", { month: "long" })
 
-  const [moneyOut, moneyIn, recentTxRaw, topMerchantsRaw, subs, prevMonthAgg, trendTx, catTotals] =
+  const [moneyOut, moneyIn, recentTxRaw, topMerchantsRaw, subs, prevMonthAgg, trendTx, catTotals, financialAccounts, acctCredits, acctDebits] =
     await Promise.all([
       db.transaction.aggregate({
         where: { householdId: hid, type: "debit", date: { gte: startOfMonth } },
@@ -123,6 +123,21 @@ export default async function DashboardPage() {
       db.transaction.groupBy({
         by: ["categoryId"],
         where: { householdId: hid, type: "debit", date: { gte: startOfMonth } },
+        _sum: { amount: true },
+      }),
+      db.financialAccount.findMany({
+        where: { householdId: hid },
+        select: { id: true, name: true, type: true, currency: true },
+        orderBy: [{ isDefault: "desc" }, { createdAt: "asc" }],
+      }),
+      db.transaction.groupBy({
+        by: ["financialAccountId"],
+        where: { householdId: hid, type: "credit", financialAccountId: { not: null } },
+        _sum: { amount: true },
+      }),
+      db.transaction.groupBy({
+        by: ["financialAccountId"],
+        where: { householdId: hid, type: "debit", financialAccountId: { not: null } },
         _sum: { amount: true },
       }),
     ])
@@ -171,6 +186,17 @@ export default async function DashboardPage() {
     }))
     .sort((a, b) => b.total - a.total)
 
+  // Account balances: sum(credits) - sum(debits) per account, all-time
+  const creditByAcct = new Map(acctCredits.map((r) => [r.financialAccountId, r._sum.amount ?? 0]))
+  const debitByAcct  = new Map(acctDebits.map((r)  => [r.financialAccountId, r._sum.amount ?? 0]))
+  const accountBalances = financialAccounts.map((a) => ({
+    id:       a.id,
+    name:     a.name,
+    type:     a.type,
+    currency: a.currency,
+    balance:  Math.round(((creditByAcct.get(a.id) ?? 0) - (debitByAcct.get(a.id) ?? 0)) * 100) / 100,
+  }))
+
   const data: DashboardData = {
     spent,
     received,
@@ -207,6 +233,7 @@ export default async function DashboardPage() {
       })),
     trend,
     categories,
+    accountBalances,
   }
 
   return (
