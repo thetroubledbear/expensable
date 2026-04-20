@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { signIn } from "next-auth/react"
 import { useSearchParams } from "next/navigation"
 import {
@@ -35,7 +35,7 @@ const FEATURES = [
   },
 ]
 
-export default function LoginPage() {
+function LoginForm() {
   const params = useSearchParams()
   const callbackUrl = params.get("callbackUrl") ?? "/dashboard"
   const [error, setError] = useState("")
@@ -212,5 +212,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   )
 }
