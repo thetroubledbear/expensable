@@ -78,12 +78,13 @@ export interface Plan {
   tier: PlanTier
   monthlyFileLimit: number
   maxHouseholdMembers: number
+  monthlyAIQueryLimit: number | null // null = unlimited
 }
 
 export const PLANS: Record<PlanTier, Plan> = {
-  free: { tier: "free", monthlyFileLimit: 25, maxHouseholdMembers: 1 },
-  pro: { tier: "pro", monthlyFileLimit: 60, maxHouseholdMembers: 1 },
-  family: { tier: "family", monthlyFileLimit: 1000, maxHouseholdMembers: 6 },
+  free:   { tier: "free",   monthlyFileLimit: 25,   maxHouseholdMembers: 1, monthlyAIQueryLimit: 10 },
+  pro:    { tier: "pro",    monthlyFileLimit: 60,    maxHouseholdMembers: 1, monthlyAIQueryLimit: 100 },
+  family: { tier: "family", monthlyFileLimit: 1000,  maxHouseholdMembers: 6, monthlyAIQueryLimit: null },
 }
 
 // ─── API Responses ────────────────────────────────────────────────────────────

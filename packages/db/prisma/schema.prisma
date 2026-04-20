@@ -106,6 +106,7 @@ model HouseholdBilling {
   stripeSubscriptionId String?   @unique
   tier                 String    @default("free") // free | pro | family
   filesUploadedThisMonth Int     @default(0)
+  aiQueriesThisMonth     Int     @default(0)
   billingCycleStart    DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
 

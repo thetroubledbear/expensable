@@ -14,10 +14,12 @@ export function NLQueryWidget() {
   const [answer, setAnswer] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [remaining, setRemaining] = useState<number | null | undefined>(undefined)
+  const [limitReached, setLimitReached] = useState(false)
 
   async function ask(q?: string) {
     const text = (q ?? question).trim()
-    if (!text) return
+    if (!text || limitReached) return
     setLoading(true)
     setAnswer(null)
     setError(null)
@@ -28,8 +30,13 @@ export function NLQueryWidget() {
         body: JSON.stringify({ question: text }),
       })
       const data = await res.json()
-      if (!res.ok) setError(data.error ?? "Failed")
-      else setAnswer(data.answer)
+      if (!res.ok) {
+        setError(data.error ?? "Failed")
+        if (data.limitReached) setLimitReached(true)
+      } else {
+        setAnswer(data.answer)
+        if (data.remaining !== undefined) setRemaining(data.remaining)
+      }
     } catch {
       setError("Network error")
     } finally {
@@ -43,18 +50,22 @@ export function NLQueryWidget() {
         <input
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter" && !loading) ask() }}
-          placeholder="Ask about your spending…"
-          className="flex-1 text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent placeholder:text-slate-300"
+          onKeyDown={(e) => { if (e.key === "Enter" && !loading && !limitReached) ask() }}
+          placeholder={limitReached ? "Monthly limit reached — upgrade to continue" : "Ask about your spending…"}
+          disabled={limitReached}
+          className="flex-1 text-sm border border-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent placeholder:text-slate-300 disabled:bg-slate-50 disabled:text-slate-400"
         />
         <button
           onClick={() => ask()}
-          disabled={loading || !question.trim()}
+          disabled={loading || !question.trim() || limitReached}
           className="p-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors disabled:opacity-40"
         >
           <Send className="w-4 h-4" />
         </button>
       </div>
+      {remaining !== undefined && remaining !== null && !limitReached && (
+        <p className="text-[10px] text-slate-400 -mt-1">{remaining} question{remaining !== 1 ? "s" : ""} remaining this month</p>
+      )}
 
       {!answer && !loading && !error && (
         <div className="space-y-1.5">

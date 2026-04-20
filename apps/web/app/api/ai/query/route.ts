@@ -3,6 +3,7 @@ import { z } from "zod"
 import { auth } from "@/lib/auth/config"
 import { db } from "@expensable/db"
 import { resolveHousehold } from "@/lib/auth/household"
+import { PLANS } from "@expensable/types"
 import Anthropic from "@anthropic-ai/sdk"
 
 const bodySchema = z.object({
@@ -24,6 +25,37 @@ export async function POST(req: NextRequest) {
 
   const { householdId } = membership
   const currency = membership.household.defaultCurrency
+  const billing = membership.household.billing
+  const tier = (billing?.tier ?? "free") as keyof typeof PLANS
+  const plan = PLANS[tier]
+
+  // Reset monthly counter if calendar month has rolled over
+  const now = new Date()
+  if (billing) {
+    const c = billing.billingCycleStart
+    if (c.getMonth() !== now.getMonth() || c.getFullYear() !== now.getFullYear()) {
+      await db.householdBilling.update({
+        where: { id: billing.id },
+        data: { aiQueriesThisMonth: 0, filesUploadedThisMonth: 0, billingCycleStart: now },
+      })
+      billing.aiQueriesThisMonth = 0
+    }
+  }
+
+  const queryLimit = plan.monthlyAIQueryLimit
+  const usedQueries = billing?.aiQueriesThisMonth ?? 0
+
+  if (queryLimit !== null && usedQueries >= queryLimit) {
+    return NextResponse.json(
+      {
+        error: `Monthly AI query limit reached (${queryLimit} queries on ${tier} plan). Upgrade to ask more questions.`,
+        limitReached: true,
+        used: usedQueries,
+        limit: queryLimit,
+      },
+      { status: 429 }
+    )
+  }
 
   // Build a spending summary for context
   const [catTotals, topMerchants, recentTx, subscriptions] = await Promise.all([
@@ -111,7 +143,17 @@ ${subsText || "None"}
     })
 
     const answer = message.content[0].type === "text" ? message.content[0].text : "Unable to generate answer."
-    return NextResponse.json({ answer })
+
+    // Increment usage counter (fire-and-forget, don't block response)
+    if (billing) {
+      db.householdBilling.update({
+        where: { id: billing.id },
+        data: { aiQueriesThisMonth: { increment: 1 } },
+      }).catch(() => null)
+    }
+
+    const remaining = queryLimit === null ? null : queryLimit - usedQueries - 1
+    return NextResponse.json({ answer, remaining, limit: queryLimit })
   } catch {
     return NextResponse.json({ error: "Failed to process query" }, { status: 500 })
   }

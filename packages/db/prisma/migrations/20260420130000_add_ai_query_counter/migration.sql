@@ -1,0 +1,1 @@
+ALTER TABLE "HouseholdBilling" ADD COLUMN "aiQueriesThisMonth" INTEGER NOT NULL DEFAULT 0;
