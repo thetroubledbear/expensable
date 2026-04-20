@@ -288,6 +288,14 @@ async function processFile(
       const categories = await db.category.findMany({ select: { id: true, name: true } })
       const catByName = new Map(categories.map((c) => [c.name, c.id]))
 
+      // Re-verify account still exists (may have been deleted since upload)
+      if (financialAccountId) {
+        const acct = await db.financialAccount.findFirst({
+          where: { id: financialAccountId, householdId },
+        })
+        if (!acct) financialAccountId = null
+      }
+
       await db.transaction.createMany({
         data: result.transactions.map((t) => {
           const hint = t.categoryHint?.toLowerCase()

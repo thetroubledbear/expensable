@@ -37,17 +37,18 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const { isDefault, ...rest } = parsed.data
 
   try {
-    if (isDefault) {
-      await db.financialAccount.updateMany({
-        where: { householdId: membership.householdId },
-        data: { isDefault: false },
+    const account = await db.$transaction(async (tx) => {
+      if (isDefault) {
+        await tx.financialAccount.updateMany({
+          where: { householdId: membership.householdId },
+          data: { isDefault: false },
+        })
+      }
+      return tx.financialAccount.update({
+        where: { id },
+        data: { ...rest, ...(isDefault !== undefined ? { isDefault } : {}) },
+        include: { _count: { select: { transactions: true } } },
       })
-    }
-
-    const account = await db.financialAccount.update({
-      where: { id },
-      data: { ...rest, ...(isDefault !== undefined ? { isDefault } : {}) },
-      include: { _count: { select: { transactions: true } } },
     })
     return NextResponse.json(account)
   } catch (e) {
@@ -81,18 +82,19 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   }
 
   try {
-    // If deleting the default account, promote the next one
-    if (account.isDefault) {
-      const next = await db.financialAccount.findFirst({
-        where: { householdId: membership.householdId, id: { not: id } },
-        orderBy: { createdAt: "asc" },
-      })
-      if (next) {
-        await db.financialAccount.update({ where: { id: next.id }, data: { isDefault: true } })
+    await db.$transaction(async (tx) => {
+      // Promote next account to default before deleting
+      if (account.isDefault) {
+        const next = await tx.financialAccount.findFirst({
+          where: { householdId: membership.householdId, id: { not: id } },
+          orderBy: { createdAt: "asc" },
+        })
+        if (next) {
+          await tx.financialAccount.update({ where: { id: next.id }, data: { isDefault: true } })
+        }
       }
-    }
-
-    await db.financialAccount.delete({ where: { id } })
+      await tx.financialAccount.delete({ where: { id } })
+    })
     return new NextResponse(null, { status: 204 })
   } catch {
     return NextResponse.json({ error: "Failed to delete account" }, { status: 500 })

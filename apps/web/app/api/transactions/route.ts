@@ -11,8 +11,8 @@ export async function GET(req: NextRequest) {
   }
 
   const sp = req.nextUrl.searchParams
-  const page = Math.max(1, parseInt(sp.get("page") ?? "1"))
-  const limit = Math.min(100, Math.max(1, parseInt(sp.get("limit") ?? "25")))
+  const page = Math.max(1, parseInt(sp.get("page") ?? "1") || 1)
+  const limit = Math.min(100, Math.max(1, parseInt(sp.get("limit") ?? "25") || 25))
   const search = sp.get("search")?.trim().slice(0, 100) ?? ""
   const type = sp.get("type")
   const categoryId = sp.get("categoryId")
@@ -63,7 +63,7 @@ export async function GET(req: NextRequest) {
 const SUPPORTED_CURRENCIES = ["USD","EUR","GBP","CHF","CAD","AUD","JPY","NOK","SEK","DKK","NZD","SGD","HKD"] as const
 
 const createSchema = z.object({
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((d) => !isNaN(Date.parse(d)), { message: "Invalid date" }),
   description: z.string().min(1).max(500),
   merchantName: z.string().max(200).optional().nullable(),
   amount: z.number().positive().max(100_000_000),

@@ -8,7 +8,7 @@ import { ensureCategories } from "@/lib/categories"
 const SUPPORTED_CURRENCIES = ["USD","EUR","GBP","CHF","CAD","AUD","JPY","NOK","SEK","DKK","NZD","SGD","HKD"] as const
 
 const transferSchema = z.object({
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((d) => !isNaN(Date.parse(d)), { message: "Invalid date" }),
   description: z.string().min(1).max(500),
   amount: z.number().positive().max(100_000_000),
   currency: z.enum(SUPPORTED_CURRENCIES),
