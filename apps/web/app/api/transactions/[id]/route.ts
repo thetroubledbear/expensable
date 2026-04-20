@@ -48,6 +48,12 @@ export async function PATCH(
     })
     if (!membership) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 
+    // Validate category exists if provided (non-null)
+    if (parsed.data.categoryId) {
+      const cat = await db.category.findUnique({ where: { id: parsed.data.categoryId } })
+      if (!cat) return NextResponse.json({ error: "Category not found" }, { status: 400 })
+    }
+
     const updated = await db.transaction.update({
       where: { id },
       data: {

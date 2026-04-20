@@ -64,16 +64,17 @@ export async function POST(req: NextRequest) {
   const { name, type, currency, isDefault } = parsed.data
 
   try {
-    if (isDefault) {
-      await db.financialAccount.updateMany({
-        where: { householdId: membership.householdId },
-        data: { isDefault: false },
+    const account = await db.$transaction(async (tx) => {
+      if (isDefault) {
+        await tx.financialAccount.updateMany({
+          where: { householdId: membership.householdId },
+          data: { isDefault: false },
+        })
+      }
+      return tx.financialAccount.create({
+        data: { householdId: membership.householdId, name, type, currency, isDefault },
+        include: { _count: { select: { transactions: true } } },
       })
-    }
-
-    const account = await db.financialAccount.create({
-      data: { householdId: membership.householdId, name, type, currency, isDefault },
-      include: { _count: { select: { transactions: true } } },
     })
     return NextResponse.json(account, { status: 201 })
   } catch (e) {
