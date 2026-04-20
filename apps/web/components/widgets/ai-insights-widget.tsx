@@ -62,12 +62,7 @@ export function AIInsightsWidget() {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-2 text-center py-4">
         <WifiOff className="w-6 h-6 text-slate-300" />
-        <p className="text-xs text-slate-400">
-          Ollama not running.{" "}
-          <code className="font-mono bg-slate-100 px-1 rounded text-xs">
-            ollama serve
-          </code>
-        </p>
+        <p className="text-xs text-slate-400">AI unavailable. Check again later.</p>
       </div>
     )
   }
@@ -82,11 +77,11 @@ export function AIInsightsWidget() {
 
   return (
     <div className="flex flex-col h-full">
-      <ul className="space-y-2.5 flex-1">
+      <ul className="flex-1 divide-y divide-slate-50">
         {insights.map((insight, i) => (
-          <li key={i} className="flex gap-2.5 items-start">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
-            <p className="text-sm text-slate-700 leading-relaxed">{insight}</p>
+          <li key={i} className="flex gap-3 items-start py-2.5 first:pt-0 last:pb-0">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-[7px] shrink-0" />
+            <p className="text-sm text-slate-600 leading-relaxed">{insight}</p>
           </li>
         ))}
       </ul>

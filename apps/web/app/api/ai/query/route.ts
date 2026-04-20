@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server"
+import { GoogleGenerativeAI } from "@google/generative-ai"
 import { z } from "zod"
 import { auth } from "@/lib/auth/config"
 import { db } from "@expensable/db"
 import { resolveHousehold } from "@/lib/auth/household"
 import { PLANS } from "@expensable/types"
-import Anthropic from "@anthropic-ai/sdk"
+
+const MODEL = process.env.GEMINI_MODEL ?? "gemini-2.0-flash"
 
 const bodySchema = z.object({
   question: z.string().min(1).max(500),
@@ -29,7 +31,6 @@ export async function POST(req: NextRequest) {
   const tier = (billing?.tier ?? "free") as keyof typeof PLANS
   const plan = PLANS[tier]
 
-  // Reset monthly counter if calendar month has rolled over
   const now = new Date()
   if (billing) {
     const c = billing.billingCycleStart
@@ -57,7 +58,6 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  // Build a spending summary for context
   const [catTotals, topMerchants, recentTx, subscriptions] = await Promise.all([
     db.transaction.groupBy({
       by: ["categoryId"],
@@ -122,42 +122,19 @@ DETECTED SUBSCRIPTIONS:
 ${subsText || "None"}
 `
 
-  const systemPrompt = `You are a personal finance assistant. Answer questions about the user's spending based on the data provided. Be concise (2-4 sentences max). Use the same currency shown in the data. If the data doesn't support a precise answer, give your best estimate and say so.`
-  const userContent = `${context}\n\nQuestion: ${parsed.data.question}`
+  const systemPrompt = `You are a personal finance assistant. Answer questions about the user's spending based on the data provided.
+Rules:
+- Reply with a direct answer only — 2-4 sentences max
+- Never show reasoning, bullet analysis, or intermediate steps
+- Use the currency shown in the data
+- If data is missing or insufficient, say so in one sentence and give your best estimate`
 
   try {
-    let answer: string
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
+    const model = genAI.getGenerativeModel({ model: MODEL, systemInstruction: systemPrompt })
+    const result = await model.generateContent(`${context}\n\nQuestion: ${parsed.data.question}`)
+    const answer = result.response.text()
 
-    if (process.env.ANTHROPIC_API_KEY) {
-      const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-      const message = await client.messages.create({
-        model: "claude-sonnet-4-6",
-        max_tokens: 512,
-        system: systemPrompt,
-        messages: [{ role: "user", content: userContent }],
-      })
-      answer = message.content[0].type === "text" ? message.content[0].text : "Unable to generate answer."
-    } else {
-      const ollamaBase = process.env.OLLAMA_BASE_URL ?? "http://localhost:11434"
-      const ollamaModel = process.env.OLLAMA_MODEL ?? "gemma4:e4b"
-      const res = await fetch(`${ollamaBase}/api/chat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: ollamaModel,
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userContent },
-          ],
-          stream: false,
-        }),
-      })
-      if (!res.ok) throw new Error(`Ollama error ${res.status}`)
-      const data = await res.json()
-      answer = data.message?.content ?? "Unable to generate answer."
-    }
-
-    // Increment usage counter (fire-and-forget, don't block response)
     if (billing) {
       db.householdBilling.update({
         where: { id: billing.id },

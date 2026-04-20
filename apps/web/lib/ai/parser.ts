@@ -1,5 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk"
-import { ollamaChat } from "./ollama"
+import { GoogleGenerativeAI } from "@google/generative-ai"
 import type { FileType } from "@expensable/types"
 import { sanitizeForAI } from "./sanitize"
 
@@ -25,6 +24,8 @@ type ParseInput =
   | { type: "image"; mediaType: string; data: string }
   | { type: "pdf"; data: string }
 
+const MODEL = process.env.GEMINI_MODEL ?? "gemini-2.0-flash"
+
 const SYSTEM_PROMPT = `You are a financial data extraction expert. Extract all transactions from the provided document.
 Return a JSON object with this exact structure:
 {
@@ -49,85 +50,44 @@ Rules:
 - Return only the JSON object, no other text
 - CRITICAL for categoryHint: Use your world knowledge of real businesses, brands, and services to assign the most accurate category. Examples: "STARBUCKS", "BARKBOY", "EXKI", "PAIN QUOTIDIEN" → food; "UBER", "SNCB", "DE LIJN", "VILLO" → transport; "NETFLIX", "SPOTIFY", "AMAZON PRIME" → subscription; "IKEA", "ZARA", "H&M" → shopping; "BOOKING.COM", "AIRBNB" → travel; "DELHAIZE", "LIDL", "CARREFOUR" → food; "AMAZON" → shopping; "APPLE", "GOOGLE" charges → subscription or shopping based on context. For merchant names with city/location context (e.g. a bar name in a European city), use that context to identify the business type. Only use "other" when the merchant is truly unidentifiable (random alphanumeric codes like "REF 48291", internal bank transfers, or codes with no recognizable pattern).`
 
-function useOllama() {
-  return !process.env.ANTHROPIC_API_KEY
-}
-
 function extractJson(text: string): ParseResult {
   const match = text.match(/\{[\s\S]*\}/)
   if (!match) throw new Error("No parseable JSON in response")
   return JSON.parse(match[0]) as ParseResult
 }
 
-async function parseWithOllama(content: ParseInput, fileType: FileType): Promise<ParseResult> {
-  if (content instanceof Object && content.type === "pdf") {
-    throw new Error("PDF parsing requires ANTHROPIC_API_KEY — Ollama cannot read PDFs natively")
-  }
-
-  if (typeof content === "string") {
-    const safe = sanitizeForAI(content)
-    const raw = await ollamaChat(
-      SYSTEM_PROMPT,
-      `Parse all transactions from this ${fileType.toUpperCase()} content:\n\n${safe}`
-    )
-    return extractJson(raw)
-  }
-
-  // image — gemma4 supports vision
-  const raw = await ollamaChat(
-    SYSTEM_PROMPT,
-    "Parse all transactions from this receipt/document image.",
-    content.data
-  )
-  return extractJson(raw)
-}
-
-async function parseWithClaude(content: ParseInput, fileType: FileType): Promise<ParseResult> {
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
-
-  let messageContent: Anthropic.MessageParam["content"]
-
-  if (typeof content === "string") {
-    const safe = sanitizeForAI(content)
-    messageContent = `Parse all transactions from this ${fileType.toUpperCase()} content:\n\n${safe}`
-  } else if (content.type === "pdf") {
-    messageContent = [
-      {
-        type: "document",
-        source: { type: "base64", media_type: "application/pdf", data: content.data },
-      },
-      { type: "text", text: "Parse all transactions from this PDF document." },
-    ]
-  } else {
-    messageContent = [
-      {
-        type: "image",
-        source: {
-          type: "base64",
-          media_type: content.mediaType as "image/jpeg" | "image/png" | "image/webp" | "image/gif",
-          data: content.data,
-        },
-      },
-      { type: "text", text: "Parse all transactions from this receipt/document image." },
-    ]
-  }
-
-  const message = await client.messages.create({
-    model: "claude-sonnet-4-6",
-    max_tokens: 4096,
-    system: SYSTEM_PROMPT,
-    messages: [{ role: "user", content: messageContent }],
-  })
-
-  const text = message.content[0].type === "text" ? message.content[0].text : ""
-  return extractJson(text)
-}
-
 export async function parseFileContent(
   content: ParseInput,
   fileType: FileType
 ): Promise<ParseResult> {
-  return useOllama()
-    ? parseWithOllama(content, fileType)
-    : parseWithClaude(content, fileType)
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
+  const model = genAI.getGenerativeModel({
+    model: MODEL,
+    systemInstruction: SYSTEM_PROMPT,
+  })
+
+  let parts: Parameters<typeof model.generateContent>[0]
+
+  if (typeof content === "string") {
+    const safe = sanitizeForAI(content)
+    parts = `Parse all transactions from this ${fileType.toUpperCase()} content:\n\n${safe}`
+  } else if (content.type === "pdf") {
+    parts = [
+      { inlineData: { mimeType: "application/pdf", data: content.data } },
+      { text: "Parse all transactions from this PDF document." },
+    ]
+  } else {
+    parts = [
+      {
+        inlineData: {
+          mimeType: content.mediaType as string,
+          data: content.data,
+        },
+      },
+      { text: "Parse all transactions from this receipt/document image." },
+    ]
+  }
+
+  const result = await model.generateContent(parts)
+  return extractJson(result.response.text())
 }

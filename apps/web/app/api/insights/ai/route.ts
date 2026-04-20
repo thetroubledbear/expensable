@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
+import { GoogleGenerativeAI } from "@google/generative-ai"
 import { auth } from "@/lib/auth/config"
 import { db } from "@expensable/db"
 import { resolveHousehold } from "@/lib/auth/household"
-import { ollamaChat } from "@/lib/ai/ollama"
+
+const MODEL = process.env.GEMINI_MODEL ?? "gemini-2.0-flash"
 
 export async function GET(req: NextRequest) {
   const session = await auth()
@@ -22,12 +24,10 @@ export async function GET(req: NextRequest) {
   const now = new Date()
   const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
 
-  // Count files successfully processed this month (stable proxy for "new data")
   const doneFileCount = await db.uploadedFile.count({
     where: { householdId: hid, status: "done" },
   })
 
-  // Return cached insights if file count hasn't changed
   if (!force) {
     const cached = await db.aIInsightCache.findUnique({
       where: { householdId_month: { householdId: hid, month: monthKey } },
@@ -38,7 +38,6 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // Gather spending data for prompt
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
   const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
   const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59)
@@ -126,22 +125,37 @@ Top merchants:
 ${merchantLines || "  - No data"}`
 
   try {
-    const raw = await ollamaChat(
-      "You are a concise personal finance assistant. Return ONLY valid JSON with no markdown fences.",
-      `Analyze this spending data and return 4 short, specific insights (1-2 sentences each).
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
+    const model = genAI.getGenerativeModel({
+      model: MODEL,
+      systemInstruction:
+        "You are a concise personal finance assistant. Output plain sentences only that are written beautifully and give extraordinary insights to your users — no JSON, no labels, no markdown, no keys.",
+    })
+
+    const result = await model.generateContent(
+      `Analyze this spending data and give exactly 6 financial insights.
 
 ${summary}
 
-Return this exact JSON shape: {"insights":["insight 1","insight 2","insight 3","insight 4"]}`
+Each line is one insight. No numbers, no labels, no intro, no extra text.`
     )
 
-    const match = raw.match(/\{[\s\S]*\}/)
-    const parsed = match ? (JSON.parse(match[0]) as { insights?: unknown }) : {}
-    const insights = Array.isArray(parsed.insights)
-      ? (parsed.insights as string[]).slice(0, 5)
-      : []
+    const raw = result.response.text()
+    const insights = raw
+      .split("\n")
+      .map((l) => l
+        .replace(/^\s*\d+[.)]\s*/, "")
+        .replace(/^\s*"?insight\s*\d*"?\s*[:–-]\s*/i, "")
+        .replace(/^\s*"insight"\s*:\s*"?/, "")
+        .replace(/\*\*(.+?)\*\*/g, "$1")
+        .replace(/\*(.+?)\*/g, "$1")
+        .replace(/`(.+?)`/g, "$1")
+        .replace(/^["'""]|["'""]$/g, "")
+        .trim()
+      )
+      .filter((l) => l.length > 10)
+      .slice(0, 5)
 
-    // Persist to cache
     await db.aIInsightCache.upsert({
       where: { householdId_month: { householdId: hid, month: monthKey } },
       create: {
@@ -158,7 +172,8 @@ Return this exact JSON shape: {"insights":["insight 1","insight 2","insight 3","
     })
 
     return NextResponse.json({ insights, available: true, cached: false })
-  } catch {
-    return NextResponse.json({ insights: [], available: false, error: "Ollama not reachable" })
+  } catch (err) {
+    console.error("AI insights error:", err)
+    return NextResponse.json({ insights: [], available: false, error: "AI not available" })
   }
 }
