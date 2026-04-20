@@ -80,6 +80,8 @@ model Household {
   aiInsightCaches   AIInsightCache[]
   invites           HouseholdInvite[]
   financialAccounts FinancialAccount[]
+  budgets           Budget[]
+  notifications     Notification[]
 }
 
 model HouseholdMember {
@@ -166,6 +168,7 @@ model Category {
   isSystem Boolean @default(true)
 
   transactions Transaction[]
+  budgets      Budget[]
 }
 
 // ─── Subscriptions ────────────────────────────────────────────────────────────
@@ -219,6 +222,41 @@ model FinancialAccount {
   uploadedFiles UploadedFile[]
 
   @@unique([householdId, name])
+}
+
+// ─── Budgets ──────────────────────────────────────────────────────────────────
+
+model Budget {
+  id          String    @id @default(cuid())
+  householdId String
+  categoryId  String?
+  amount      Float
+  period      String    @default("monthly")
+  aiSuggested Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  category  Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@unique([householdId, categoryId])
+}
+
+// ─── Notifications ────────────────────────────────────────────────────────────
+
+model Notification {
+  id          String   @id @default(cuid())
+  householdId String
+  type        String   // duplicate | amount_spike | odd_timing
+  title       String
+  body        String
+  metadata    String?
+  read        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+
+  @@index([householdId, read])
 }
 
 // ─── Household Invites ────────────────────────────────────────────────────────

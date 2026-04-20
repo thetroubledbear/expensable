@@ -35,7 +35,9 @@ export function CategoryBreakdownWidget({ categories, currency, monthName }: Pro
       <p className="text-xs text-slate-400 mb-3">{monthName}</p>
       <div className="space-y-3 flex-1 overflow-auto">
         {categories.slice(0, 10).map((cat) => {
-          const pct = total > 0 ? Math.round((cat.total / total) * 100) : 0
+          const rawPct = total > 0 ? (cat.total / total) * 100 : 0
+          const displayPct = rawPct < 1 ? rawPct.toFixed(1) : Math.round(rawPct).toString()
+          const barWidth = Math.max(2, rawPct)
           return (
             <div key={cat.name}>
               <div className="flex items-center justify-between mb-1">
@@ -47,7 +49,7 @@ export function CategoryBreakdownWidget({ categories, currency, monthName }: Pro
                   <span className="text-xs text-slate-600 truncate">{cat.name}</span>
                 </div>
                 <div className="flex items-center gap-2 shrink-0 ml-2">
-                  <span className="text-xs text-slate-400">{pct}%</span>
+                  <span className="text-xs text-slate-400">{displayPct}%</span>
                   <span className="text-xs font-medium text-slate-700 tabular-nums">
                     {fmt(cat.total, currency)}
                   </span>
@@ -56,7 +58,7 @@ export function CategoryBreakdownWidget({ categories, currency, monthName }: Pro
               <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
                 <div
                   className="h-full rounded-full"
-                  style={{ width: `${pct}%`, backgroundColor: cat.color }}
+                  style={{ width: `${barWidth}%`, backgroundColor: cat.color }}
                 />
               </div>
             </div>

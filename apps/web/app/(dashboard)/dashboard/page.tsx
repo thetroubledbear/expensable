@@ -4,6 +4,8 @@ import { resolveHousehold } from "@/lib/auth/household"
 import Link from "next/link"
 import { UploadCloud } from "lucide-react"
 import { DashboardGrid, type DashboardData } from "@/components/dashboard-grid"
+import { CATEGORY_COLOR_MAP } from "@/lib/categories"
+import { NotificationsBell } from "@/components/notifications-bell"
 
 function greeting() {
   const h = new Date().getHours()
@@ -181,7 +183,10 @@ export default async function DashboardPage() {
   const categories = catTotals
     .map((c) => ({
       name: c.categoryId ? (catById.get(c.categoryId)?.name ?? "Other") : "Uncategorized",
-      color: c.categoryId ? (catById.get(c.categoryId)?.color ?? "#94a3b8") : "#94a3b8",
+      color: (() => {
+        const raw = c.categoryId ? (catById.get(c.categoryId)?.color ?? "") : ""
+        return CATEGORY_COLOR_MAP[raw] ?? raw ?? "#94a3b8"
+      })(),
       total: Math.round((c._sum.amount ?? 0) * 100) / 100,
     }))
     .sort((a, b) => b.total - a.total)
@@ -238,13 +243,16 @@ export default async function DashboardPage() {
 
   return (
     <div className="p-8 max-w-7xl mx-auto w-full">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-slate-900">
-          {greeting()}, {firstName}
-        </h1>
-        <p className="text-slate-500 mt-1 text-sm">
-          {membership?.household.name ?? "Your workspace"} · {monthName} overview
-        </p>
+      <div className="mb-6 flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-slate-900">
+            {greeting()}, {firstName}
+          </h1>
+          <p className="text-slate-500 mt-1 text-sm">
+            {membership?.household.name ?? "Your workspace"} · {monthName} overview
+          </p>
+        </div>
+        <NotificationsBell />
       </div>
       <DashboardGrid data={data} />
     </div>
