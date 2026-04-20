@@ -27,7 +27,12 @@
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
       "Bash(where node *)",
-      "Bash(del \"packages\\\\db\\\\generated\\\\client\\\\query_engine-windows.dll.node\")"
+      "Bash(del \"packages\\\\db\\\\generated\\\\client\\\\query_engine-windows.dll.node\")",
+      "Bash(del \"C:\\\\Users\\\\vtoto\\\\Desktop\\\\Expensable\\\\packages\\\\db\\\\generated\\\\client\\\\query_engine-windows.dll.node\")",
+      "Bash(powershell *)",
+      "Bash(git push *)",
+      "Bash(git commit *)",
+      "Bash(npx turbo *)"
     ]
   },
   "enableAllProjectMcpServers": true,

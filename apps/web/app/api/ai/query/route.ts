@@ -122,27 +122,40 @@ DETECTED SUBSCRIPTIONS:
 ${subsText || "None"}
 `
 
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return NextResponse.json({
-      answer: "Natural language queries require an Anthropic API key. Set ANTHROPIC_API_KEY in your environment.",
-    })
-  }
+  const systemPrompt = `You are a personal finance assistant. Answer questions about the user's spending based on the data provided. Be concise (2-4 sentences max). Use the same currency shown in the data. If the data doesn't support a precise answer, give your best estimate and say so.`
+  const userContent = `${context}\n\nQuestion: ${parsed.data.question}`
 
   try {
-    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
-    const message = await client.messages.create({
-      model: "claude-sonnet-4-6",
-      max_tokens: 512,
-      system: `You are a personal finance assistant. Answer questions about the user's spending based on the data provided. Be concise (2-4 sentences max). Use the same currency shown in the data. If the data doesn't support a precise answer, give your best estimate and say so.`,
-      messages: [
-        {
-          role: "user",
-          content: `${context}\n\nQuestion: ${parsed.data.question}`,
-        },
-      ],
-    })
+    let answer: string
 
-    const answer = message.content[0].type === "text" ? message.content[0].text : "Unable to generate answer."
+    if (process.env.ANTHROPIC_API_KEY) {
+      const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+      const message = await client.messages.create({
+        model: "claude-sonnet-4-6",
+        max_tokens: 512,
+        system: systemPrompt,
+        messages: [{ role: "user", content: userContent }],
+      })
+      answer = message.content[0].type === "text" ? message.content[0].text : "Unable to generate answer."
+    } else {
+      const ollamaBase = process.env.OLLAMA_BASE_URL ?? "http://localhost:11434"
+      const ollamaModel = process.env.OLLAMA_MODEL ?? "gemma4:e4b"
+      const res = await fetch(`${ollamaBase}/api/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: ollamaModel,
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userContent },
+          ],
+          stream: false,
+        }),
+      })
+      if (!res.ok) throw new Error(`Ollama error ${res.status}`)
+      const data = await res.json()
+      answer = data.message?.content ?? "Unable to generate answer."
+    }
 
     // Increment usage counter (fire-and-forget, don't block response)
     if (billing) {
@@ -154,7 +167,8 @@ ${subsText || "None"}
 
     const remaining = queryLimit === null ? null : queryLimit - usedQueries - 1
     return NextResponse.json({ answer, remaining, limit: queryLimit })
-  } catch {
+  } catch (err) {
+    console.error("AI query error:", err)
     return NextResponse.json({ error: "Failed to process query" }, { status: 500 })
   }
 }
