@@ -46,6 +46,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       return session
     },
   },
+  events: {
+    async createUser({ user }) {
+      const existing = await db.householdMember.findFirst({
+        where: { userId: user.id },
+      })
+      if (existing) return
+
+      await db.household.create({
+        data: {
+          name: `${user.name ?? user.email}'s Household`,
+          billing: { create: { tier: "free" } },
+          members: {
+            create: { userId: user.id!, role: "owner" },
+          },
+        },
+      })
+    },
+  },
   pages: {
     signIn: "/login",
   },
