@@ -1,6 +1,9 @@
 import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
+  outputFileTracingIncludes: {
+    "**": ["../../packages/db/generated/client/*.node"],
+  },
   transpilePackages: ["@expensable/types", "@expensable/utils", "@expensable/db", "@expensable/api-client"],
   images: {
     remotePatterns: [
