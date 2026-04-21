@@ -9,16 +9,17 @@ function RootLayoutNav() {
 
   useEffect(() => {
     if (loading) return
-    const inAuth = segments[0] === "(auth)"
+    const inAuth = (segments[0] as string) === "(auth)"
     if (!user && !inAuth) {
-      router.replace("/(auth)/login")
+      router.replace("/(auth)/login" as never)
     } else if (user && inAuth) {
-      router.replace("/(tabs)")
+      router.replace("/(tabs)" as never)
     }
   }, [user, loading, segments])
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(tabs)" />
     </Stack>

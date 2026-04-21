@@ -180,7 +180,7 @@ export default function DashboardScreen() {
                     <Text style={styles.rowAmount}>{fmt(m.amount, data.currency)}</Text>
                   </View>
                   <View style={styles.barBg}>
-                    <View style={[styles.barFill, { width: `${m.pct}%` }]} />
+                    <View style={[styles.barFill, { width: `${m.pct}%` as string }]} />
                   </View>
                 </View>
               ))}
