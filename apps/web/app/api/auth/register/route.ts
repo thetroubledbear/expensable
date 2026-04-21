@@ -30,7 +30,8 @@ export async function POST(req: NextRequest) {
   let existing: unknown
   try {
     existing = await db.user.findUnique({ where: { email } })
-  } catch {
+  } catch (e) {
+    console.error("[register] db lookup error:", e)
     return NextResponse.json({ error: "Registration failed" }, { status: 500 })
   }
 
@@ -61,7 +62,8 @@ export async function POST(req: NextRequest) {
         },
       },
     })
-  } catch {
+  } catch (e) {
+    console.error("[register] db create error:", e)
     return NextResponse.json({ error: "Registration failed" }, { status: 500 })
   }
 

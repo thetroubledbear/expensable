@@ -1,7 +1,6 @@
 import { PrismaClient } from "../generated/client"
 
-// Prisma's Quaint engine does not support the channel_binding param —
-// strip it so the connection string is compatible.
+// Prisma's Quaint engine does not support channel_binding — strip it.
 function dbUrl() {
   const raw = process.env.DATABASE_URL ?? ""
   try {
@@ -17,7 +16,7 @@ const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }
 
 export const db =
   globalForPrisma.prisma ??
-  new PrismaClient({ datasources: { db: { url: dbUrl() } } })
+  new PrismaClient({ datasourceUrl: dbUrl() })
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = db
 
