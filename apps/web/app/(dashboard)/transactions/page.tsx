@@ -1,4 +1,4 @@
-import { requireAuth } from "@/lib/auth/session"
+﻿import { requireAuth } from "@/lib/auth/session"
 import { db } from "@expensable/db"
 import { resolveHousehold } from "@/lib/auth/household"
 import { ensureCategories } from "@/lib/categories"
@@ -48,8 +48,8 @@ export default async function TransactionsPage() {
   }
 
   return (
-    <div className="p-8 max-w-5xl mx-auto w-full">
-      <div className="flex items-start justify-between mb-8">
+    <div className="p-4 sm:p-8 max-w-5xl mx-auto w-full">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-6 sm:mb-8">
         <div>
           <h1 className="text-2xl font-semibold text-slate-900">Transactions</h1>
           <p className="text-slate-500 mt-1 text-sm">

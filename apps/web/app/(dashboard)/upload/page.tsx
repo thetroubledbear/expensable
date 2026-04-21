@@ -1,4 +1,4 @@
-import { requireAuth } from "@/lib/auth/session"
+﻿import { requireAuth } from "@/lib/auth/session"
 import { UploadDropzone } from "@/components/upload-dropzone"
 import { resolveHousehold } from "@/lib/auth/household"
 import { PLANS } from "@expensable/types"
@@ -14,7 +14,7 @@ export default async function UploadPage() {
   const limit = PLANS[tier].monthlyFileLimit
 
   return (
-    <div className="p-8 max-w-2xl mx-auto w-full">
+    <div className="p-4 sm:p-8 max-w-2xl mx-auto w-full">
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-slate-900">Upload Files</h1>
         <p className="text-slate-500 mt-1 text-sm">

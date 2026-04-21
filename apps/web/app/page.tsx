@@ -27,23 +27,23 @@ export default async function Home() {
 function Navbar() {
   return (
     <header className="fixed top-0 inset-x-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
-      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-lg bg-emerald-500 flex items-center justify-center">
             <Wallet className="w-4 h-4 text-white" />
           </div>
           <span className="text-slate-900 font-semibold text-[15px] tracking-tight">Expensable</span>
         </div>
-        <nav className="flex items-center gap-3">
+        <nav className="flex items-center gap-2 sm:gap-3">
           <Link
             href="/login"
-            className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+            className="px-3 sm:px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
           >
             Sign in
           </Link>
           <Link
             href="/register"
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition-colors"
           >
             Get started
             <ArrowRight className="w-3.5 h-3.5" />
@@ -58,7 +58,7 @@ function Navbar() {
 
 function Hero() {
   return (
-    <section className="pt-32 pb-16 px-6 bg-gradient-to-b from-slate-50 via-white to-white">
+    <section className="pt-28 sm:pt-32 pb-12 sm:pb-16 px-4 sm:px-6 bg-gradient-to-b from-slate-50 via-white to-white">
       <div className="max-w-6xl mx-auto">
         {/* Badge */}
         <div className="flex justify-center mb-6">
@@ -69,26 +69,26 @@ function Hero() {
         </div>
 
         {/* Headline */}
-        <h1 className="text-center text-5xl sm:text-6xl font-bold text-slate-900 tracking-tight leading-[1.1] max-w-3xl mx-auto">
+        <h1 className="text-center text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight leading-[1.1] max-w-3xl mx-auto">
           Stop guessing where your{" "}
           <span className="text-emerald-600">money goes</span>
         </h1>
-        <p className="text-center text-lg text-slate-500 mt-6 max-w-2xl mx-auto leading-relaxed">
+        <p className="text-center text-base sm:text-lg text-slate-500 mt-6 max-w-2xl mx-auto leading-relaxed">
           Upload bank statements, receipts, and CSV exports. Our AI extracts every transaction automatically — no manual entry, no spreadsheets.
         </p>
 
         {/* CTAs */}
-        <div className="flex items-center justify-center gap-4 mt-8">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
           <Link
             href="/register"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition-colors shadow-sm"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition-colors shadow-sm"
           >
             Start for free
             <ArrowRight className="w-4 h-4" />
           </Link>
           <Link
             href="/login"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition-colors"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition-colors"
           >
             Sign in
           </Link>
@@ -99,8 +99,10 @@ function Hero() {
           Free plan available · No credit card required
         </p>
 
-        {/* Dashboard mockup */}
-        <DashboardMockup />
+        {/* Dashboard mockup — hidden on small phones */}
+        <div className="hidden sm:block">
+          <DashboardMockup />
+        </div>
       </div>
     </section>
   )
@@ -171,7 +173,6 @@ function DashboardMockup() {
 
             {/* Chart + list row */}
             <div className="grid grid-cols-5 gap-3">
-              {/* Fake chart */}
               <div className="col-span-3 bg-white rounded-xl border border-slate-100 p-3 shadow-sm">
                 <p className="text-[10px] font-semibold text-slate-500 mb-3">6-Month Trend</p>
                 <div className="flex items-end gap-2 h-16">
@@ -183,8 +184,6 @@ function DashboardMockup() {
                   ))}
                 </div>
               </div>
-
-              {/* Fake recent tx */}
               <div className="col-span-2 bg-white rounded-xl border border-slate-100 p-3 shadow-sm">
                 <p className="text-[10px] font-semibold text-slate-500 mb-2">Recent</p>
                 {[
@@ -243,24 +242,24 @@ const FEATURES = [
 
 function Features() {
   return (
-    <section className="py-20 px-6 bg-white">
+    <section className="py-16 sm:py-20 px-4 sm:px-6 bg-white">
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">
+        <div className="text-center mb-10 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 tracking-tight">
             Everything you need, nothing you don&apos;t
           </h2>
-          <p className="text-slate-500 mt-3 max-w-xl mx-auto">
+          <p className="text-slate-500 mt-3 max-w-xl mx-auto text-sm sm:text-base">
             Built for people who want real insight into their finances without the spreadsheet headache.
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
           {FEATURES.map((f) => {
             const Icon = f.icon
             return (
               <div
                 key={f.title}
-                className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 hover:shadow-md hover:border-slate-200 transition-all"
+                className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 sm:p-6 hover:shadow-md hover:border-slate-200 transition-all"
               >
                 <div className={`w-10 h-10 rounded-xl ${f.iconBg} flex items-center justify-center mb-4`}>
                   <Icon className={`w-5 h-5 ${f.iconColor}`} />
@@ -304,20 +303,19 @@ const STEPS = [
 
 function HowItWorks() {
   return (
-    <section className="py-20 px-6 bg-slate-50">
+    <section className="py-16 sm:py-20 px-4 sm:px-6 bg-slate-50">
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">
+        <div className="text-center mb-10 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 tracking-tight">
             From upload to insight in seconds
           </h2>
         </div>
 
-        <div className="grid sm:grid-cols-3 gap-8">
+        <div className="grid sm:grid-cols-3 gap-8 sm:gap-8">
           {STEPS.map((s, i) => {
             const Icon = s.icon
             return (
               <div key={s.step} className="relative">
-                {/* Connector line */}
                 {i < STEPS.length - 1 && (
                   <div className="hidden sm:block absolute top-5 left-[calc(50%+2rem)] right-[-calc(50%-2rem)] h-px bg-slate-200" />
                 )}
@@ -342,13 +340,13 @@ function HowItWorks() {
 
 function CtaSection() {
   return (
-    <section className="py-20 px-6 bg-white">
+    <section className="py-16 sm:py-20 px-4 sm:px-6 bg-white">
       <div className="max-w-2xl mx-auto text-center">
-        <div className="bg-gradient-to-br from-emerald-50 to-slate-50 rounded-3xl border border-emerald-100 p-12">
-          <h2 className="text-3xl font-bold text-slate-900 tracking-tight mb-3">
+        <div className="bg-gradient-to-br from-emerald-50 to-slate-50 rounded-3xl border border-emerald-100 p-8 sm:p-12">
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-3">
             Start tracking today
           </h2>
-          <p className="text-slate-500 mb-8">
+          <p className="text-slate-500 mb-8 text-sm sm:text-base">
             Free plan included. Upgrade to Pro or Family when you need more.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -367,10 +365,10 @@ function CtaSection() {
             </Link>
           </div>
 
-          <div className="flex items-center justify-center gap-6 mt-8">
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mt-8">
             {["No credit card required", "Free plan forever", "Cancel anytime"].map((t) => (
               <div key={t} className="flex items-center gap-1.5 text-xs text-slate-400">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                 {t}
               </div>
             ))}
@@ -385,8 +383,8 @@ function CtaSection() {
 
 function Footer() {
   return (
-    <footer className="border-t border-slate-100 py-8 px-6">
-      <div className="max-w-6xl mx-auto flex items-center justify-between">
+    <footer className="border-t border-slate-100 py-8 px-4 sm:px-6">
+      <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-md bg-emerald-500 flex items-center justify-center">
             <Wallet className="w-3.5 h-3.5 text-white" />

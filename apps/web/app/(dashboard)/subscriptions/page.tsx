@@ -1,4 +1,4 @@
-import { requireAuth } from "@/lib/auth/session"
+﻿import { requireAuth } from "@/lib/auth/session"
 import { db } from "@expensable/db"
 import { resolveHousehold } from "@/lib/auth/household"
 import { SubscriptionCard } from "@/components/subscription-card"
@@ -45,7 +45,7 @@ export default async function SubscriptionsPage() {
   const totalMonthly = subs.reduce((acc, s) => acc + estimateMonthly(s.amount, s.frequency), 0)
 
   return (
-    <div className="p-8 max-w-5xl mx-auto w-full">
+    <div className="p-4 sm:p-8 max-w-5xl mx-auto w-full">
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-slate-900">Subscriptions</h1>
         <p className="text-slate-500 mt-1 text-sm">Auto-detected recurring charges</p>
@@ -70,7 +70,7 @@ export default async function SubscriptionsPage() {
               <span className="text-sm font-normal text-slate-400 ml-1">/mo</span>
             </p>
             <p className="text-xs text-slate-400 mt-0.5">
-              {fmt(totalMonthly * 12, currency)}/yr · {subs.length} subscription
+              {fmt(totalMonthly * 12, currency)}/yr Â· {subs.length} subscription
               {subs.length !== 1 ? "s" : ""}
             </p>
           </div>
