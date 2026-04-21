@@ -32,7 +32,14 @@
       "Bash(powershell *)",
       "Bash(git push *)",
       "Bash(git commit *)",
-      "Bash(npx turbo *)"
+      "Bash(npx turbo *)",
+      "Bash(npm ls *)",
+      "Bash(git *)",
+      "PowerShell(New-Item *)",
+      "PowerShell(cd C:\\\\Users\\\\vtoto\\\\Desktop\\\\Expensable\\\\packages\\\\db; $env:DIRECT_URL=\"postgresql://neondb_owner:npg_pg5zWQu6GvRB@ep-plain-cake-alii5qx5-pooler.c-3.eu-central-1.aws.neon.tech/neondb?channel_binding=require&sslmode=require\"; npx prisma db push 2>&1)",
+      "PowerShell(Test-NetConnection *)",
+      "PowerShell(cd C:\\\\Users\\\\vtoto\\\\Desktop\\\\Expensable\\\\packages\\\\db; $env:DIRECT_URL=\"postgresql://neondb_owner:npg_pg5zWQu6GvRB@ep-plain-cake-alii5qx5.c-3.eu-central-1.aws.neon.tech/neondb?sslmode=require\"; npx prisma db push 2>&1)",
+      "PowerShell(cd C:\\\\Users\\\\vtoto\\\\Desktop\\\\Expensable\\\\packages\\\\db; $env:DIRECT_URL=\"\"; $env:DATABASE_URL=\"postgresql://neondb_owner:npg_pg5zWQu6GvRB@ep-plain-cake-alii5qx5-pooler.c-3.eu-central-1.aws.neon.tech/neondb?channel_binding=require&sslmode=require\"; npx prisma db push 2>&1)"
     ]
   },
   "enableAllProjectMcpServers": true,

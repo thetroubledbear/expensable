@@ -104,7 +104,7 @@ Prisma schema at `packages/db/prisma/schema.prisma`. Key models:
 - `UploadedFile` → `Transaction` (one-to-many)
 - `DetectedSubscription` — recurring payments auto-detected
 
-Prisma env: `packages/db/.env` holds `DATABASE_URL` (Prisma auto-loads this).  
+Prisma env: `DATABASE_URL` = Neon pooled URL (pgbouncer, used at runtime); `DIRECT_URL` = Neon direct URL (used by migrations only). Set both in `apps/web/.env.local` and Vercel env vars.  
 Do NOT run `db:migrate` from both `packages/db` and `apps/web` at the same time — advisory lock conflict.  
 If `prisma generate` fails with EPERM on `.dll.node`: dev server is holding the file — kill node, delete the `.node` file, regenerate.
 
@@ -115,9 +115,10 @@ Defined in `packages/types/src/index.ts` as `PLANS` constant:
 - family: 1000 files/month, 6 members
 
 ### Storage
-`apps/web/lib/storage/index.ts` — S3-compatible (MinIO locally, real S3 in prod).  
+`apps/web/lib/storage/index.ts` — Google Cloud Storage.  
 Key pattern: `households/{householdId}/files/{fileId}/{filename}`.  
-MinIO bucket `expensable` must be created manually at `localhost:9001` before uploading.
+Auth: `GCS_SERVICE_ACCOUNT_KEY` env (full service account JSON string) for Vercel; locally use `gcloud auth application-default login`.  
+Bucket name via `GCS_BUCKET` env (default: `expensable`).
 
 ### Household & Currency API
 - `GET /api/household` — returns current user's household (name, defaultCurrency, etc.)
