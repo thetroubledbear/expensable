@@ -1,4 +1,4 @@
-import { requireAuth } from "@/lib/auth/session"
+﻿import { requireAuth } from "@/lib/auth/session"
 import { db } from "@expensable/db"
 import { resolveHousehold } from "@/lib/auth/household"
 import Link from "next/link"
@@ -31,7 +31,7 @@ export default async function FilesPage() {
   }))
 
   return (
-    <div className="p-8 max-w-5xl mx-auto w-full">
+    <div className="p-4 sm:p-8 max-w-5xl mx-auto w-full">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-semibold text-slate-900">Files Vault</h1>
