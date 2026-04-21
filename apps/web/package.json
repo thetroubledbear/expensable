@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npm run db:generate && next build",
+    "build": "npm run db:generate && npm run copy-prisma-engine && next build",
+    "copy-prisma-engine": "node -e \"const {cpSync,mkdirSync}=require('fs');mkdirSync('./generated/client',{recursive:true});cpSync('../../packages/db/generated/client','./generated/client',{recursive:true});\"",
     "start": "next start",
     "lint": "eslint .",
     "type-check": "tsc --noEmit",
