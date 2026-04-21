@@ -1,35 +1,37 @@
-import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3"
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
+import { Storage } from "@google-cloud/storage"
 
-const s3 = new S3Client({
-  region: process.env.S3_REGION ?? "us-east-1",
-  endpoint: process.env.S3_ENDPOINT,        // set for local MinIO
-  forcePathStyle: !!process.env.S3_ENDPOINT, // required for MinIO
-  credentials: {
-    accessKeyId: process.env.S3_ACCESS_KEY!,
-    secretAccessKey: process.env.S3_SECRET_KEY!,
-  },
-})
+function createStorage() {
+  if (process.env.GCS_SERVICE_ACCOUNT_KEY) {
+    return new Storage({ credentials: JSON.parse(process.env.GCS_SERVICE_ACCOUNT_KEY) })
+  }
+  // Local dev: falls back to Application Default Credentials (gcloud auth application-default login)
+  return new Storage()
+}
 
-const BUCKET = process.env.S3_BUCKET ?? "expensable"
+const storage = createStorage()
+const BUCKET = process.env.GCS_BUCKET ?? "expensable"
+const bucket = storage.bucket(BUCKET)
 
 export async function uploadFile(key: string, body: Buffer, contentType: string): Promise<string> {
-  await s3.send(new PutObjectCommand({ Bucket: BUCKET, Key: key, Body: body, ContentType: contentType }))
+  await bucket.file(key).save(body, { contentType })
   return key
 }
 
 export async function getFileBuffer(key: string): Promise<Buffer> {
-  const res = await s3.send(new GetObjectCommand({ Bucket: BUCKET, Key: key }))
-  const bytes = await res.Body!.transformToByteArray()
-  return Buffer.from(bytes)
+  const [data] = await bucket.file(key).download()
+  return data
 }
 
 export async function getPresignedUrl(key: string, expiresIn = 3600): Promise<string> {
-  return getSignedUrl(s3, new GetObjectCommand({ Bucket: BUCKET, Key: key }), { expiresIn })
+  const [url] = await bucket.file(key).getSignedUrl({
+    action: "read",
+    expires: Date.now() + expiresIn * 1000,
+  })
+  return url
 }
 
 export async function deleteFile(key: string): Promise<void> {
-  await s3.send(new DeleteObjectCommand({ Bucket: BUCKET, Key: key }))
+  await bucket.file(key).delete()
 }
 
 export function buildStorageKey(householdId: string, fileId: string, filename: string): string {

@@ -11,14 +11,13 @@
     "db:generate": "cd ../../packages/db && npx prisma generate"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.0",
     "@auth/prisma-adapter": "^2.11.2",
-    "@aws-sdk/client-s3": "^3.1031.0",
-    "@aws-sdk/s3-request-presigner": "^3.1031.0",
     "@expensable/api-client": "*",
     "@expensable/db": "*",
     "@expensable/types": "*",
     "@expensable/utils": "*",
+    "@google-cloud/storage": "^7.19.0",
+    "@google/generative-ai": "^0.24.0",
     "@stripe/stripe-js": "^9.2.0",
     "@types/bcryptjs": "^2.4.6",
     "bcryptjs": "^3.0.3",
