@@ -7,89 +7,110 @@ on:
       - 'apps/web/**'
       - 'apps/mobile/**'
 
+# ─── Detect which apps changed ─────────────────────────────────────────────────
 jobs:
-  deploy:
+  changes:
     runs-on: ubuntu-latest
-
-    environment:
-      name: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
-
+    outputs:
+      web: ${{ steps.diff.outputs.web }}
+      mobile: ${{ steps.diff.outputs.mobile }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 2
-
-      # -------------------
-      # Detect changes
-      # -------------------
-      - name: Detect changes
-        id: changes
+      - id: diff
         run: |
           if git diff --name-only HEAD~1 HEAD | grep -q '^apps/web/'; then
             echo "web=true" >> $GITHUB_OUTPUT
           fi
-
           if git diff --name-only HEAD~1 HEAD | grep -q '^apps/mobile/'; then
             echo "mobile=true" >> $GITHUB_OUTPUT
           fi
 
-      # ===================
-      # WEB (Vercel)
-      # ===================
+# ─── Staging (develop branch, no review needed) ────────────────────────────────
+  deploy-staging:
+    if: github.ref == 'refs/heads/develop'
+    needs: changes
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      # Web
       - name: Install Vercel CLI
-        if: steps.changes.outputs.web == 'true'
+        if: needs.changes.outputs.web == 'true'
         run: npm install -g vercel
 
-      - name: Pull Vercel config
-        if: steps.changes.outputs.web == 'true'
+      - name: Deploy Web (staging)
+        if: needs.changes.outputs.web == 'true'
         run: |
-          if [ "${GITHUB_REF}" == "refs/heads/main" ]; then
-            vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
-          else
-            vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
-          fi
+          vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+          vercel build --token=${{ secrets.VERCEL_TOKEN }}
+          vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Build Web
-        if: steps.changes.outputs.web == 'true'
-        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Deploy Web
-        if: steps.changes.outputs.web == 'true'
-        run: |
-          if [ "${GITHUB_REF}" == "refs/heads/main" ]; then
-            vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
-          else
-            vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
-          fi
-
-      # ===================
-      # MOBILE (Expo Android)
-      # ===================
-      - name: Setup Node
-        if: steps.changes.outputs.mobile == 'true'
-        uses: actions/setup-node@v4
+      # Mobile
+      - uses: actions/setup-node@v4
+        if: needs.changes.outputs.mobile == 'true'
         with:
           node-version: 18
 
-      - name: Install Mobile deps
-        if: steps.changes.outputs.mobile == 'true'
-        run: |
-          cd apps/mobile
-          npm install
-
       - name: Install Expo tools
-        if: steps.changes.outputs.mobile == 'true'
+        if: needs.changes.outputs.mobile == 'true'
         run: npm install -g expo-cli eas-cli
 
-      - name: Build Android App
-        if: steps.changes.outputs.mobile == 'true'
+      - name: Install Mobile deps
+        if: needs.changes.outputs.mobile == 'true'
+        run: cd apps/mobile && npm install
+
+      - name: Build Android (staging)
+        if: needs.changes.outputs.mobile == 'true'
+        run: cd apps/mobile && eas build --platform android --profile staging --non-interactive
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+# ─── Production (main branch, requires reviewer approval) ──────────────────────
+  deploy-production:
+    if: github.ref == 'refs/heads/main'
+    needs: changes
+    runs-on: ubuntu-latest
+    environment: production   # <-- GitHub pauses here until a reviewer approves
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      # Web
+      - name: Install Vercel CLI
+        if: needs.changes.outputs.web == 'true'
+        run: npm install -g vercel
+
+      - name: Deploy Web (production)
+        if: needs.changes.outputs.web == 'true'
         run: |
-          cd apps/mobile
-          if [ "${GITHUB_REF}" == "refs/heads/main" ]; then
-            eas build --platform android --profile production --non-interactive
-          else
-            eas build --platform android --profile staging --non-interactive
-          fi
+          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          vercel build --token=${{ secrets.VERCEL_TOKEN }}
+          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      # Mobile
+      - uses: actions/setup-node@v4
+        if: needs.changes.outputs.mobile == 'true'
+        with:
+          node-version: 18
+
+      - name: Install Expo tools
+        if: needs.changes.outputs.mobile == 'true'
+        run: npm install -g expo-cli eas-cli
+
+      - name: Install Mobile deps
+        if: needs.changes.outputs.mobile == 'true'
+        run: cd apps/mobile && npm install
+
+      - name: Build Android (production)
+        if: needs.changes.outputs.mobile == 'true'
+        run: cd apps/mobile && eas build --platform android --profile production --non-interactive
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
