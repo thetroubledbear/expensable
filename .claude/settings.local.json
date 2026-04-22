@@ -39,7 +39,17 @@
       "PowerShell(cd C:\\\\Users\\\\vtoto\\\\Desktop\\\\Expensable\\\\packages\\\\db; $env:DIRECT_URL=\"postgresql://neondb_owner:npg_pg5zWQu6GvRB@ep-plain-cake-alii5qx5-pooler.c-3.eu-central-1.aws.neon.tech/neondb?channel_binding=require&sslmode=require\"; npx prisma db push 2>&1)",
       "PowerShell(Test-NetConnection *)",
       "PowerShell(cd C:\\\\Users\\\\vtoto\\\\Desktop\\\\Expensable\\\\packages\\\\db; $env:DIRECT_URL=\"postgresql://neondb_owner:npg_pg5zWQu6GvRB@ep-plain-cake-alii5qx5.c-3.eu-central-1.aws.neon.tech/neondb?sslmode=require\"; npx prisma db push 2>&1)",
-      "PowerShell(cd C:\\\\Users\\\\vtoto\\\\Desktop\\\\Expensable\\\\packages\\\\db; $env:DIRECT_URL=\"\"; $env:DATABASE_URL=\"postgresql://neondb_owner:npg_pg5zWQu6GvRB@ep-plain-cake-alii5qx5-pooler.c-3.eu-central-1.aws.neon.tech/neondb?channel_binding=require&sslmode=require\"; npx prisma db push 2>&1)"
+      "PowerShell(cd C:\\\\Users\\\\vtoto\\\\Desktop\\\\Expensable\\\\packages\\\\db; $env:DIRECT_URL=\"\"; $env:DATABASE_URL=\"postgresql://neondb_owner:npg_pg5zWQu6GvRB@ep-plain-cake-alii5qx5-pooler.c-3.eu-central-1.aws.neon.tech/neondb?channel_binding=require&sslmode=require\"; npx prisma db push 2>&1)",
+      "PowerShell(head *)",
+      "Bash(./gradlew app:assembleDebug -x lint -x test --configure-on-demand --build-cache -PreactNativeArchitectures=arm64-v8a)",
+      "PowerShell($env:ANDROID_HOME; $env:ANDROID_SDK_ROOT; [System.Environment]::GetEnvironmentVariable\\(\"ANDROID_HOME\",\"Machine\"\\); [System.Environment]::GetEnvironmentVariable\\(\"ANDROID_SDK_ROOT\",\"Machine\"\\))",
+      "PowerShell(& \"C:\\\\Users\\\\vtoto\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" -s RFCY10PD7JN uninstall com.expensable.app)",
+      "Bash(grep -E \"\\\\.\\(tsx?|json\\)$\")",
+      "Bash(dir /b \"C:\\\\Users\\\\vtoto\\\\Desktop\\\\Expensable\\\\apps\")",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\vtoto\\\\Desktop\\\\Expensable\\\\apps\\\\web\\\\app\\\\api\" -Recurse -Name \"route.ts\" | ForEach-Object { $_ })",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\vtoto\\\\Desktop\\\\Expensable\\\\apps\\\\mobile\" -Name | Where-Object { $_ -notlike \"node_modules\" -and $_ -notlike \"android\" })",
+      "PowerShell(npm show *)",
+      "PowerShell(& \"C:\\\\Users\\\\vtoto\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" -s RFCY10PD7JN uninstall com.expensable.app 2>&1; & \"C:\\\\Users\\\\vtoto\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" -s RFCY10PD7JN install \"C:\\\\Users\\\\vtoto\\\\Desktop\\\\Expensable\\\\apps\\\\mobile\\\\android\\\\app\\\\build\\\\outputs\\\\apk\\\\debug\\\\app-debug.apk\" 2>&1)"
     ]
   },
   "enableAllProjectMcpServers": true,
