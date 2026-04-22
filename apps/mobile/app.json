@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "Expensable",
+    "slug": "expensable",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "newArchEnabled": false,
+    "android": {
+      "package": "com.expensable.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#059669"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "com.expensable.app",
+      "supportsTablet": true
+    }
+  }
+}
