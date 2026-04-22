@@ -1,6 +1,5 @@
 "use client"
 
-
 import { useState, Suspense } from "react"
 import { signIn } from "next-auth/react"
 import { useSearchParams } from "next/navigation"
