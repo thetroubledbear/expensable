@@ -30,11 +30,11 @@ npm-debug.log*
 .vscode/
 .idea/
 
-# Expo
-.expo/
-apps/mobile/.expo/
-apps/mobile/android/
-apps/mobile/ios/
+# Android (Capacitor build outputs handled by apps/web/android/.gitignore)
+apps/web/android/.gradle/
+apps/web/android/build/
+apps/web/android/app/build/
+apps/web/android/local.properties
 
 # Prisma
 packages/db/generated/
