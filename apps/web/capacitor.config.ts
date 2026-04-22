@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'Expensable',
   webDir: 'out',
   server: {
-    url: 'https://expensable-gamma.vercel.app',
+    url: 'https://expensable-web.vercel.app',
     cleartext: false,
   },
 };
