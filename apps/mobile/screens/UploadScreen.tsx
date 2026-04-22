@@ -52,8 +52,11 @@ export default function UploadScreen() {
     if (result.canceled) return
     const asset = result.assets[0]
     setUploading(true)
-    await uploadFile(asset.uri, `receipt_${Date.now()}.jpg`, asset.mimeType ?? "image/jpeg")
-    setUploading(false)
+    try {
+      await uploadFile(asset.uri, `receipt_${Date.now()}.jpg`, asset.mimeType ?? "image/jpeg")
+    } finally {
+      setUploading(false)
+    }
   }
 
   async function handleGallery() {
@@ -70,8 +73,11 @@ export default function UploadScreen() {
     if (result.canceled) return
     const asset = result.assets[0]
     setUploading(true)
-    await uploadFile(asset.uri, `image_${Date.now()}.jpg`, asset.mimeType ?? "image/jpeg")
-    setUploading(false)
+    try {
+      await uploadFile(asset.uri, `image_${Date.now()}.jpg`, asset.mimeType ?? "image/jpeg")
+    } finally {
+      setUploading(false)
+    }
   }
 
   async function handleDocument() {
@@ -82,8 +88,11 @@ export default function UploadScreen() {
     if (result.canceled) return
     const asset = result.assets[0]
     setUploading(true)
-    await uploadFile(asset.uri, asset.name, asset.mimeType ?? "application/octet-stream")
-    setUploading(false)
+    try {
+      await uploadFile(asset.uri, asset.name, asset.mimeType ?? "application/octet-stream")
+    } finally {
+      setUploading(false)
+    }
   }
 
   return (

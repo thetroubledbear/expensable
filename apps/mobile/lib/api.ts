@@ -90,13 +90,26 @@ export async function apiUploadFile(formData: FormData): Promise<{ id?: string; 
   const headers: Record<string, string> = {}
   if (cookie) headers["Cookie"] = cookie
 
-  const res = await fetch(`${BASE_URL}/api/files`, {
-    method: "POST",
-    headers,
-    body: formData,
-  })
-  ingestSetCookie(res.headers.get("set-cookie"))
-  const data = await res.json().catch(() => ({})) as { id?: string; status?: string; error?: string }
-  if (!res.ok) return { error: data.error ?? `Upload failed (${res.status})` }
-  return data
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), 60_000)
+
+  try {
+    const res = await fetch(`${BASE_URL}/api/files`, {
+      method: "POST",
+      headers,
+      body: formData,
+      signal: controller.signal,
+    })
+    clearTimeout(timeoutId)
+    ingestSetCookie(res.headers.get("set-cookie"))
+    const data = await res.json().catch(() => ({})) as { id?: string; status?: string; error?: string }
+    if (!res.ok) return { error: data.error ?? `Upload failed (${res.status})` }
+    return data
+  } catch (err: unknown) {
+    clearTimeout(timeoutId)
+    if (err instanceof Error && err.name === "AbortError") {
+      return { error: "Upload timed out — try a smaller file or check your connection" }
+    }
+    throw err
+  }
 }
