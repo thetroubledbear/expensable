@@ -15,6 +15,11 @@
     "ios": {
       "bundleIdentifier": "com.expensable.app",
       "supportsTablet": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "7ec4980c-e686-4da6-b9f5-d01425cd0f1f"
+      }
     }
   }
 }

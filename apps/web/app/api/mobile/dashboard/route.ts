@@ -21,6 +21,7 @@ export async function GET() {
     return NextResponse.json({ error: "No household" }, { status: 404 })
   }
 
+  try {
   const hid = membership.householdId
   const currency = membership.household.defaultCurrency ?? "USD"
   const now = new Date()
