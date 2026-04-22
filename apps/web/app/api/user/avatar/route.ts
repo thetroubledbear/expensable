@@ -24,12 +24,8 @@ export async function POST(req: NextRequest) {
   const session = await auth()
   if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-  let formData: FormData
-  try {
-    formData = await req.formData()
-  } catch {
-    return NextResponse.json({ error: "Invalid form data" }, { status: 400 })
-  }
+  const formData = await req.formData().catch(() => null)
+  if (!formData) return NextResponse.json({ error: "Invalid form data" }, { status: 400 })
 
   const file = formData.get("file") as File | null
   if (!file) return NextResponse.json({ error: "No file provided" }, { status: 400 })
