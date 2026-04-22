@@ -167,4 +167,8 @@ export async function GET() {
     categories,
     accountBalances,
   })
+  } catch (error) {
+    console.error("Mobile dashboard error:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+  }
 }
