@@ -3,14 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { signIn } from "next-auth/react"
-import {
-  Wallet,
-  Loader2,
-  Upload,
-  BarChart3,
-  Bell,
-  Repeat2,
-} from "lucide-react"
+import { Wallet, Loader2, ArrowRight } from "lucide-react"
 
 const CURRENCIES = [
   { code: "USD", label: "USD — US Dollar" },
@@ -28,13 +21,6 @@ const CURRENCIES = [
   { code: "HKD", label: "HKD — Hong Kong Dollar" },
 ]
 
-const STEPS = [
-  { icon: Upload,   label: "Upload a bank statement or receipt" },
-  { icon: BarChart3, label: "AI extracts and categorises every transaction" },
-  { icon: Bell,     label: "Get alerts for subscriptions and anomalies" },
-  { icon: Repeat2,  label: "Track month-over-month savings progress" },
-]
-
 export default function RegisterPage() {
   const router = useRouter()
   const [error, setError] = useState("")
@@ -44,7 +30,6 @@ export default function RegisterPage() {
     e.preventDefault()
     setError("")
     setLoading(true)
-
     const form = new FormData(e.currentTarget)
     const name = form.get("name") as string
     const email = form.get("email") as string
@@ -68,155 +53,220 @@ export default function RegisterPage() {
     router.push("/dashboard")
   }
 
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
+    e.currentTarget.style.border = "1px solid rgba(16,185,129,0.5)"
+    e.currentTarget.style.boxShadow = "0 0 0 3px rgba(16,185,129,0.08)"
+  }
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
+    e.currentTarget.style.border = "1px solid rgba(255,255,255,0.08)"
+    e.currentTarget.style.boxShadow = "none"
+  }
+
   return (
-    <div className="flex min-h-screen">
-      {/* ── Left panel ── */}
-      <div className="hidden lg:flex lg:w-[52%] relative overflow-hidden flex-col bg-slate-950">
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-950/60 via-slate-950 to-slate-900" />
-        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-emerald-500/10 blur-3xl" />
-        <div className="absolute bottom-0 right-0 w-80 h-80 rounded-full bg-emerald-400/8 blur-3xl" />
+    <div className="min-h-screen flex flex-col" style={{ background: "#060d1a" }}>
+
+      {/* ── Background ── */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div
-          className="absolute inset-0 opacity-[0.04]"
+          className="absolute -top-[15%] left-[40%] w-[600px] h-[450px] rounded-full"
+          style={{
+            background: "radial-gradient(ellipse, rgba(16,185,129,0.15) 0%, transparent 70%)",
+            filter: "blur(70px)",
+          }}
+        />
+        <div
+          className="absolute bottom-[-5%] left-[-5%] w-[400px] h-[300px] rounded-full"
+          style={{
+            background: "radial-gradient(ellipse, rgba(99,102,241,0.08) 0%, transparent 70%)",
+            filter: "blur(80px)",
+          }}
+        />
+        <div
+          className="absolute inset-0 opacity-[0.022]"
           style={{
             backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)",
             backgroundSize: "28px 28px",
           }}
         />
-
-        <div className="relative z-10 flex flex-col h-full px-12 py-12">
-          {/* Logo */}
-          <div className="flex items-center gap-3 mb-auto">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/30">
-              <Wallet className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-white font-bold text-xl tracking-tight">Expensable</span>
-          </div>
-
-          {/* Hero */}
-          <div className="mb-12">
-            <h2 className="text-4xl font-bold text-white leading-tight mb-4">
-              Take control of<br />
-              <span className="text-emerald-400">every dollar.</span>
-            </h2>
-            <p className="text-slate-400 text-base leading-relaxed max-w-sm">
-              Set up in minutes. Your AI finance assistant is ready when you are.
-            </p>
-          </div>
-
-          {/* How it works */}
-          <div className="mb-10">
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-5">How it works</p>
-            <div className="space-y-4">
-              {STEPS.map(({ icon: Icon, label }, i) => (
-                <div key={label} className="flex items-center gap-3.5">
-                  <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/20 shrink-0">
-                    <Icon className="w-3.5 h-3.5 text-emerald-400" />
-                  </div>
-                  <div className="flex items-center gap-3 flex-1">
-                    <span className="text-[10px] font-bold text-emerald-600/60 tabular-nums w-4 shrink-0">
-                      {String(i + 1).padStart(2, "0")}
-                    </span>
-                    <p className="text-sm text-slate-300">{label}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Decorative stat strip */}
-          <div className="rounded-2xl bg-white/5 border border-white/8 backdrop-blur-sm p-4">
-            <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest mb-3">
-              Example household
-            </p>
-            <div className="space-y-2">
-              {[
-                { label: "Subscriptions detected",  value: "14",    color: "text-violet-400" },
-                { label: "Monthly savings rate",     value: "31%",   color: "text-emerald-400" },
-                { label: "Transactions categorised", value: "1,203", color: "text-slate-200" },
-              ].map(({ label, value, color }) => (
-                <div key={label} className="flex items-center justify-between">
-                  <p className="text-xs text-slate-500">{label}</p>
-                  <p className={`text-sm font-bold tabular-nums ${color}`}>{value}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        <div
+          className="absolute inset-0"
+          style={{ background: "radial-gradient(ellipse at 50% 0%, transparent 45%, #060d1a 75%)" }}
+        />
       </div>
 
-      {/* ── Right panel: form ── */}
-      <div className="flex-1 flex items-center justify-center bg-slate-50 px-6 py-12">
-        <div className="w-full max-w-sm">
-          {/* Logo (mobile only) */}
-          <div className="flex items-center justify-center gap-2.5 mb-8 lg:hidden">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500 flex items-center justify-center">
-              <Wallet className="w-5 h-5 text-white" />
+      {/* ── Header ── */}
+      <header className="relative z-10 px-6 pt-6 pb-0 flex items-center justify-between max-w-5xl mx-auto w-full">
+        <div className="flex items-center gap-2.5">
+          <div
+            className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+            style={{
+              background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+              boxShadow: "0 0 18px rgba(16,185,129,0.35)",
+            }}
+          >
+            <Wallet className="w-4 h-4 text-white" />
+          </div>
+          <span className="font-semibold text-[15px] tracking-tight" style={{ color: "rgba(255,255,255,0.9)" }}>
+            Expensable
+          </span>
+        </div>
+        <a href="/login" className="text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>
+          Have an account?{" "}
+          <span className="font-medium" style={{ color: "#34d399" }}>Sign in →</span>
+        </a>
+      </header>
+
+      {/* ── Main ── */}
+      <main className="relative z-10 flex-1 flex items-center justify-center px-4 py-10">
+        <div className="w-full max-w-[390px]">
+
+          {/* Badge + heading */}
+          <div className="text-center mb-8">
+            <div
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-medium mb-4"
+              style={{
+                background: "rgba(16,185,129,0.08)",
+                border: "1px solid rgba(16,185,129,0.18)",
+                color: "#34d399",
+                letterSpacing: "0.02em",
+              }}
+            >
+              Free to start — no card needed
             </div>
-            <span className="text-slate-900 font-bold text-xl tracking-tight">Expensable</span>
+            <h1
+              className="text-[26px] font-bold leading-tight mb-2"
+              style={{ color: "rgba(255,255,255,0.93)" }}
+            >
+              Create your account
+            </h1>
+            <p className="text-sm" style={{ color: "rgba(255,255,255,0.3)" }}>
+              Your AI finance assistant awaits
+            </p>
           </div>
 
-          <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
-            <h1 className="text-lg font-semibold text-slate-900 mb-1">Create account</h1>
-            <p className="text-sm text-slate-500 mb-6">Free to start — no credit card needed</p>
-
+          {/* Glass card */}
+          <div
+            className="rounded-2xl p-6"
+            style={{
+              background: "rgba(255,255,255,0.035)",
+              border: "1px solid rgba(255,255,255,0.075)",
+              backdropFilter: "blur(24px)",
+              WebkitBackdropFilter: "blur(24px)",
+              boxShadow: "0 30px 60px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.07)",
+            }}
+          >
             <form onSubmit={handleSubmit} className="space-y-3">
-              <input
-                name="name"
-                type="text"
-                required
-                placeholder="Your name"
-                className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
-              />
-              <input
-                name="email"
-                type="email"
-                required
-                placeholder="Email"
-                className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
-              />
-              <input
-                name="password"
-                type="password"
-                required
-                minLength={8}
-                placeholder="Password (min 8 characters)"
-                className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
-              />
+              {/* Text inputs */}
+              {[
+                { name: "name",     type: "text",     placeholder: "Your name",         label: "Full name"      },
+                { name: "email",    type: "email",    placeholder: "you@example.com",   label: "Email address"  },
+                { name: "password", type: "password", placeholder: "Min 8 characters",  label: "Password", minLength: 8 },
+              ].map((f) => (
+                <div key={f.name}>
+                  <label
+                    className="block text-[11px] font-medium mb-1.5"
+                    style={{ color: "rgba(255,255,255,0.4)", letterSpacing: "0.02em" }}
+                  >
+                    {f.label}
+                  </label>
+                  <input
+                    name={f.name}
+                    type={f.type}
+                    required
+                    placeholder={f.placeholder}
+                    minLength={f.minLength}
+                    className="w-full rounded-xl px-3.5 py-[10px] text-sm outline-none transition-all duration-150"
+                    style={{
+                      background: "rgba(255,255,255,0.05)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      color: "rgba(255,255,255,0.88)",
+                    }}
+                    onFocus={handleFocus}
+                    onBlur={handleBlur}
+                  />
+                </div>
+              ))}
+
+              {/* Currency */}
               <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1.5">
+                <label
+                  className="block text-[11px] font-medium mb-1.5"
+                  style={{ color: "rgba(255,255,255,0.4)", letterSpacing: "0.02em" }}
+                >
                   Default currency
                 </label>
                 <select
                   name="currency"
                   defaultValue="USD"
-                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition bg-white"
+                  className="w-full rounded-xl px-3.5 py-[10px] text-sm outline-none transition-all duration-150 appearance-none"
+                  style={{
+                    background: "rgba(255,255,255,0.05)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                    color: "rgba(255,255,255,0.88)",
+                  }}
+                  onFocus={handleFocus}
+                  onBlur={handleBlur}
                 >
                   {CURRENCIES.map((c) => (
-                    <option key={c.code} value={c.code}>
+                    <option key={c.code} value={c.code} style={{ background: "#0d1829", color: "#e2e8f0" }}>
                       {c.label}
                     </option>
                   ))}
                 </select>
               </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
+
+              {error && (
+                <div
+                  className="rounded-xl px-3.5 py-2.5 text-[13px]"
+                  style={{
+                    background: "rgba(239,68,68,0.08)",
+                    border: "1px solid rgba(239,68,68,0.2)",
+                    color: "#fca5a5",
+                  }}
+                >
+                  {error}
+                </div>
+              )}
+
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+                className="w-full flex items-center justify-center gap-1.5 rounded-xl px-4 py-[10px] text-sm font-semibold transition-all duration-150 disabled:opacity-40 mt-1"
+                style={{
+                  background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                  color: "white",
+                  boxShadow: "0 4px 22px rgba(16,185,129,0.28)",
+                }}
+                onMouseEnter={(e) => {
+                  if (!loading) e.currentTarget.style.boxShadow = "0 4px 32px rgba(16,185,129,0.45)"
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = "0 4px 22px rgba(16,185,129,0.28)"
+                }}
               >
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Create account"}
+                {loading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>Create account <ArrowRight className="w-3.5 h-3.5" /></>
+                )}
               </button>
             </form>
           </div>
 
-          <p className="text-center text-xs text-slate-400 mt-5">
+          <p className="text-center text-xs mt-5" style={{ color: "rgba(255,255,255,0.18)" }}>
             Already have an account?{" "}
-            <a href="/login" className="text-emerald-600 hover:underline font-medium">
+            <a
+              href="/login"
+              className="transition-colors"
+              style={{ color: "rgba(52,211,153,0.7)" }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#34d399")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(52,211,153,0.7)")}
+            >
               Sign in
             </a>
           </p>
         </div>
-      </div>
+      </main>
     </div>
   )
 }
