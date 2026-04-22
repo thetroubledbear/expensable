@@ -1,39 +1,10 @@
 "use client"
 
+
 import { useState, Suspense } from "react"
 import { signIn } from "next-auth/react"
 import { useSearchParams } from "next/navigation"
-import {
-  Wallet,
-  Loader2,
-  Sparkles,
-  ShieldCheck,
-  Users,
-  TrendingUp,
-} from "lucide-react"
-
-const FEATURES = [
-  {
-    icon: Sparkles,
-    title: "AI-powered parsing",
-    desc: "Upload a bank statement or receipt — transactions extracted automatically.",
-  },
-  {
-    icon: TrendingUp,
-    title: "Real-time insights",
-    desc: "Monthly trends, top merchants, savings rate, and subscription detection.",
-  },
-  {
-    icon: Users,
-    title: "Family sharing",
-    desc: "Invite household members and track finances together on one dashboard.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Private by design",
-    desc: "Your data stays in your household. No data sold, ever.",
-  },
-]
+import { Wallet, Loader2, ArrowRight } from "lucide-react"
 
 function LoginForm() {
   const params = useSearchParams()
@@ -45,7 +16,6 @@ function LoginForm() {
     e.preventDefault()
     setError("")
     setLoading(true)
-
     const form = new FormData(e.currentTarget)
     const result = await signIn("credentials", {
       email: form.get("email"),
@@ -53,7 +23,6 @@ function LoginForm() {
       callbackUrl,
       redirect: false,
     })
-
     if (result?.error) {
       setError("Invalid email or password")
       setLoading(false)
@@ -62,155 +31,226 @@ function LoginForm() {
     }
   }
 
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.currentTarget.style.border = "1px solid rgba(16,185,129,0.5)"
+    e.currentTarget.style.boxShadow = "0 0 0 3px rgba(16,185,129,0.08)"
+  }
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.currentTarget.style.border = "1px solid rgba(255,255,255,0.08)"
+    e.currentTarget.style.boxShadow = "none"
+  }
+
   return (
-    <div className="flex min-h-screen">
-      {/* ── Left panel ── */}
-      <div className="hidden lg:flex lg:w-[52%] relative overflow-hidden flex-col bg-slate-950">
-        {/* Background layers */}
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-950/60 via-slate-950 to-slate-900" />
-        {/* Glow blobs */}
-        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-emerald-500/10 blur-3xl" />
-        <div className="absolute bottom-0 right-0 w-80 h-80 rounded-full bg-emerald-400/8 blur-3xl" />
-        {/* Dot grid */}
+    <div className="min-h-screen flex flex-col" style={{ background: "#060d1a" }}>
+
+      {/* ── Background ── */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div
-          className="absolute inset-0 opacity-[0.04]"
+          className="absolute -top-[20%] left-1/2 -translate-x-1/2 w-[700px] h-[500px] rounded-full"
+          style={{
+            background: "radial-gradient(ellipse, rgba(16,185,129,0.18) 0%, transparent 70%)",
+            filter: "blur(60px)",
+          }}
+        />
+        <div
+          className="absolute bottom-0 right-0 w-[450px] h-[350px] rounded-full"
+          style={{
+            background: "radial-gradient(ellipse, rgba(99,102,241,0.1) 0%, transparent 70%)",
+            filter: "blur(80px)",
+          }}
+        />
+        <div
+          className="absolute inset-0 opacity-[0.022]"
           style={{
             backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)",
             backgroundSize: "28px 28px",
           }}
         />
+        <div
+          className="absolute inset-0"
+          style={{ background: "radial-gradient(ellipse at 50% 0%, transparent 45%, #060d1a 75%)" }}
+        />
+      </div>
 
-        {/* Content */}
-        <div className="relative z-10 flex flex-col h-full px-12 py-12">
-          {/* Logo */}
-          <div className="flex items-center gap-3 mb-auto">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/30">
-              <Wallet className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-white font-bold text-xl tracking-tight">Expensable</span>
+      {/* ── Header ── */}
+      <header className="relative z-10 px-6 pt-6 pb-0 flex items-center justify-between max-w-5xl mx-auto w-full">
+        <div className="flex items-center gap-2.5">
+          <div
+            className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+            style={{
+              background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+              boxShadow: "0 0 18px rgba(16,185,129,0.35)",
+            }}
+          >
+            <Wallet className="w-4 h-4 text-white" />
           </div>
+          <span className="font-semibold text-[15px] tracking-tight" style={{ color: "rgba(255,255,255,0.9)" }}>
+            Expensable
+          </span>
+        </div>
+        <a href="/register" className="text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>
+          No account?{" "}
+          <span className="font-medium" style={{ color: "#34d399" }}>
+            Create one →
+          </span>
+        </a>
+      </header>
 
-          {/* Hero text */}
-          <div className="mb-12">
-            <h2 className="text-4xl font-bold text-white leading-tight mb-4">
-              Your finances,<br />
-              <span className="text-emerald-400">finally clear.</span>
-            </h2>
-            <p className="text-slate-400 text-base leading-relaxed max-w-sm">
-              Upload statements, get instant AI insights, and take control of every dollar.
+      {/* ── Main ── */}
+      <main className="relative z-10 flex-1 flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-[390px]">
+
+          {/* Badge + heading */}
+          <div className="text-center mb-8">
+            <div
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-medium mb-4"
+              style={{
+                background: "rgba(16,185,129,0.08)",
+                border: "1px solid rgba(16,185,129,0.18)",
+                color: "#34d399",
+                letterSpacing: "0.02em",
+              }}
+            >
+              <span
+                className="w-1.5 h-1.5 rounded-full"
+                style={{ background: "#34d399", boxShadow: "0 0 6px #34d399" }}
+              />
+              Secure sign-in
+            </div>
+            <h1
+              className="text-[26px] font-bold leading-tight mb-2"
+              style={{ color: "rgba(255,255,255,0.93)" }}
+            >
+              Welcome back
+            </h1>
+            <p className="text-sm" style={{ color: "rgba(255,255,255,0.3)" }}>
+              Sign in to your Expensable account
             </p>
           </div>
 
-          {/* Feature list */}
-          <div className="space-y-5 mb-12">
-            {FEATURES.map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="flex items-start gap-3.5">
-                <div className="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                  <Icon className="w-4 h-4 text-emerald-400" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-white">{title}</p>
-                  <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+          {/* Glass card */}
+          <div
+            className="rounded-2xl p-6"
+            style={{
+              background: "rgba(255,255,255,0.035)",
+              border: "1px solid rgba(255,255,255,0.075)",
+              backdropFilter: "blur(24px)",
+              WebkitBackdropFilter: "blur(24px)",
+              boxShadow: "0 30px 60px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.07)",
+            }}
+          >
+            {/* Google */}
+            <button
+              onClick={() => signIn("google", { callbackUrl })}
+              className="flex w-full items-center justify-center gap-2.5 rounded-xl px-4 py-[10px] text-sm font-medium transition-all duration-150"
+              style={{
+                background: "rgba(255,255,255,0.96)",
+                color: "#1e293b",
+                boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,1)")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.96)")}
+            >
+              <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+              </svg>
+              Continue with Google
+            </button>
 
-          {/* Decorative mini-card */}
-          <div className="rounded-2xl bg-white/5 border border-white/8 backdrop-blur-sm p-4">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-xs font-semibold text-slate-300">This month</p>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-semibold">Live</span>
+            {/* Divider */}
+            <div className="relative my-5 flex items-center">
+              <div className="flex-1" style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }} />
+              <span
+                className="mx-3 text-[11px]"
+                style={{ color: "rgba(255,255,255,0.22)" }}
+              >
+                or email
+              </span>
+              <div className="flex-1" style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }} />
             </div>
-            <div className="grid grid-cols-3 gap-3">
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-3">
               {[
-                { label: "Spent", value: "$2,840", color: "text-red-400" },
-                { label: "Earned", value: "$5,200", color: "text-emerald-400" },
-                { label: "Saved", value: "$2,360", color: "text-slate-200" },
-              ].map(({ label, value, color }) => (
-                <div key={label}>
-                  <p className={`text-sm font-bold tabular-nums ${color}`}>{value}</p>
-                  <p className="text-[10px] text-slate-500 mt-0.5">{label}</p>
+                { name: "email", type: "email", placeholder: "you@example.com", label: "Email" },
+                { name: "password", type: "password", placeholder: "••••••••", label: "Password" },
+              ].map((f) => (
+                <div key={f.name}>
+                  <label
+                    className="block text-[11px] font-medium mb-1.5"
+                    style={{ color: "rgba(255,255,255,0.4)", letterSpacing: "0.02em" }}
+                  >
+                    {f.label}
+                  </label>
+                  <input
+                    name={f.name}
+                    type={f.type}
+                    required
+                    placeholder={f.placeholder}
+                    className="w-full rounded-xl px-3.5 py-[10px] text-sm outline-none transition-all duration-150"
+                    style={{
+                      background: "rgba(255,255,255,0.05)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                      color: "rgba(255,255,255,0.88)",
+                    }}
+                    onFocus={handleFocus}
+                    onBlur={handleBlur}
+                  />
                 </div>
               ))}
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* ── Right panel: form ── */}
-      <div className="flex-1 flex items-center justify-center bg-slate-50 px-6 py-12">
-        <div className="w-full max-w-sm">
-          {/* Logo (mobile only) */}
-          <div className="flex items-center justify-center gap-2.5 mb-8 lg:hidden">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500 flex items-center justify-center">
-              <Wallet className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-slate-900 font-bold text-xl tracking-tight">Expensable</span>
-          </div>
-
-          <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
-            <h1 className="text-lg font-semibold text-slate-900 mb-1">Welcome back</h1>
-            <p className="text-sm text-slate-500 mb-6">Sign in to your account</p>
-
-            <div className="space-y-3">
-              <button
-                onClick={() => signIn("google", { callbackUrl })}
-                className="flex w-full items-center justify-center gap-2.5 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
-              >
-                <svg className="w-4 h-4" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                </svg>
-                Continue with Google
-              </button>
-
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-slate-100" />
-                </div>
-                <div className="relative flex justify-center text-xs">
-                  <span className="bg-white px-2 text-slate-400">or</span>
-                </div>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-3">
-                <input
-                  name="email"
-                  type="email"
-                  required
-                  placeholder="Email"
-                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
-                />
-                <input
-                  name="password"
-                  type="password"
-                  required
-                  placeholder="Password"
-                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
-                />
-                {error && <p className="text-sm text-red-500">{error}</p>}
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+              {error && (
+                <div
+                  className="rounded-xl px-3.5 py-2.5 text-[13px]"
+                  style={{
+                    background: "rgba(239,68,68,0.08)",
+                    border: "1px solid rgba(239,68,68,0.2)",
+                    color: "#fca5a5",
+                  }}
                 >
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Sign in"}
-                </button>
-              </form>
-            </div>
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-1.5 rounded-xl px-4 py-[10px] text-sm font-semibold transition-all duration-150 disabled:opacity-40 mt-1"
+                style={{
+                  background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+                  color: "white",
+                  boxShadow: "0 4px 22px rgba(16,185,129,0.28)",
+                }}
+                onMouseEnter={(e) => {
+                  if (!loading) e.currentTarget.style.boxShadow = "0 4px 32px rgba(16,185,129,0.45)"
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = "0 4px 22px rgba(16,185,129,0.28)"
+                }}
+              >
+                {loading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>Sign in <ArrowRight className="w-3.5 h-3.5" /></>
+                )}
+              </button>
+            </form>
           </div>
 
-          <p className="text-center text-xs text-slate-400 mt-5">
+          <p className="text-center text-xs mt-5" style={{ color: "rgba(255,255,255,0.18)" }}>
             No account?{" "}
-            <a href="/register" className="text-emerald-600 hover:underline font-medium">
-              Create one
+            <a href="/register" className="transition-colors" style={{ color: "rgba(52,211,153,0.7)" }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#34d399")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(52,211,153,0.7)")}
+            >
+              Sign up free
             </a>
           </p>
         </div>
-      </div>
+      </main>
     </div>
   )
 }
