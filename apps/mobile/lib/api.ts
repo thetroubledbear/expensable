@@ -72,6 +72,19 @@ export async function authGetSession(): Promise<{ user?: { id: string; name?: st
   }
 }
 
+export async function apiDeleteById(path: string): Promise<void> {
+  await request(path, { method: "DELETE" })
+}
+
+export async function apiPatch<T = unknown>(path: string, body: unknown): Promise<T> {
+  const res = await request(path, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  })
+  return res.json() as Promise<T>
+}
+
 export async function apiUploadFile(formData: FormData): Promise<{ id: string; status: string }> {
   const cookie = getCookieHeader()
   const headers: Record<string, string> = {}

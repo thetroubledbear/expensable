@@ -18,7 +18,7 @@ type Props = {
 }
 
 export default function LoginScreen({ navigation }: Props) {
-  const { signIn } = useAuth()
+  const { signIn, promptGoogleSignIn, googleLoading } = useAuth()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
@@ -75,6 +75,27 @@ export default function LoginScreen({ navigation }: Props) {
             <ActivityIndicator color="#fff" />
           ) : (
             <Text style={styles.buttonText}>Sign in</Text>
+          )}
+        </TouchableOpacity>
+
+        <View style={styles.divider}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>or</Text>
+          <View style={styles.dividerLine} />
+        </View>
+
+        <TouchableOpacity
+          style={[styles.googleButton, googleLoading && styles.buttonDisabled]}
+          onPress={promptGoogleSignIn}
+          disabled={googleLoading}
+        >
+          {googleLoading ? (
+            <ActivityIndicator color="#374151" />
+          ) : (
+            <>
+              <Text style={styles.googleIcon}>G</Text>
+              <Text style={styles.googleButtonText}>Continue with Google</Text>
+            </>
           )}
         </TouchableOpacity>
 
@@ -142,7 +163,23 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: { opacity: 0.6 },
   buttonText: { color: "#fff", fontSize: 15, fontWeight: "600" },
-  footer: { flexDirection: "row", justifyContent: "center", marginTop: 20 },
+  divider: { flexDirection: "row", alignItems: "center", marginVertical: 20, gap: 10 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: "#e2e8f0" },
+  dividerText: { fontSize: 13, color: "#94a3b8" },
+  googleButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    borderRadius: 10,
+    paddingVertical: 13,
+    backgroundColor: "#fff",
+  },
+  googleIcon: { fontSize: 16, fontWeight: "700", color: "#4285F4" },
+  googleButtonText: { fontSize: 15, fontWeight: "500", color: "#374151" },
+  footer: { flexDirection: "row", justifyContent: "center", marginTop: 24 },
   footerText: { color: "#64748b", fontSize: 14 },
   link: { color: "#059669", fontSize: 14, fontWeight: "600" },
 })

@@ -8,9 +8,10 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native"
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { useAuth } from "../lib/auth"
 import { apiGet } from "../lib/api"
-import { LogOut, Home, CreditCard, User } from "lucide-react-native"
+import { LogOut, Home, CreditCard, User, RefreshCw, ChevronRight } from "lucide-react-native"
 
 interface HouseholdData {
   id: string
@@ -19,7 +20,11 @@ interface HouseholdData {
   billing: { tier: string }
 }
 
-export default function SettingsScreen() {
+type Props = {
+  navigation: NativeStackNavigationProp<{ SettingsMain: undefined; Subscriptions: undefined }, "SettingsMain">
+}
+
+export default function SettingsScreen({ navigation }: Props) {
   const { user, signOut } = useAuth()
   const [household, setHousehold] = useState<HouseholdData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -88,6 +93,22 @@ export default function SettingsScreen() {
           </View>
         </View>
       ) : null}
+
+      <View style={styles.section}>
+        <Text style={styles.sectionLabel}>Features</Text>
+        <View style={styles.card}>
+          <TouchableOpacity style={styles.row} onPress={() => navigation.navigate("Subscriptions")}>
+            <View style={styles.iconBox}>
+              <RefreshCw color="#8b5cf6" size={18} />
+            </View>
+            <View style={styles.rowInfo}>
+              <Text style={styles.rowTitle}>Subscriptions</Text>
+              <Text style={styles.rowSub}>Recurring payments detected</Text>
+            </View>
+            <ChevronRight color="#cbd5e1" size={18} />
+          </TouchableOpacity>
+        </View>
+      </View>
 
       <View style={styles.section}>
         <TouchableOpacity style={styles.signOutBtn} onPress={handleSignOut}>
