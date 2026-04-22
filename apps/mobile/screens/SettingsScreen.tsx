@@ -11,7 +11,7 @@ import {
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { useAuth } from "../lib/auth"
 import { apiGet } from "../lib/api"
-import { LogOut, Home, CreditCard, User, RefreshCw, ChevronRight } from "lucide-react-native"
+import { LogOut, Home, CreditCard, User, RefreshCw, ChevronRight, UserPlus } from "lucide-react-native"
 
 interface HouseholdData {
   id: string
@@ -21,7 +21,7 @@ interface HouseholdData {
 }
 
 type Props = {
-  navigation: NativeStackNavigationProp<{ SettingsMain: undefined; Subscriptions: undefined }, "SettingsMain">
+  navigation: NativeStackNavigationProp<{ SettingsMain: undefined; Subscriptions: undefined; Invite: undefined }, "SettingsMain">
 }
 
 export default function SettingsScreen({ navigation }: Props) {
@@ -104,6 +104,19 @@ export default function SettingsScreen({ navigation }: Props) {
             <View style={styles.rowInfo}>
               <Text style={styles.rowTitle}>Subscriptions</Text>
               <Text style={styles.rowSub}>Recurring payments detected</Text>
+            </View>
+            <ChevronRight color="#cbd5e1" size={18} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.row, { borderTopWidth: 1, borderTopColor: "#f1f5f9" }]}
+            onPress={() => navigation.navigate("Invite")}
+          >
+            <View style={styles.iconBox}>
+              <UserPlus color="#059669" size={18} />
+            </View>
+            <View style={styles.rowInfo}>
+              <Text style={styles.rowTitle}>Invite Member</Text>
+              <Text style={styles.rowSub}>Add someone to your household</Text>
             </View>
             <ChevronRight color="#cbd5e1" size={18} />
           </TouchableOpacity>
