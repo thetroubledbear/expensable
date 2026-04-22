@@ -13,6 +13,7 @@ WebBrowser.maybeCompleteAuthSession()
 // To enable Google Sign-In on Android, also register the redirect URI
 // expensable://oauthredirect in your Google Cloud Console OAuth client
 const GOOGLE_WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? ""
+const GOOGLE_ANDROID_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID ?? ""
 
 const CREDS_KEY = "saved_credentials"
 
@@ -43,6 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const [, googleResponse, promptAsync] = Google.useAuthRequest({
     webClientId: GOOGLE_WEB_CLIENT_ID,
+    androidClientId: GOOGLE_ANDROID_CLIENT_ID || undefined,
     redirectUri,
   })
 

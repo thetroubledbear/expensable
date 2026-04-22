@@ -28,10 +28,10 @@ export default function UploadScreen() {
     formData.append("file", { uri, name, type: mimeType } as unknown as Blob)
     try {
       const res = await apiUploadFile(formData)
-      if ("id" in res) {
+      if (res.id) {
         setResults((prev) => [...prev, { name, status: "success" }])
       } else {
-        setResults((prev) => [...prev, { name, status: "error", message: "Upload failed" }])
+        setResults((prev) => [...prev, { name, status: "error", message: res.error ?? "Upload failed" }])
       }
     } catch {
       setResults((prev) => [...prev, { name, status: "error", message: "Network error" }])

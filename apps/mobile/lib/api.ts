@@ -85,7 +85,7 @@ export async function apiPatch<T = unknown>(path: string, body: unknown): Promis
   return res.json() as Promise<T>
 }
 
-export async function apiUploadFile(formData: FormData): Promise<{ id: string; status: string }> {
+export async function apiUploadFile(formData: FormData): Promise<{ id?: string; status?: string; error?: string }> {
   const cookie = getCookieHeader()
   const headers: Record<string, string> = {}
   if (cookie) headers["Cookie"] = cookie
@@ -96,5 +96,7 @@ export async function apiUploadFile(formData: FormData): Promise<{ id: string; s
     body: formData,
   })
   ingestSetCookie(res.headers.get("set-cookie"))
-  return res.json()
+  const data = await res.json().catch(() => ({})) as { id?: string; status?: string; error?: string }
+  if (!res.ok) return { error: data.error ?? `Upload failed (${res.status})` }
+  return data
 }

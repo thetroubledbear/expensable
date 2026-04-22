@@ -9,6 +9,7 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native"
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { apiGet } from "../lib/api"
 import { Search, X } from "lucide-react-native"
 
@@ -38,7 +39,11 @@ function fmt(amount: number, currency: string): string {
   }
 }
 
-export default function TransactionsScreen() {
+type Props = {
+  navigation: NativeStackNavigationProp<{ TransactionsList: undefined; AddTransaction: undefined }, "TransactionsList">
+}
+
+export default function TransactionsScreen({ navigation }: Props) {
   const [data, setData] = useState<ApiResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -46,11 +51,18 @@ export default function TransactionsScreen() {
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [page, setPage] = useState(1)
   const [typeFilter, setTypeFilter] = useState<"" | "debit" | "credit">("")
+  const [currency, setCurrency] = useState("USD")
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 400)
     return () => clearTimeout(t)
   }, [search])
+
+  useEffect(() => {
+    apiGet<{ defaultCurrency?: string }>("/api/household")
+      .then((d) => { if (d.defaultCurrency) setCurrency(d.defaultCurrency) })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => { setPage(1) }, [debouncedSearch, typeFilter])
 
@@ -74,8 +86,6 @@ export default function TransactionsScreen() {
     setRefreshing(true)
     load()
   }
-
-  const currency = "USD"
 
   return (
     <View style={styles.container}>
@@ -169,6 +179,10 @@ export default function TransactionsScreen() {
           )}
         </ScrollView>
       )}
+
+      <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate("AddTransaction")}>
+        <Text style={styles.fabText}>+</Text>
+      </TouchableOpacity>
     </View>
   )
 }
@@ -204,4 +218,21 @@ const styles = StyleSheet.create({
   pageBtnDisabled: { opacity: 0.4 },
   pageBtnText: { fontSize: 13, color: "#0f172a", fontWeight: "500" },
   pageInfo: { fontSize: 13, color: "#64748b" },
+  fab: {
+    position: "absolute",
+    right: 20,
+    bottom: 24,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: "#059669",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  fabText: { fontSize: 30, color: "#fff", lineHeight: 34, fontWeight: "300" },
 })

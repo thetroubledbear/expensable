@@ -113,7 +113,7 @@ export default function DashboardScreen() {
 
       {noHousehold || !data ? (
         <Card>
-          <Text style={styles.emptyText}>No data yet. Upload a file on the web to get started.</Text>
+          <Text style={styles.emptyText}>No data yet. Upload a file using the Upload tab to get started.</Text>
         </Card>
       ) : (
         <>
@@ -180,6 +180,29 @@ export default function DashboardScreen() {
                   </View>
                 </View>
               ))}
+            </Card>
+          )}
+
+          {data.categories.length > 0 && (
+            <Card>
+              <Text style={styles.sectionTitle}>By Category</Text>
+              {(() => {
+                const maxCat = Math.max(...data.categories.map((c) => c.total), 1)
+                return data.categories.map((c, i) => (
+                  <View key={i} style={styles.merchantRow}>
+                    <View style={styles.merchantTop}>
+                      <Text style={styles.rowTitle} numberOfLines={1}>{c.name}</Text>
+                      <Text style={styles.rowAmount}>{fmt(c.total, data.currency)}</Text>
+                    </View>
+                    <View style={styles.barBg}>
+                      <View style={[styles.barFill, {
+                        width: `${Math.round((c.total / maxCat) * 100)}%` as `${number}%`,
+                        backgroundColor: c.color,
+                      }]} />
+                    </View>
+                  </View>
+                ))
+              })()}
             </Card>
           )}
 

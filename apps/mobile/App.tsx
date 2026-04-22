@@ -8,14 +8,17 @@ import LoginScreen from "./screens/LoginScreen"
 import RegisterScreen from "./screens/RegisterScreen"
 import DashboardScreen from "./screens/DashboardScreen"
 import TransactionsScreen from "./screens/TransactionsScreen"
+import AddTransactionScreen from "./screens/AddTransactionScreen"
 import UploadScreen from "./screens/UploadScreen"
 import FilesScreen from "./screens/FilesScreen"
 import SettingsScreen from "./screens/SettingsScreen"
 import SubscriptionsScreen from "./screens/SubscriptionsScreen"
+import InviteScreen from "./screens/InviteScreen"
 
 const AuthStack = createNativeStackNavigator()
 const Tab = createBottomTabNavigator()
 const SettingsStack = createNativeStackNavigator()
+const TransactionsStack = createNativeStackNavigator()
 
 function AuthNavigator() {
   return (
@@ -26,11 +29,21 @@ function AuthNavigator() {
   )
 }
 
+function TransactionsNavigator() {
+  return (
+    <TransactionsStack.Navigator screenOptions={{ headerShown: false }}>
+      <TransactionsStack.Screen name="TransactionsList" component={TransactionsScreen} />
+      <TransactionsStack.Screen name="AddTransaction" component={AddTransactionScreen} />
+    </TransactionsStack.Navigator>
+  )
+}
+
 function SettingsNavigator() {
   return (
     <SettingsStack.Navigator screenOptions={{ headerShown: false }}>
       <SettingsStack.Screen name="SettingsMain" component={SettingsScreen} />
       <SettingsStack.Screen name="Subscriptions" component={SubscriptionsScreen} />
+      <SettingsStack.Screen name="Invite" component={InviteScreen} />
     </SettingsStack.Navigator>
   )
 }
@@ -52,7 +65,7 @@ function TabNavigator() {
       />
       <Tab.Screen
         name="Transactions"
-        component={TransactionsScreen}
+        component={TransactionsNavigator}
         options={{ tabBarIcon: ({ color, size }) => <ArrowLeftRight color={color} size={size} /> }}
       />
       <Tab.Screen
