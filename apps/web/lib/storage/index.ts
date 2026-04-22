@@ -1,29 +1,32 @@
 import { Storage } from "@google-cloud/storage"
 
-function createStorage() {
-  if (process.env.GCS_SERVICE_ACCOUNT_KEY) {
-    return new Storage({ credentials: JSON.parse(process.env.GCS_SERVICE_ACCOUNT_KEY) })
+let _storage: Storage | null = null
+let _bucket: ReturnType<Storage["bucket"]> | null = null
+
+function getBucket() {
+  if (!_bucket) {
+    if (!_storage) {
+      _storage = process.env.GCS_SERVICE_ACCOUNT_KEY
+        ? new Storage({ credentials: JSON.parse(process.env.GCS_SERVICE_ACCOUNT_KEY) })
+        : new Storage()
+    }
+    _bucket = _storage.bucket(process.env.GCS_BUCKET || "expensable")
   }
-  // Local dev: falls back to Application Default Credentials (gcloud auth application-default login)
-  return new Storage()
+  return _bucket
 }
 
-const storage = createStorage()
-const BUCKET = process.env.GCS_BUCKET ?? "expensable"
-const bucket = storage.bucket(BUCKET)
-
 export async function uploadFile(key: string, body: Buffer, contentType: string): Promise<string> {
-  await bucket.file(key).save(body, { contentType })
+  await getBucket().file(key).save(body, { contentType })
   return key
 }
 
 export async function getFileBuffer(key: string): Promise<Buffer> {
-  const [data] = await bucket.file(key).download()
+  const [data] = await getBucket().file(key).download()
   return data
 }
 
 export async function getPresignedUrl(key: string, expiresIn = 3600): Promise<string> {
-  const [url] = await bucket.file(key).getSignedUrl({
+  const [url] = await getBucket().file(key).getSignedUrl({
     action: "read",
     expires: Date.now() + expiresIn * 1000,
   })
@@ -31,7 +34,7 @@ export async function getPresignedUrl(key: string, expiresIn = 3600): Promise<st
 }
 
 export async function deleteFile(key: string): Promise<void> {
-  await bucket.file(key).delete()
+  await getBucket().file(key).delete()
 }
 
 export function buildStorageKey(householdId: string, fileId: string, filename: string): string {
