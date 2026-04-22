@@ -2,17 +2,20 @@ import { ActivityIndicator, View } from "react-native"
 import { NavigationContainer } from "@react-navigation/native"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
-import { Home, ArrowLeftRight, Upload, Settings } from "lucide-react-native"
+import { Home, ArrowLeftRight, Upload, FolderOpen, Settings } from "lucide-react-native"
 import { AuthProvider, useAuth } from "./lib/auth"
 import LoginScreen from "./screens/LoginScreen"
 import RegisterScreen from "./screens/RegisterScreen"
 import DashboardScreen from "./screens/DashboardScreen"
 import TransactionsScreen from "./screens/TransactionsScreen"
 import UploadScreen from "./screens/UploadScreen"
+import FilesScreen from "./screens/FilesScreen"
 import SettingsScreen from "./screens/SettingsScreen"
+import SubscriptionsScreen from "./screens/SubscriptionsScreen"
 
 const AuthStack = createNativeStackNavigator()
 const Tab = createBottomTabNavigator()
+const SettingsStack = createNativeStackNavigator()
 
 function AuthNavigator() {
   return (
@@ -20,6 +23,15 @@ function AuthNavigator() {
       <AuthStack.Screen name="Login" component={LoginScreen} />
       <AuthStack.Screen name="Register" component={RegisterScreen} />
     </AuthStack.Navigator>
+  )
+}
+
+function SettingsNavigator() {
+  return (
+    <SettingsStack.Navigator screenOptions={{ headerShown: false }}>
+      <SettingsStack.Screen name="SettingsMain" component={SettingsScreen} />
+      <SettingsStack.Screen name="Subscriptions" component={SubscriptionsScreen} />
+    </SettingsStack.Navigator>
   )
 }
 
@@ -49,8 +61,13 @@ function TabNavigator() {
         options={{ tabBarIcon: ({ color, size }) => <Upload color={color} size={size} /> }}
       />
       <Tab.Screen
+        name="Files"
+        component={FilesScreen}
+        options={{ tabBarIcon: ({ color, size }) => <FolderOpen color={color} size={size} /> }}
+      />
+      <Tab.Screen
         name="Settings"
-        component={SettingsScreen}
+        component={SettingsNavigator}
         options={{ tabBarIcon: ({ color, size }) => <Settings color={color} size={size} /> }}
       />
     </Tab.Navigator>

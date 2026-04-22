@@ -192,6 +192,48 @@ export default function DashboardScreen() {
               </View>
             </Card>
           )}
+
+          {data.trend.length > 1 && (
+            <Card>
+              <Text style={styles.sectionTitle}>6-Month Trend</Text>
+              <View style={styles.trendContainer}>
+                {(() => {
+                  const maxVal = Math.max(...data.trend.map((t) => Math.max(t.spent, t.received)), 1)
+                  return data.trend.map((t, i) => (
+                    <View key={i} style={styles.trendCol}>
+                      <View style={styles.trendBars}>
+                        <View
+                          style={[
+                            styles.trendBar,
+                            styles.trendBarSpent,
+                            { height: Math.max(4, (t.spent / maxVal) * 60) },
+                          ]}
+                        />
+                        <View
+                          style={[
+                            styles.trendBar,
+                            styles.trendBarReceived,
+                            { height: Math.max(4, (t.received / maxVal) * 60) },
+                          ]}
+                        />
+                      </View>
+                      <Text style={styles.trendMonth}>{t.month.slice(5)}</Text>
+                    </View>
+                  ))
+                })()}
+              </View>
+              <View style={styles.trendLegend}>
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendDot, { backgroundColor: "#ef4444" }]} />
+                  <Text style={styles.legendText}>Spent</Text>
+                </View>
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendDot, { backgroundColor: "#059669" }]} />
+                  <Text style={styles.legendText}>Received</Text>
+                </View>
+              </View>
+            </Card>
+          )}
         </>
       )}
     </ScrollView>
@@ -234,4 +276,15 @@ const styles = StyleSheet.create({
   green: { color: "#059669" },
   red: { color: "#ef4444" },
   emptyText: { color: "#64748b", textAlign: "center", fontSize: 14, lineHeight: 22 },
+  trendContainer: { flexDirection: "row", alignItems: "flex-end", gap: 8, marginBottom: 8 },
+  trendCol: { flex: 1, alignItems: "center", gap: 4 },
+  trendBars: { flexDirection: "row", alignItems: "flex-end", gap: 2, height: 64 },
+  trendBar: { width: 8, borderRadius: 3 },
+  trendBarSpent: { backgroundColor: "#ef4444" },
+  trendBarReceived: { backgroundColor: "#059669" },
+  trendMonth: { fontSize: 10, color: "#94a3b8", fontWeight: "500" },
+  trendLegend: { flexDirection: "row", gap: 16, justifyContent: "center", marginTop: 4 },
+  legendItem: { flexDirection: "row", alignItems: "center", gap: 6 },
+  legendDot: { width: 8, height: 8, borderRadius: 4 },
+  legendText: { fontSize: 11, color: "#64748b" },
 })
