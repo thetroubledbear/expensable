@@ -162,8 +162,9 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const formData = await req.formData().catch(() => null)
-  if (!formData) return NextResponse.json({ error: "Invalid form data" }, { status: 400 })
+  const rawForm = await req.formData().catch(() => null)
+  if (!rawForm) return NextResponse.json({ error: "Invalid form data" }, { status: 400 })
+  const formData = rawForm as unknown as { get(name: string): string | File | null }
 
   const file = formData.get("file") as File | null
   const accountId = (formData.get("accountId") as string | null)?.trim() || null
