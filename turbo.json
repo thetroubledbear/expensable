@@ -38,6 +38,9 @@
     },
     "db:migrate": {
       "cache": false
+    },
+    "cap:sync": {
+      "cache": false
     }
   }
 }
