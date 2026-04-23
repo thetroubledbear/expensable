@@ -22,13 +22,12 @@ jobs:
           fetch-depth: 0
       - id: diff
         run: |
-          # main and manual dispatch always deploy everything
-          if [ "${{ github.ref }}" = "refs/heads/main" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          # manual dispatch: deploy everything
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "web=true" >> $GITHUB_OUTPUT
             echo "mobile=true" >> $GITHUB_OUTPUT
             exit 0
           fi
-          # develop: only deploy what changed
           BASE="${{ github.event.before }}"
           if [ "$BASE" = "0000000000000000000000000000000000000000" ] || [ -z "$BASE" ]; then
             BASE="HEAD~1"
