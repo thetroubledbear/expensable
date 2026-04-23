@@ -26,9 +26,11 @@ interface User {
 interface AuthContextValue {
   user: User | null
   loading: boolean
+  onboardingCompleted: boolean
   signIn: (email: string, password: string) => Promise<string | null>
   signOut: () => Promise<void>
   register: (name: string, email: string, password: string) => Promise<string | null>
+  completeOnboarding: () => Promise<void>
   promptGoogleSignIn: () => void
   googleLoading: boolean
 }
@@ -39,6 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [googleLoading, setGoogleLoading] = useState(false)
+  const [onboardingCompleted, setOnboardingCompleted] = useState(true)
 
   const redirectUri = makeRedirectUri({ native: "expensable://oauthredirect" })
 
@@ -66,6 +69,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const session = await authGetSession()
     if (session?.user) {
       setUser(session.user)
+      const done = await SecureStore.getItemAsync(`onboarding_${session.user.id}`).catch(() => null)
+      setOnboardingCompleted(done === "true")
     } else {
       const raw = await SecureStore.getItemAsync(CREDS_KEY).catch(() => null)
       if (raw) {
@@ -74,7 +79,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const ok = await authSignIn(email, password)
           if (ok) {
             const s = await authGetSession()
-            if (s?.user) setUser(s.user)
+            if (s?.user) {
+              setUser(s.user)
+              const done = await SecureStore.getItemAsync(`onboarding_${s.user.id}`).catch(() => null)
+              setOnboardingCompleted(done === "true")
+            }
           }
         } catch {}
       }
@@ -107,12 +116,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     promptAsync()
   }
 
+  async function completeOnboarding(): Promise<void> {
+    const currentUser = user
+    if (currentUser) {
+      await SecureStore.setItemAsync(`onboarding_${currentUser.id}`, "true").catch(() => {})
+      try {
+        await fetch(`${BASE_URL}/api/user/complete-onboarding`, { method: "POST" })
+      } catch {}
+    }
+    setOnboardingCompleted(true)
+  }
+
   async function signIn(email: string, password: string): Promise<string | null> {
     const ok = await authSignIn(email, password)
     if (!ok) return "Invalid email or password"
     const session = await authGetSession()
     if (!session?.user) return "Session not established"
     setUser(session.user)
+    const done = await SecureStore.getItemAsync(`onboarding_${session.user.id}`).catch(() => null)
+    setOnboardingCompleted(done === "true")
     await SecureStore.setItemAsync(CREDS_KEY, JSON.stringify({ email, password }))
     return null
   }
@@ -141,7 +163,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signOut, register, promptGoogleSignIn, googleLoading }}>
+    <AuthContext.Provider value={{ user, loading, onboardingCompleted, signIn, signOut, register, completeOnboarding, promptGoogleSignIn, googleLoading }}>
       {children}
     </AuthContext.Provider>
   )
