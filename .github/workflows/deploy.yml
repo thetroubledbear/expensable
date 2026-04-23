@@ -68,7 +68,7 @@ jobs:
       - uses: actions/setup-node@v4
         if: needs.changes.outputs.mobile == 'true'
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Install Expo tools
         if: needs.changes.outputs.mobile == 'true'
@@ -80,9 +80,10 @@ jobs:
 
       - name: Push OTA update (staging)
         if: needs.changes.outputs.mobile == 'true'
-        run: cd apps/mobile && eas update --branch staging --message "Deploy from CI" --non-interactive
+        run: cd apps/mobile && eas update --branch staging --message "Deploy from CI"
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          CI: '1'
 
 # ─── Production ───────────────────────────────────────────────────────────────
 #  • develop push: runs after staging succeeds, then waits for approval
@@ -117,7 +118,7 @@ jobs:
       - uses: actions/setup-node@v4
         if: needs.changes.outputs.mobile == 'true'
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Install Expo tools
         if: needs.changes.outputs.mobile == 'true'
@@ -129,6 +130,7 @@ jobs:
 
       - name: Push OTA update (production)
         if: needs.changes.outputs.mobile == 'true'
-        run: cd apps/mobile && eas update --branch production --message "Deploy from CI" --non-interactive
+        run: cd apps/mobile && eas update --branch production --message "Deploy from CI"
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          CI: '1'
