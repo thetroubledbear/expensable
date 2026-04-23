@@ -27,7 +27,7 @@ jobs:
             echo "mobile=true" >> $GITHUB_OUTPUT
           fi
 
-# ─── Staging (develop branch, no review needed) ────────────────────────────────
+# ─── Staging (develop branch — auto, no approval) ─────────────────────────────
   deploy-staging:
     if: github.ref == 'refs/heads/develop'
     needs: changes
@@ -74,12 +74,14 @@ jobs:
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
-# ─── Production (main branch, requires reviewer approval) ──────────────────────
+# ─── Production (develop branch — runs after staging, requires manual approval)
+#     Configure: GitHub → Settings → Environments → production → Required reviewers
+# ──────────────────────────────────────────────────────────────────────────────
   deploy-production:
-    if: github.ref == 'refs/heads/main'
-    needs: changes
+    if: github.ref == 'refs/heads/develop'
+    needs: [changes, deploy-staging]
     runs-on: ubuntu-latest
-    environment: production   # <-- GitHub pauses here until a reviewer approves
+    environment: production   # GitHub pauses here until a reviewer approves
 
     steps:
       - uses: actions/checkout@v4
