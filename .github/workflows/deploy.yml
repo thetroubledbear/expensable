@@ -81,7 +81,7 @@ jobs:
 
       - name: Push OTA update (staging)
         if: needs.changes.outputs.mobile == 'true'
-        run: cd apps/mobile && eas update --branch staging --message "ci: ${{ github.sha }}" --non-interactive
+        run: cd apps/mobile && eas update --branch staging --message "Deploy from CI" --non-interactive
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
@@ -130,6 +130,6 @@ jobs:
 
       - name: Push OTA update (production)
         if: needs.changes.outputs.mobile == 'true'
-        run: cd apps/mobile && eas update --branch production --message "ci: ${{ github.sha }}" --non-interactive
+        run: cd apps/mobile && eas update --branch production --message "Deploy from CI" --non-interactive
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
