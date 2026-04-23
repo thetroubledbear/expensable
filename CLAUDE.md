@@ -135,6 +135,31 @@ Bucket name via `GCS_BUCKET` env (default: `expensable`).
 - **Table cards**: do NOT use `overflow-hidden` — clips dropdown menus (CategoryPicker, delete confirm)
 - Component files: `components/sidebar.tsx`, `components/upload-dropzone.tsx`, `components/files-poller.tsx`, `components/category-picker.tsx`, `components/transactions-table.tsx`, `components/file-delete-button.tsx`
 
+### Onboarding (Phase 3.5)
+5-step intro wizard shown once to new users on both web and mobile.
+
+**DB:** `User.onboardingCompleted Boolean @default(false)` — run migration after pulling: `cd packages/db && npx prisma migrate dev --name add-onboarding-flag`
+
+**Web flow:**
+- Register → redirects to `/onboarding` (callbackUrl changed in register page)
+- Dashboard checks `!onboardingCompleted && fileCount === 0` → redirects to `/onboarding` (catches users who land on dashboard directly)
+- Server page: `apps/web/app/onboarding/page.tsx` — checks auth + flag, redirects if already done
+- Client wizard: `apps/web/components/onboarding-wizard.tsx` — matches dark glassmorphic auth design
+- API: `POST /api/user/complete-onboarding` — sets `onboardingCompleted = true`
+
+**Mobile flow:**
+- `apps/mobile/lib/auth.tsx` — `onboardingCompleted` state (defaults `true` to avoid flash), read from `SecureStore` key `onboarding_<userId>` on login/init
+- `completeOnboarding()` in auth context — saves to SecureStore + calls API
+- `apps/mobile/App.tsx` — `RootNavigator` renders `<OnboardingScreen />` when `user && !onboardingCompleted`
+- Screen: `apps/mobile/screens/OnboardingScreen.tsx`
+
+**Steps (same content on both platforms):**
+1. Welcome / Meet Expensable — stat cards preview
+2. Import Any File — CSV / PDF / IMG file type badges
+3. AI Does the Work — categorized transaction rows preview
+4. Powerful Dashboard — bar chart + top merchant preview
+5. Bring Your Household — avatar stack + family badge
+
 ### Dashboard Analytics
 Dashboard shows (current month only):
 - **Money out** — sum of debit transactions
@@ -181,5 +206,6 @@ Dashboard shows (current month only):
 | 2 | ✅ Done | File upload UI + AI parsing + files list + security hardening |
 | 2.5 | ✅ Done | Dashboard analytics (money in/out/net, top merchants) + currency settings + page centering |
 | 3 | ✅ Done | Transaction list + auto-categorization + bulk delete + category picker UI |
+| 3.5 | ✅ Done | Onboarding wizard — 5-step flow (web + mobile) |
 | 4 | — | Insights + Stripe subscription |
 | 5 | — | Expo mobile app |

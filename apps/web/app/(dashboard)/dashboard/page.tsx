@@ -1,6 +1,7 @@
 import { requireAuth } from "@/lib/auth/session"
 import { db } from "@expensable/db"
 import { resolveHousehold } from "@/lib/auth/household"
+import { redirect } from "next/navigation"
 import Link from "next/link"
 import { UploadCloud } from "lucide-react"
 import { DashboardGrid, type DashboardData } from "@/components/dashboard-grid"
@@ -41,7 +42,14 @@ export default async function DashboardPage() {
     )
   }
 
-  const fileCount = await db.uploadedFile.count({ where: { householdId: hid } })
+  const [fileCount, userRecord] = await Promise.all([
+    db.uploadedFile.count({ where: { householdId: hid } }),
+    db.user.findUnique({ where: { id: session.user?.id! }, select: { onboardingCompleted: true } }),
+  ])
+
+  if (!userRecord?.onboardingCompleted && fileCount === 0) {
+    redirect("/onboarding")
+  }
 
   if (fileCount === 0) {
     return (
