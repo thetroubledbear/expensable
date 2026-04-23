@@ -71,7 +71,7 @@ jobs:
 
       - name: Install Expo tools
         if: needs.changes.outputs.mobile == 'true'
-        run: npm install -g expo-cli eas-cli
+        run: npm install -g eas-cli@latest
 
       - name: Install Mobile deps
         if: needs.changes.outputs.mobile == 'true'
@@ -127,7 +127,7 @@ jobs:
 
       - name: Install Expo tools
         if: needs.changes.outputs.mobile == 'true'
-        run: npm install -g expo-cli eas-cli
+        run: npm install -g eas-cli@latest
 
       - name: Install Mobile deps
         if: needs.changes.outputs.mobile == 'true'
