@@ -9,37 +9,52 @@ on:
       - '.github/workflows/**'
   workflow_dispatch:
 
-# ─── Detect which apps changed ─────────────────────────────────────────────────
+# ─── Detect what changed ───────────────────────────────────────────────────────
+#  web          → deploy web
+#  mobile_build → native files changed (package.json, android/, ios/, App.json,
+#                 eas.json) — needs full eas build → APK
+#  mobile_update → JS-only files changed — eas update (OTA) is enough
+# ──────────────────────────────────────────────────────────────────────────────
 jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
       web: ${{ steps.diff.outputs.web }}
-      mobile: ${{ steps.diff.outputs.mobile }}
+      mobile_build: ${{ steps.diff.outputs.mobile_build }}
+      mobile_update: ${{ steps.diff.outputs.mobile_update }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - id: diff
         run: |
-          # manual dispatch: deploy everything
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "web=true" >> $GITHUB_OUTPUT
-            echo "mobile=true" >> $GITHUB_OUTPUT
+            echo "web=true"          >> $GITHUB_OUTPUT
+            echo "mobile_build=true" >> $GITHUB_OUTPUT
             exit 0
           fi
+
           BASE="${{ github.event.before }}"
           if [ "$BASE" = "0000000000000000000000000000000000000000" ] || [ -z "$BASE" ]; then
             BASE="HEAD~1"
           fi
-          if git diff --name-only "$BASE" HEAD | grep -q '^apps/web/'; then
+
+          CHANGED=$(git diff --name-only "$BASE" HEAD)
+
+          # Web
+          if echo "$CHANGED" | grep -q '^apps/web/'; then
             echo "web=true" >> $GITHUB_OUTPUT
           fi
-          if git diff --name-only "$BASE" HEAD | grep -q '^apps/mobile/'; then
-            echo "mobile=true" >> $GITHUB_OUTPUT
+
+          # Mobile — native files require full APK build
+          if echo "$CHANGED" | grep -qE '^apps/mobile/(android/|ios/|package\.json|App\.json|eas\.json)'; then
+            echo "mobile_build=true" >> $GITHUB_OUTPUT
+          # Mobile — JS/TS only, OTA update is enough
+          elif echo "$CHANGED" | grep -q '^apps/mobile/'; then
+            echo "mobile_update=true" >> $GITHUB_OUTPUT
           fi
 
-# ─── Staging (develop only — auto, no approval) ───────────────────────────────
+# ─── Staging (develop only — auto) ────────────────────────────────────────────
   deploy-staging:
     if: github.ref == 'refs/heads/develop'
     needs: changes
@@ -51,6 +66,7 @@ jobs:
         with:
           fetch-depth: 2
 
+      # ── Web ──
       - name: Install Vercel CLI
         if: needs.changes.outputs.web == 'true'
         run: npm install -g vercel
@@ -65,30 +81,38 @@ jobs:
           vercel build --token=${{ secrets.VERCEL_TOKEN }}
           vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
 
+      # ── Mobile ──
       - uses: actions/setup-node@v4
-        if: needs.changes.outputs.mobile == 'true'
+        if: needs.changes.outputs.mobile_build == 'true' || needs.changes.outputs.mobile_update == 'true'
         with:
           node-version: 20
 
-      - name: Install Expo tools
-        if: needs.changes.outputs.mobile == 'true'
+      - name: Install EAS CLI
+        if: needs.changes.outputs.mobile_build == 'true' || needs.changes.outputs.mobile_update == 'true'
         run: npm install -g eas-cli@latest
 
-      - name: Install Mobile deps
-        if: needs.changes.outputs.mobile == 'true'
+      - name: Install mobile deps
+        if: needs.changes.outputs.mobile_build == 'true' || needs.changes.outputs.mobile_update == 'true'
         run: cd apps/mobile && npm install
 
+      - name: Build Android APK (staging)
+        if: needs.changes.outputs.mobile_build == 'true'
+        run: cd apps/mobile && eas build --platform android --profile staging --non-interactive
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          CI: '1'
+
       - name: Push OTA update (staging)
-        if: needs.changes.outputs.mobile == 'true'
+        if: needs.changes.outputs.mobile_update == 'true'
         run: cd apps/mobile && eas update --branch staging --message "Deploy from CI"
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           CI: '1'
 
-# ─── Production ───────────────────────────────────────────────────────────────
-#  • develop push: runs after staging succeeds, then waits for approval
-#  • main push / workflow_dispatch: runs directly, still waits for approval
-#  Approval gate: Settings → Environments → production → Required reviewers
+# ─── Production (approval required) ───────────────────────────────────────────
+#  develop push: after staging succeeds → approval gate
+#  main push / workflow_dispatch: directly → approval gate
+#  Set up: Settings → Environments → production → Required reviewers
 # ──────────────────────────────────────────────────────────────────────────────
   deploy-production:
     if: always() && needs.changes.result == 'success' && (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' || (github.ref == 'refs/heads/develop' && needs['deploy-staging'].result == 'success'))
@@ -101,6 +125,7 @@ jobs:
         with:
           fetch-depth: 2
 
+      # ── Web ──
       - name: Install Vercel CLI
         if: needs.changes.outputs.web == 'true'
         run: npm install -g vercel
@@ -115,21 +140,29 @@ jobs:
           vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
           vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
 
+      # ── Mobile ──
       - uses: actions/setup-node@v4
-        if: needs.changes.outputs.mobile == 'true'
+        if: needs.changes.outputs.mobile_build == 'true' || needs.changes.outputs.mobile_update == 'true'
         with:
           node-version: 20
 
-      - name: Install Expo tools
-        if: needs.changes.outputs.mobile == 'true'
+      - name: Install EAS CLI
+        if: needs.changes.outputs.mobile_build == 'true' || needs.changes.outputs.mobile_update == 'true'
         run: npm install -g eas-cli@latest
 
-      - name: Install Mobile deps
-        if: needs.changes.outputs.mobile == 'true'
+      - name: Install mobile deps
+        if: needs.changes.outputs.mobile_build == 'true' || needs.changes.outputs.mobile_update == 'true'
         run: cd apps/mobile && npm install
 
+      - name: Build Android APK (production)
+        if: needs.changes.outputs.mobile_build == 'true'
+        run: cd apps/mobile && eas build --platform android --profile production --non-interactive
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          CI: '1'
+
       - name: Push OTA update (production)
-        if: needs.changes.outputs.mobile == 'true'
+        if: needs.changes.outputs.mobile_update == 'true'
         run: cd apps/mobile && eas update --branch production --message "Deploy from CI"
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
