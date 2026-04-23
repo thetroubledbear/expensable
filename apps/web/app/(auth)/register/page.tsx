@@ -49,8 +49,8 @@ export default function RegisterPage() {
       return
     }
 
-    await signIn("credentials", { email, password, callbackUrl: "/dashboard" })
-    router.push("/dashboard")
+    await signIn("credentials", { email, password, callbackUrl: "/onboarding" })
+    router.push("/onboarding")
   }
 
   const handleFocus = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {

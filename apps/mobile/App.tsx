@@ -14,6 +14,7 @@ import FilesScreen from "./screens/FilesScreen"
 import SettingsScreen from "./screens/SettingsScreen"
 import SubscriptionsScreen from "./screens/SubscriptionsScreen"
 import InviteScreen from "./screens/InviteScreen"
+import OnboardingScreen from "./screens/OnboardingScreen"
 
 const AuthStack = createNativeStackNavigator()
 const Tab = createBottomTabNavigator()
@@ -88,7 +89,7 @@ function TabNavigator() {
 }
 
 function RootNavigator() {
-  const { user, loading } = useAuth()
+  const { user, loading, onboardingCompleted } = useAuth()
 
   if (loading) {
     return (
@@ -98,7 +99,9 @@ function RootNavigator() {
     )
   }
 
-  return user ? <TabNavigator /> : <AuthNavigator />
+  if (!user) return <AuthNavigator />
+  if (!onboardingCompleted) return <OnboardingScreen />
+  return <TabNavigator />
 }
 
 export default function App() {

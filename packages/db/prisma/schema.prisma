@@ -19,8 +19,9 @@ model User {
   image           String?
   passwordHash    String?
   emailVerified   DateTime?
-  dashboardLayout String?   // JSON: { layouts, hidden }
-  createdAt       DateTime  @default(now())
+  dashboardLayout     String?   // JSON: { layouts, hidden }
+  onboardingCompleted Boolean   @default(false)
+  createdAt           DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
   accounts      Account[]
