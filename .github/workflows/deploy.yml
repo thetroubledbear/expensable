@@ -91,14 +91,7 @@ jobs:
 #  Approval gate: Settings → Environments → production → Required reviewers
 # ──────────────────────────────────────────────────────────────────────────────
   deploy-production:
-    if: |
-      always() &&
-      needs.changes.result == 'success' &&
-      (
-        github.ref == 'refs/heads/main' ||
-        github.event_name == 'workflow_dispatch' ||
-        (github.ref == 'refs/heads/develop' && needs.deploy-staging.result == 'success')
-      )
+    if: always() && needs.changes.result == 'success' && (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' || (github.ref == 'refs/heads/develop' && needs['deploy-staging'].result == 'success'))
     needs: [changes, deploy-staging]
     runs-on: ubuntu-latest
     environment: production
