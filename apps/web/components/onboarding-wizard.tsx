@@ -149,7 +149,7 @@ function FamilyVisual() {
           <div
             key={i}
             className="w-11 h-11 rounded-full flex items-center justify-center text-xs font-bold text-white ring-2"
-            style={{ background: m.color, ringColor: "#060d1a", zIndex: members.length - i }}
+            style={{ background: m.color, boxShadow: "0 0 0 2px #060d1a", zIndex: members.length - i }}
           >
             {m.initials}
           </div>
