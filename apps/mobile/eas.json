@@ -21,14 +21,6 @@
       "channel": "production"
     }
   },
-  "update": {
-    "staging": {
-      "channel": "staging"
-    },
-    "production": {
-      "channel": "production"
-    }
-  },
   "submit": {
     "production": {}
   }
