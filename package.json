@@ -25,6 +25,7 @@
   },
   "packageManager": "npm@11.6.2",
   "dependencies": {
+    "expo-dev-client": "~6.0.20",
     "patch-package": "^8.0.1"
   }
 }

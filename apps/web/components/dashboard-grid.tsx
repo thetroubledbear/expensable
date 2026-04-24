@@ -107,6 +107,40 @@ const DEFAULT_LAYOUTS: AnyLayouts = {
     { i: "budgets",               x: 0, y: 60, w: 10, h: 8 },
     { i: "ask-ai",                x: 0, y: 68, w: 10, h: 8 },
   ],
+  sm: [
+    { i: "money-out",             x: 0, y: 0,  w: 2, h: 3 },
+    { i: "money-in",              x: 2, y: 0,  w: 2, h: 3 },
+    { i: "net",                   x: 0, y: 3,  w: 2, h: 3 },
+    { i: "savings-rate",          x: 2, y: 3,  w: 2, h: 3 },
+    { i: "recent-tx",             x: 0, y: 6,  w: 4, h: 7 },
+    { i: "top-spending",          x: 0, y: 13, w: 4, h: 6 },
+    { i: "ai-insights",           x: 0, y: 19, w: 4, h: 6 },
+    { i: "subscriptions-summary", x: 0, y: 25, w: 4, h: 6 },
+    { i: "spending-trend",        x: 0, y: 31, w: 4, h: 6 },
+    { i: "category-pie",          x: 0, y: 37, w: 4, h: 7 },
+    { i: "category-breakdown",    x: 0, y: 44, w: 4, h: 7 },
+    { i: "account-balances",      x: 0, y: 51, w: 4, h: 6 },
+    { i: "files-count",           x: 0, y: 57, w: 4, h: 3 },
+    { i: "budgets",               x: 0, y: 60, w: 4, h: 8 },
+    { i: "ask-ai",                x: 0, y: 68, w: 4, h: 8 },
+  ],
+  xs: [
+    { i: "money-out",             x: 0, y: 0,  w: 2, h: 3 },
+    { i: "money-in",              x: 0, y: 3,  w: 2, h: 3 },
+    { i: "net",                   x: 0, y: 6,  w: 2, h: 3 },
+    { i: "savings-rate",          x: 0, y: 9,  w: 2, h: 3 },
+    { i: "recent-tx",             x: 0, y: 12, w: 2, h: 7 },
+    { i: "top-spending",          x: 0, y: 19, w: 2, h: 6 },
+    { i: "ai-insights",           x: 0, y: 25, w: 2, h: 6 },
+    { i: "subscriptions-summary", x: 0, y: 31, w: 2, h: 6 },
+    { i: "spending-trend",        x: 0, y: 37, w: 2, h: 6 },
+    { i: "category-pie",          x: 0, y: 43, w: 2, h: 7 },
+    { i: "category-breakdown",    x: 0, y: 50, w: 2, h: 7 },
+    { i: "account-balances",      x: 0, y: 57, w: 2, h: 6 },
+    { i: "files-count",           x: 0, y: 63, w: 2, h: 3 },
+    { i: "budgets",               x: 0, y: 66, w: 2, h: 8 },
+    { i: "ask-ai",                x: 0, y: 74, w: 2, h: 8 },
+  ],
 }
 
 const WIDGET_LABELS: Record<WidgetId, string | React.ReactNode> = {
@@ -316,8 +350,8 @@ export function DashboardGrid({ data }: Props) {
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         <Responsive
           layouts={layouts}
-          breakpoints={{ lg: 1200, md: 768 }}
-          cols={{ lg: 12, md: 10 }}
+          breakpoints={{ lg: 1200, md: 768, sm: 480, xs: 0 }}
+          cols={{ lg: 12, md: 10, sm: 4, xs: 2 }}
           rowHeight={60}
           width={width}
           margin={[16, 16] as [number, number]}
