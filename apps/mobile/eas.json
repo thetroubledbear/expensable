@@ -9,13 +9,25 @@
       "distribution": "internal"
     },
     "staging": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "channel": "staging",
+      "android": {
+        "buildType": "apk"
+      }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "channel": "staging",
+      "android": {
+        "buildType": "apk"
+      }
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "channel": "production",
+      "android": {
+        "buildType": "apk"
+      }
     }
   },
   "submit": {
