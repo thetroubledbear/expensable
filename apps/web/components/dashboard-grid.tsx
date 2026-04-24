@@ -24,6 +24,7 @@ import { BudgetWidget } from "@/components/widgets/budget-widget"
 import { NLQueryWidget } from "@/components/widgets/nl-query-widget"
 import { HealthScoreWidget } from "@/components/widgets/health-score-widget"
 import { SpendingInsightsWidget } from "@/components/widgets/spending-insights-widget"
+import { SocialComparisonWidget } from "@/components/widgets/social-comparison-widget"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -45,6 +46,7 @@ export type WidgetId =
   | "ask-ai"
   | "health-score"
   | "spending-insights"
+  | "social-comparison"
 
 export interface DashboardData {
   spent: number
@@ -95,6 +97,7 @@ const DEFAULT_LAYOUTS: AnyLayouts = {
     { i: "ask-ai",                x: 6, y: 35, w: 6,  h: 8, minW: 4, minH: 5 },
     { i: "health-score",          x: 0, y: 43, w: 4,  h: 8, minW: 3, minH: 6 },
     { i: "spending-insights",     x: 4, y: 43, w: 8,  h: 8, minW: 4, minH: 5 },
+    { i: "social-comparison",     x: 0, y: 51, w: 12, h: 8, minW: 5, minH: 5 },
   ],
   md: [
     { i: "money-out",             x: 0, y: 0,  w: 5, h: 3 },
@@ -114,6 +117,7 @@ const DEFAULT_LAYOUTS: AnyLayouts = {
     { i: "ask-ai",                x: 0, y: 68, w: 10, h: 8 },
     { i: "health-score",          x: 0, y: 76, w: 10, h: 8 },
     { i: "spending-insights",     x: 0, y: 84, w: 10, h: 8 },
+    { i: "social-comparison",     x: 0, y: 92, w: 10, h: 8 },
   ],
 }
 
@@ -135,6 +139,7 @@ const WIDGET_LABELS: Record<WidgetId, string | React.ReactNode> = {
   "ask-ai":                "Ask AI",
   "health-score":          "Financial Health",
   "spending-insights":     "Spending vs Last Month",
+  "social-comparison":     "How You Compare",
 }
 
 const ALL_WIDGETS: WidgetId[] = [
@@ -144,7 +149,7 @@ const ALL_WIDGETS: WidgetId[] = [
   "spending-trend", "category-pie", "category-breakdown",
   "account-balances", "files-count",
   "budgets", "ask-ai",
-  "health-score", "spending-insights",
+  "health-score", "spending-insights", "social-comparison",
 ]
 
 const STORAGE_KEY = "expensable-dashboard-v2"
@@ -499,6 +504,8 @@ function WidgetContent({ id, data }: { id: WidgetId; data: DashboardData }) {
       return <HealthScoreWidget />
     case "spending-insights":
       return <SpendingInsightsWidget currency={data.currency} />
+    case "social-comparison":
+      return <SocialComparisonWidget />
     default:
       return null
   }

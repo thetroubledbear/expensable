@@ -9,6 +9,7 @@ const SUPPORTED_CURRENCIES = ["USD","EUR","GBP","CHF","CAD","AUD","JPY","NOK","S
 const patchSchema = z.object({
   name: z.string().min(1).max(128).optional(),
   defaultCurrency: z.enum(SUPPORTED_CURRENCIES).optional(),
+  socialComparison: z.boolean().optional(),
 })
 
 export async function GET() {
@@ -44,7 +45,7 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "Invalid input" }, { status: 400 })
   }
 
-  if (!parsed.data.name && !parsed.data.defaultCurrency) {
+  if (!parsed.data.name && !parsed.data.defaultCurrency && parsed.data.socialComparison === undefined) {
     return NextResponse.json({ error: "Nothing to update" }, { status: 400 })
   }
 
