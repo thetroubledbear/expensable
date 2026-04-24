@@ -10,13 +10,14 @@ import {
 } from "react-native"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { useAuth } from "../lib/auth"
-import { apiGet } from "../lib/api"
-import { LogOut, Home, CreditCard, User, RefreshCw, ChevronRight, UserPlus } from "lucide-react-native"
+import { apiGet, apiPatch } from "../lib/api"
+import { LogOut, Home, CreditCard, User, RefreshCw, ChevronRight, UserPlus, BarChart2 } from "lucide-react-native"
 
 interface HouseholdData {
   id: string
   name: string
   defaultCurrency: string
+  socialComparison: boolean
   billing: { tier: string }
 }
 
@@ -28,13 +29,33 @@ export default function SettingsScreen({ navigation }: Props) {
   const { user, signOut } = useAuth()
   const [household, setHousehold] = useState<HouseholdData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [socialComparison, setSocialComparison] = useState(false)
+  const [togglingComparison, setTogglingComparison] = useState(false)
 
   useEffect(() => {
     apiGet<HouseholdData>("/api/household")
-      .then((data) => setHousehold("id" in data ? data : null))
+      .then((data) => {
+        if ("id" in data) {
+          setHousehold(data)
+          setSocialComparison(data.socialComparison ?? false)
+        }
+      })
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
+
+  async function toggleSocialComparison() {
+    setTogglingComparison(true)
+    const next = !socialComparison
+    setSocialComparison(next)
+    try {
+      await apiPatch("/api/household", { socialComparison: next })
+    } catch {
+      setSocialComparison(!next)
+    } finally {
+      setTogglingComparison(false)
+    }
+  }
 
   function handleSignOut() {
     Alert.alert("Sign out", "Are you sure you want to sign out?", [
@@ -120,6 +141,22 @@ export default function SettingsScreen({ navigation }: Props) {
             </View>
             <ChevronRight color="#cbd5e1" size={18} />
           </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.row, { borderTopWidth: 1, borderTopColor: "#f1f5f9" }]}
+            onPress={toggleSocialComparison}
+            disabled={togglingComparison}
+          >
+            <View style={[styles.iconBox, { backgroundColor: socialComparison ? "#eff6ff" : "#f8fafc" }]}>
+              <BarChart2 color={socialComparison ? "#3b82f6" : "#94a3b8"} size={18} />
+            </View>
+            <View style={styles.rowInfo}>
+              <Text style={styles.rowTitle}>Social Comparison</Text>
+              <Text style={styles.rowSub}>Compare spend vs anonymized regional averages</Text>
+            </View>
+            <View style={[styles.toggle, socialComparison ? styles.toggleOn : styles.toggleOff]}>
+              <View style={[styles.toggleThumb, { alignSelf: socialComparison ? "flex-end" : "flex-start" }]} />
+            </View>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -150,4 +187,8 @@ const styles = StyleSheet.create({
   signOutBtn: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: "#fff", borderRadius: 16, padding: 16, shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 2 },
   signOutText: { fontSize: 15, fontWeight: "500", color: "#ef4444" },
   version: { textAlign: "center", fontSize: 12, color: "#cbd5e1", marginTop: 8 },
+  toggle: { width: 40, height: 22, borderRadius: 11, padding: 2, justifyContent: "center" },
+  toggleOn: { backgroundColor: "#3b82f6" },
+  toggleOff: { backgroundColor: "#cbd5e1" },
+  toggleThumb: { width: 18, height: 18, borderRadius: 9, backgroundColor: "#fff" },
 })

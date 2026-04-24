@@ -27,7 +27,12 @@
     },
     "plugins": [
       "expo-secure-store",
-      "expo-web-browser"
+      "expo-web-browser",
+      ["expo-speech-recognition", {
+        "microphonePermission": "Allow Expensable to use the microphone for voice input.",
+        "speechRecognitionPermission": "Allow Expensable to recognize your speech to log transactions.",
+        "androidSpeechServicePackages": ["com.google.android.googlequicksearchbox"]
+      }]
     ]
   }
 }
