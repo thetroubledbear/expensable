@@ -22,6 +22,8 @@ import { SavingsRateWidget } from "@/components/widgets/savings-rate-widget"
 import { AccountBalancesWidget, type AccountBalance } from "@/components/widgets/account-balances-widget"
 import { BudgetWidget } from "@/components/widgets/budget-widget"
 import { NLQueryWidget } from "@/components/widgets/nl-query-widget"
+import { HealthScoreWidget } from "@/components/widgets/health-score-widget"
+import { SpendingInsightsWidget } from "@/components/widgets/spending-insights-widget"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -41,6 +43,8 @@ export type WidgetId =
   | "account-balances"
   | "budgets"
   | "ask-ai"
+  | "health-score"
+  | "spending-insights"
 
 export interface DashboardData {
   spent: number
@@ -89,6 +93,8 @@ const DEFAULT_LAYOUTS: AnyLayouts = {
     { i: "files-count",           x: 5, y: 29, w: 3,  h: 3, minW: 2, minH: 3 },
     { i: "budgets",               x: 0, y: 35, w: 6,  h: 8, minW: 4, minH: 5 },
     { i: "ask-ai",                x: 6, y: 35, w: 6,  h: 8, minW: 4, minH: 5 },
+    { i: "health-score",          x: 0, y: 43, w: 4,  h: 8, minW: 3, minH: 6 },
+    { i: "spending-insights",     x: 4, y: 43, w: 8,  h: 8, minW: 4, minH: 5 },
   ],
   md: [
     { i: "money-out",             x: 0, y: 0,  w: 5, h: 3 },
@@ -106,6 +112,8 @@ const DEFAULT_LAYOUTS: AnyLayouts = {
     { i: "files-count",           x: 0, y: 57, w: 5,  h: 3 },
     { i: "budgets",               x: 0, y: 60, w: 10, h: 8 },
     { i: "ask-ai",                x: 0, y: 68, w: 10, h: 8 },
+    { i: "health-score",          x: 0, y: 76, w: 10, h: 8 },
+    { i: "spending-insights",     x: 0, y: 84, w: 10, h: 8 },
   ],
 }
 
@@ -125,6 +133,8 @@ const WIDGET_LABELS: Record<WidgetId, string | React.ReactNode> = {
   "account-balances":      "Account Balances",
   "budgets":               "Budgets",
   "ask-ai":                "Ask AI",
+  "health-score":          "Financial Health",
+  "spending-insights":     "Spending vs Last Month",
 }
 
 const ALL_WIDGETS: WidgetId[] = [
@@ -134,6 +144,7 @@ const ALL_WIDGETS: WidgetId[] = [
   "spending-trend", "category-pie", "category-breakdown",
   "account-balances", "files-count",
   "budgets", "ask-ai",
+  "health-score", "spending-insights",
 ]
 
 const STORAGE_KEY = "expensable-dashboard-v2"
@@ -484,6 +495,10 @@ function WidgetContent({ id, data }: { id: WidgetId; data: DashboardData }) {
       return <BudgetWidget currency={data.currency} />
     case "ask-ai":
       return <NLQueryWidget />
+    case "health-score":
+      return <HealthScoreWidget />
+    case "spending-insights":
+      return <SpendingInsightsWidget currency={data.currency} />
     default:
       return null
   }
