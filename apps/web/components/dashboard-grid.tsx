@@ -25,6 +25,8 @@ import { NLQueryWidget } from "@/components/widgets/nl-query-widget"
 import { HealthScoreWidget } from "@/components/widgets/health-score-widget"
 import { SpendingInsightsWidget } from "@/components/widgets/spending-insights-widget"
 import { SocialComparisonWidget } from "@/components/widgets/social-comparison-widget"
+import { PatternInsightsWidget } from "@/components/widgets/pattern-insights-widget"
+import { FinancialRewindWidget } from "@/components/widgets/financial-rewind-widget"
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -47,6 +49,8 @@ export type WidgetId =
   | "health-score"
   | "spending-insights"
   | "social-comparison"
+  | "pattern-insights"
+  | "financial-rewind"
 
 export interface DashboardData {
   spent: number
@@ -98,6 +102,8 @@ const DEFAULT_LAYOUTS: AnyLayouts = {
     { i: "health-score",          x: 0, y: 43, w: 4,  h: 8, minW: 3, minH: 6 },
     { i: "spending-insights",     x: 4, y: 43, w: 8,  h: 8, minW: 4, minH: 5 },
     { i: "social-comparison",     x: 0, y: 51, w: 12, h: 8, minW: 5, minH: 5 },
+    { i: "pattern-insights",      x: 0, y: 59, w: 6,  h: 7, minW: 4, minH: 5 },
+    { i: "financial-rewind",      x: 6, y: 59, w: 6,  h: 7, minW: 4, minH: 5 },
   ],
   md: [
     { i: "money-out",             x: 0, y: 0,  w: 5, h: 3 },
@@ -118,6 +124,8 @@ const DEFAULT_LAYOUTS: AnyLayouts = {
     { i: "health-score",          x: 0, y: 76, w: 10, h: 8 },
     { i: "spending-insights",     x: 0, y: 84, w: 10, h: 8 },
     { i: "social-comparison",     x: 0, y: 92, w: 10, h: 8 },
+    { i: "pattern-insights",      x: 0, y: 100, w: 10, h: 7 },
+    { i: "financial-rewind",      x: 0, y: 107, w: 10, h: 7 },
   ],
   sm: [
     { i: "money-out",             x: 0, y: 0,  w: 2, h: 3 },
@@ -174,6 +182,8 @@ const WIDGET_LABELS: Record<WidgetId, string | React.ReactNode> = {
   "health-score":          "Financial Health",
   "spending-insights":     "Spending vs Last Month",
   "social-comparison":     "How You Compare",
+  "pattern-insights":      "Spending Patterns",
+  "financial-rewind":      "Financial Rewind",
 }
 
 const ALL_WIDGETS: WidgetId[] = [
@@ -184,6 +194,7 @@ const ALL_WIDGETS: WidgetId[] = [
   "account-balances", "files-count",
   "budgets", "ask-ai",
   "health-score", "spending-insights", "social-comparison",
+  "pattern-insights", "financial-rewind",
 ]
 
 const STORAGE_KEY = "expensable-dashboard-v2"
@@ -593,6 +604,10 @@ function WidgetContent({ id, data }: { id: WidgetId; data: DashboardData }) {
       return <SpendingInsightsWidget currency={data.currency} />
     case "social-comparison":
       return <SocialComparisonWidget />
+    case "pattern-insights":
+      return <PatternInsightsWidget />
+    case "financial-rewind":
+      return <FinancialRewindWidget />
     default:
       return null
   }
