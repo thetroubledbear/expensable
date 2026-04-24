@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
 } from "react-native"
 import * as ImagePicker from "expo-image-picker"
 import * as DocumentPicker from "expo-document-picker"
-import { apiUploadFile } from "../lib/api"
+import { apiUploadFile, apiGet } from "../lib/api"
 import { Camera, FileText, CheckCircle, XCircle, Image } from "lucide-react-native"
 
 interface UploadResult {
@@ -19,9 +19,28 @@ interface UploadResult {
   message?: string
 }
 
+const PLAN_LIMITS: Record<string, number> = {
+  free: 25,
+  pro: 60,
+  family: 1000,
+}
+
+const TIER_COLORS: Record<string, string> = {
+  free: "#64748b",
+  pro: "#0ea5e9",
+  family: "#8b5cf6",
+}
+
 export default function UploadScreen() {
   const [uploading, setUploading] = useState(false)
   const [results, setResults] = useState<UploadResult[]>([])
+  const [billing, setBilling] = useState<{ tier: string; filesUploadedThisMonth: number } | null>(null)
+
+  useEffect(() => {
+    apiGet<{ billing?: { tier: string; filesUploadedThisMonth: number } }>("/api/household")
+      .then((res) => { if (res.billing) setBilling(res.billing) })
+      .catch(() => {})
+  }, [])
 
   async function uploadFile(uri: string, name: string, mimeType: string) {
     const formData = new FormData()
@@ -100,6 +119,31 @@ export default function UploadScreen() {
       <Text style={styles.title}>Upload</Text>
       <Text style={styles.subtitle}>Import bank statements, receipts, or CSV exports</Text>
 
+      {billing && (() => {
+        const tier = billing.tier ?? "free"
+        const used = billing.filesUploadedThisMonth
+        const limit = PLAN_LIMITS[tier] ?? 25
+        const pct = Math.min(used / limit, 1)
+        const atLimit = used >= limit
+        const tierColor = TIER_COLORS[tier] ?? "#64748b"
+        const tierLabel = tier.charAt(0).toUpperCase() + tier.slice(1) + " plan"
+        return (
+          <View style={styles.usageCard}>
+            <View style={styles.usageRow}>
+              <Text style={styles.usageLabel}>Files this month</Text>
+              <Text style={styles.usageCount}>{used} / {limit}</Text>
+            </View>
+            <View style={styles.progressTrack}>
+              <View style={[styles.progressFill, { width: `${pct * 100}%` as unknown as number, backgroundColor: atLimit ? "#ef4444" : "#059669" }]} />
+            </View>
+            {atLimit && <Text style={styles.limitReached}>Limit reached</Text>}
+            <View style={[styles.tierBadge, { backgroundColor: tierColor + "20" }]}>
+              <Text style={[styles.tierText, { color: tierColor }]}>{tierLabel}</Text>
+            </View>
+          </View>
+        )
+      })()}
+
       <View style={styles.buttons}>
         <TouchableOpacity style={styles.actionBtn} onPress={handleCamera} disabled={uploading}>
           <View style={styles.actionIcon}>
@@ -175,7 +219,26 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f8fafc" },
   content: { padding: 16, paddingBottom: 40 },
   title: { fontSize: 22, fontWeight: "700", color: "#0f172a", marginTop: 48, marginBottom: 4 },
-  subtitle: { fontSize: 14, color: "#64748b", marginBottom: 24 },
+  subtitle: { fontSize: 14, color: "#64748b", marginBottom: 16 },
+  usageCard: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  usageRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
+  usageLabel: { fontSize: 13, fontWeight: "500", color: "#64748b" },
+  usageCount: { fontSize: 13, fontWeight: "700", color: "#0f172a" },
+  progressTrack: { height: 4, backgroundColor: "#f1f5f9", borderRadius: 2, overflow: "hidden", marginBottom: 10 },
+  progressFill: { height: 4, borderRadius: 2 },
+  limitReached: { fontSize: 12, color: "#ef4444", fontWeight: "600", marginBottom: 8 },
+  tierBadge: { alignSelf: "flex-start", borderRadius: 999, paddingHorizontal: 10, paddingVertical: 3 },
+  tierText: { fontSize: 11, fontWeight: "700" },
   buttons: { gap: 12, marginBottom: 24 },
   actionBtn: {
     backgroundColor: "#fff",

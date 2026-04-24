@@ -6,9 +6,11 @@ import {
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
+  Alert,
+  TouchableOpacity,
 } from "react-native"
-import { apiGet } from "../lib/api"
-import { RefreshCw } from "lucide-react-native"
+import { apiGet, apiDeleteById } from "../lib/api"
+import { RefreshCw, Trash2 } from "lucide-react-native"
 
 interface Subscription {
   id: string
@@ -52,6 +54,7 @@ export default function SubscriptionsScreen() {
   const [subs, setSubs] = useState<Subscription[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   useEffect(() => { load() }, [])
 
@@ -69,6 +72,30 @@ export default function SubscriptionsScreen() {
   function onRefresh() {
     setRefreshing(true)
     load()
+  }
+
+  function handleDelete(sub: Subscription) {
+    Alert.alert(
+      "Delete subscription?",
+      "This will remove it from tracking.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            setDeletingId(sub.id)
+            try {
+              await apiDeleteById("/api/subscriptions/" + sub.id)
+              setSubs((prev) => prev.filter((s) => s.id !== sub.id))
+            } catch {}
+            finally {
+              setDeletingId(null)
+            }
+          },
+        },
+      ]
+    )
   }
 
   const currency = subs[0]?.currency ?? "USD"
@@ -142,6 +169,17 @@ export default function SubscriptionsScreen() {
                     </Text>
                   </View>
                 </View>
+                <TouchableOpacity
+                  style={styles.trashBtn}
+                  onPress={() => handleDelete(sub)}
+                  disabled={deletingId === sub.id}
+                >
+                  {deletingId === sub.id ? (
+                    <ActivityIndicator size="small" color="#ef4444" />
+                  ) : (
+                    <Trash2 color="#ef4444" size={16} />
+                  )}
+                </TouchableOpacity>
               </View>
             </View>
           ))}
@@ -199,4 +237,5 @@ const styles = StyleSheet.create({
   amount: { fontSize: 16, fontWeight: "700", color: "#0f172a" },
   freqBadge: { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3, marginTop: 4 },
   freqText: { fontSize: 11, fontWeight: "700" },
+  trashBtn: { padding: 8 },
 })
