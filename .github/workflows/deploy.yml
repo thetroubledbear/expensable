@@ -47,7 +47,7 @@ jobs:
           fi
 
           # Mobile — native files require full APK build
-          if echo "$CHANGED" | grep -qE '^apps/mobile/(android/|ios/|package\.json|App\.json|eas\.json)'; then
+          if echo "$CHANGED" | grep -qE '^apps/mobile/(android/|ios/|package\.json|app\.json|app\.config\.(js|ts)|eas\.json|package-lock\.json)'; then
             echo "mobile_build=true" >> $GITHUB_OUTPUT
           # Mobile — JS/TS only, OTA update is enough
           elif echo "$CHANGED" | grep -q '^apps/mobile/'; then
