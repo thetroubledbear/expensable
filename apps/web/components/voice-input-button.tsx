@@ -79,25 +79,37 @@ export function VoiceInputButton() {
     stopListening()
     setState("processing")
 
+    let res: Response
     try {
-      const res = await fetch("/api/transactions/voice", {
+      res = await fetch("/api/transactions/voice", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ transcript: transcript.trim() }),
       })
-      const data = await res.json()
-      if (!res.ok) {
-        setErrorMsg(data.error ?? "Failed to log transaction")
-        setState("error")
-        return
-      }
-      setResult(data.transaction)
-      setState("success")
-      router.refresh()
     } catch {
-      setErrorMsg("Network error. Try again.")
+      setErrorMsg("Could not reach server. Check your connection.")
       setState("error")
+      return
     }
+
+    let data: Record<string, unknown>
+    try {
+      data = await res.json()
+    } catch {
+      setErrorMsg(`Server error (${res.status}). Check console for details.`)
+      setState("error")
+      return
+    }
+
+    if (!res.ok) {
+      setErrorMsg((data.error as string) ?? "Failed to log transaction")
+      setState("error")
+      return
+    }
+
+    setResult(data.transaction as Result)
+    setState("success")
+    router.refresh()
   }, [transcript, stopListening, router])
 
   const reset = useCallback(() => {
