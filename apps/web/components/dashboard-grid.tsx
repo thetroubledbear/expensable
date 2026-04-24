@@ -197,7 +197,7 @@ const ALL_WIDGETS: WidgetId[] = [
   "pattern-insights", "financial-rewind",
 ]
 
-const STORAGE_KEY = "expensable-dashboard-v2"
+const STORAGE_KEY = "expensable-dashboard-v3"
 
 const MOBILE_MIN_H: Partial<Record<WidgetId, string>> = {
   "spending-trend":     "280px",
@@ -210,6 +210,11 @@ const MOBILE_MIN_H: Partial<Record<WidgetId, string>> = {
   "account-balances":   "160px",
   "budgets":            "260px",
   "ask-ai":             "200px",
+  "health-score":       "280px",
+  "spending-insights":  "200px",
+  "social-comparison":  "220px",
+  "pattern-insights":   "180px",
+  "financial-rewind":   "200px",
 }
 
 // ─── Persistence ─────────────────────────────────────────────────────────────
@@ -267,16 +272,18 @@ export function DashboardGrid({ data }: Props) {
   const [editMode, setEditMode] = useState(false)
   const [mounted, setMounted] = useState(false)
 
-  // Measure container width
+  // Measure container width — depends on `mounted` because containerRef.current
+  // is null during the skeleton phase (we return early before the ref div renders)
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
+    setWidth(el.getBoundingClientRect().width || window.innerWidth)
     const ro = new ResizeObserver((entries) => {
-      setWidth(entries[0]?.contentRect.width ?? 1200)
+      setWidth(entries[0]?.contentRect.width ?? window.innerWidth)
     })
     ro.observe(el)
     return () => ro.disconnect()
-  }, [])
+  }, [mounted])
 
   // Load layout: remote first, fall back to localStorage, fall back to defaults
   useEffect(() => {
