@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react"
 import { signOut } from "next-auth/react"
+import { NotificationsBell } from "@/components/notifications-bell"
 
 const NAV = [
   { icon: LayoutDashboard, label: "Dashboard",     href: "/dashboard" },
@@ -119,6 +120,9 @@ export function Sidebar({ user }: SidebarProps) {
             <Wallet className="w-3.5 h-3.5 text-white" />
           </div>
           <span className="text-white font-semibold text-sm">Expensable</span>
+        </div>
+        <div className="ml-auto [&_button]:text-slate-400 [&_button:hover]:text-slate-200 [&_button:hover]:bg-white/10">
+          <NotificationsBell />
         </div>
       </div>
 

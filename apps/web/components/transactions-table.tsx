@@ -318,6 +318,7 @@ export function TransactionsTable({ initialData, categories, accounts, defaultCu
             loading ? "opacity-60 pointer-events-none" : ""
           }`}
         >
+          <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-100">
@@ -431,6 +432,7 @@ export function TransactionsTable({ initialData, categories, accounts, defaultCu
               })}
             </tbody>
           </table>
+          </div>
 
           {totalPages > 1 && (
             <div className="flex items-center justify-between px-5 py-3.5 border-t border-slate-100">

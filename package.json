@@ -16,6 +16,7 @@
     "db:studio": "cd packages/db && npx prisma studio"
   },
   "devDependencies": {
+    "@expo/cli": "54.0.23",
     "turbo": "^2.3.3",
     "typescript": "^5.7.2"
   },
@@ -24,6 +25,7 @@
   },
   "packageManager": "npm@11.6.2",
   "dependencies": {
+    "expo-dev-client": "~6.0.20",
     "patch-package": "^8.0.1"
   }
 }
