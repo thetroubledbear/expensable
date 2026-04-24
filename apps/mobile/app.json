@@ -16,9 +16,7 @@
       "bundleIdentifier": "com.expensable.app",
       "supportsTablet": true
     },
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
+    "runtimeVersion": "1.0.0",
     "updates": {
       "url": "https://u.expo.dev/7ec4980c-e686-4da6-b9f5-d01425cd0f1f"
     },
