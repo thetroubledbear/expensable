@@ -4,6 +4,7 @@ import { resolveHousehold } from "@/lib/auth/household"
 import { ensureCategories } from "@/lib/categories"
 import { TransactionsTable } from "@/components/transactions-table"
 import { AddTransactionModal } from "@/components/add-transaction-modal"
+import { VoiceInputButton } from "@/components/voice-input-button"
 
 export const dynamic = "force-dynamic"
 
@@ -56,7 +57,10 @@ export default async function TransactionsPage() {
             Browse, search, and categorize your transactions
           </p>
         </div>
-        <AddTransactionModal categories={categories} defaultCurrency={currency} />
+        <div className="flex items-center gap-2">
+          <VoiceInputButton />
+          <AddTransactionModal categories={categories} defaultCurrency={currency} />
+        </div>
       </div>
 
       <TransactionsTable
