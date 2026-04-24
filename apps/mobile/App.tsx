@@ -15,6 +15,7 @@ import SettingsScreen from "./screens/SettingsScreen"
 import SubscriptionsScreen from "./screens/SubscriptionsScreen"
 import InviteScreen from "./screens/InviteScreen"
 import OnboardingScreen from "./screens/OnboardingScreen"
+import AccountsScreen from "./screens/AccountsScreen"
 
 const AuthStack = createNativeStackNavigator()
 const Tab = createBottomTabNavigator()
@@ -45,6 +46,7 @@ function SettingsNavigator() {
       <SettingsStack.Screen name="SettingsMain" component={SettingsScreen} />
       <SettingsStack.Screen name="Subscriptions" component={SubscriptionsScreen} />
       <SettingsStack.Screen name="Invite" component={InviteScreen} />
+      <SettingsStack.Screen name="Accounts" component={AccountsScreen} />
     </SettingsStack.Navigator>
   )
 }
