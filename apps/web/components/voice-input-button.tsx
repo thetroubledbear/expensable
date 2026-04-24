@@ -14,6 +14,11 @@ interface Result {
   type: "debit" | "credit"
 }
 
+interface Tradeoff {
+  label: string
+  emoji: string
+}
+
 type SpeechRecognitionEvent = Event & {
   results: { [key: number]: { [key: number]: { transcript: string } } }
 }
@@ -25,6 +30,7 @@ export function VoiceInputButton() {
   const [state, setState] = useState<State>("idle")
   const [transcript, setTranscript] = useState("")
   const [result, setResult] = useState<Result | null>(null)
+  const [tradeoffs, setTradeoffs] = useState<Tradeoff[]>([])
   const [errorMsg, setErrorMsg] = useState("")
   const [open, setOpen] = useState(false)
   const recognitionRef = useRef<AnySpeechRecognition>(null)
@@ -107,9 +113,15 @@ export function VoiceInputButton() {
       return
     }
 
-    setResult(data.transaction as Result)
+    const tx = data.transaction as Result
+    setResult(tx)
     setState("success")
     router.refresh()
+    // Fire-and-forget tradeoffs fetch
+    fetch(`/api/insights/tradeoffs?amount=${tx.amount}`)
+      .then((r) => r.json())
+      .then((d) => { if (Array.isArray(d.tradeoffs)) setTradeoffs(d.tradeoffs) })
+      .catch(() => {})
   }, [transcript, stopListening, router])
 
   const reset = useCallback(() => {
@@ -117,6 +129,7 @@ export function VoiceInputButton() {
     setState("idle")
     setTranscript("")
     setResult(null)
+    setTradeoffs([])
     setErrorMsg("")
   }, [stopListening])
 
@@ -227,6 +240,18 @@ export function VoiceInputButton() {
                     <span className="text-slate-800 text-right max-w-[60%]">{result.description}</span>
                   </div>
                 </div>
+                {tradeoffs.length > 0 && (
+                  <div className="mt-3 rounded-xl bg-slate-50 px-3 py-2">
+                    <p className="text-xs text-slate-400 mb-1.5">That&apos;s about…</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {tradeoffs.map((t) => (
+                        <span key={t.label} className="text-xs bg-white border border-slate-200 rounded-lg px-2 py-1 text-slate-600">
+                          {t.emoji} {t.label}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <div className="flex gap-2 mt-4">
                   <button
                     onClick={reset}
