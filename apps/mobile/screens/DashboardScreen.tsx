@@ -6,9 +6,11 @@ import {
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
+  TextInput,
+  TouchableOpacity,
 } from "react-native"
 import { useAuth } from "../lib/auth"
-import { apiGet } from "../lib/api"
+import { apiGet, apiPost } from "../lib/api"
 
 interface DashboardData {
   spent: number
@@ -63,8 +65,13 @@ export default function DashboardScreen() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [noHousehold, setNoHousehold] = useState(false)
+  const [aiInsights, setAiInsights] = useState<string[] | null>(null)
+  const [aiInsightsLoading, setAiInsightsLoading] = useState(false)
+  const [aiQuestion, setAiQuestion] = useState("")
+  const [aiAnswer, setAiAnswer] = useState<string | null>(null)
+  const [aiQuerying, setAiQuerying] = useState(false)
 
-  useEffect(() => { load() }, [])
+  useEffect(() => { load(); loadInsights() }, [])
 
   async function load() {
     try {
@@ -85,6 +92,30 @@ export default function DashboardScreen() {
   function onRefresh() {
     setRefreshing(true)
     load()
+    loadInsights()
+  }
+
+  async function loadInsights() {
+    setAiInsightsLoading(true)
+    try {
+      const res = await apiGet<{ insights?: string[]; available?: boolean }>("/api/insights/ai")
+      if (res.available && res.insights && res.insights.length > 0) {
+        setAiInsights(res.insights)
+      }
+    } catch {}
+    setAiInsightsLoading(false)
+  }
+
+  async function askAI() {
+    const q = aiQuestion.trim()
+    if (!q || aiQuerying) return
+    setAiQuerying(true)
+    setAiAnswer(null)
+    try {
+      const res = await apiPost<{ answer?: string; error?: string }>("/api/ai/query", { question: q })
+      if (res.answer) setAiAnswer(res.answer)
+    } catch {}
+    setAiQuerying(false)
   }
 
   const firstName = user?.name?.split(" ")[0] ?? "there"
@@ -216,6 +247,56 @@ export default function DashboardScreen() {
             </Card>
           )}
 
+          <Card>
+            <Text style={styles.sectionTitle}>AI Insights</Text>
+            {aiInsightsLoading ? (
+              <ActivityIndicator color="#059669" style={{ marginVertical: 8 }} />
+            ) : aiInsights ? (
+              aiInsights.map((insight, i) => (
+                <View key={i} style={styles.insightRow}>
+                  <View style={styles.insightDot} />
+                  <Text style={styles.insightText}>{insight}</Text>
+                </View>
+              ))
+            ) : (
+              <Text style={styles.rowSub}>Not enough data yet or AI unavailable</Text>
+            )}
+          </Card>
+
+          <Card>
+            <Text style={styles.sectionTitle}>Ask AI</Text>
+            <View style={styles.askRow}>
+              <TextInput
+                style={styles.askInput}
+                value={aiQuestion}
+                onChangeText={setAiQuestion}
+                placeholder="Ask about your spending…"
+                placeholderTextColor="#94a3b8"
+                onSubmitEditing={askAI}
+                returnKeyType="send"
+              />
+              <TouchableOpacity
+                onPress={askAI}
+                disabled={aiQuerying || !aiQuestion.trim()}
+                style={[styles.askBtn, (aiQuerying || !aiQuestion.trim()) && styles.askBtnDisabled]}
+              >
+                {aiQuerying ? (
+                  <ActivityIndicator color="#fff" size="small" />
+                ) : (
+                  <Text style={styles.askBtnText}>Ask</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+            {aiAnswer && (
+              <View style={styles.answerBox}>
+                <Text style={styles.answerText}>{aiAnswer}</Text>
+                <TouchableOpacity onPress={() => { setAiAnswer(null); setAiQuestion("") }}>
+                  <Text style={styles.askAgain}>Ask another question</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </Card>
+
           {data.trend.length > 1 && (
             <Card>
               <Text style={styles.sectionTitle}>6-Month Trend</Text>
@@ -310,4 +391,33 @@ const styles = StyleSheet.create({
   legendItem: { flexDirection: "row", alignItems: "center", gap: 6 },
   legendDot: { width: 8, height: 8, borderRadius: 4 },
   legendText: { fontSize: 11, color: "#64748b" },
+  insightRow: { flexDirection: "row", alignItems: "flex-start", gap: 10, paddingVertical: 6 },
+  insightDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: "#34d399", marginTop: 5, flexShrink: 0 },
+  insightText: { flex: 1, fontSize: 13, color: "#475569", lineHeight: 20 },
+  askRow: { flexDirection: "row", gap: 8, alignItems: "center" },
+  askInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    fontSize: 13,
+    color: "#0f172a",
+    backgroundColor: "#f8fafc",
+  },
+  askBtn: {
+    backgroundColor: "#059669",
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    justifyContent: "center",
+    alignItems: "center",
+    minWidth: 48,
+  },
+  askBtnDisabled: { opacity: 0.4 },
+  askBtnText: { color: "#fff", fontWeight: "600", fontSize: 13 },
+  answerBox: { marginTop: 12, backgroundColor: "#f8fafc", borderRadius: 12, padding: 12 },
+  answerText: { fontSize: 13, color: "#334155", lineHeight: 20 },
+  askAgain: { marginTop: 8, fontSize: 12, color: "#94a3b8" },
 })

@@ -51,7 +51,8 @@
       "PowerShell(npm show *)",
       "PowerShell(& \"C:\\\\Users\\\\vtoto\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" -s RFCY10PD7JN uninstall com.expensable.app 2>&1; & \"C:\\\\Users\\\\vtoto\\\\AppData\\\\Local\\\\Android\\\\Sdk\\\\platform-tools\\\\adb.exe\" -s RFCY10PD7JN install \"C:\\\\Users\\\\vtoto\\\\Desktop\\\\Expensable\\\\apps\\\\mobile\\\\android\\\\app\\\\build\\\\outputs\\\\apk\\\\debug\\\\app-debug.apk\" 2>&1)",
       "Bash(npx expo *)",
-      "PowerShell(Select-String -Path \"C:\\\\Users\\\\vtoto\\\\Desktop\\\\Expensable\\\\package-lock.json\" -Pattern \"expo-updates\" | ForEach-Object { $_.Line } | Select-Object -First 30)"
+      "PowerShell(Select-String -Path \"C:\\\\Users\\\\vtoto\\\\Desktop\\\\Expensable\\\\package-lock.json\" -Pattern \"expo-updates\" | ForEach-Object { $_.Line } | Select-Object -First 30)",
+      "mcp__claude_ai_Notion__notion-update-page"
     ]
   },
   "enableAllProjectMcpServers": true,
