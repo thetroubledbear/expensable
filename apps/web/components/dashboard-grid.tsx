@@ -172,6 +172,19 @@ const ALL_WIDGETS: WidgetId[] = [
 
 const STORAGE_KEY = "expensable-dashboard-v2"
 
+const MOBILE_MIN_H: Partial<Record<WidgetId, string>> = {
+  "spending-trend":     "280px",
+  "category-pie":       "280px",
+  "category-breakdown": "260px",
+  "recent-tx":          "220px",
+  "top-spending":       "200px",
+  "ai-insights":        "180px",
+  "subscriptions-summary": "160px",
+  "account-balances":   "160px",
+  "budgets":            "260px",
+  "ask-ai":             "200px",
+}
+
 // ─── Persistence ─────────────────────────────────────────────────────────────
 
 function loadLocalState(): { layouts: AnyLayouts; hidden: WidgetId[] } | null {
@@ -288,11 +301,12 @@ export function DashboardGrid({ data }: Props) {
   }
 
   const visible = ALL_WIDGETS.filter((id) => !hidden.includes(id))
+  const isMobile = width < 768
 
   // SSR / pre-mount skeleton
   if (!mounted) {
     return (
-      <div className="grid grid-cols-3 gap-4">
+      <div ref={containerRef} className="grid grid-cols-2 sm:grid-cols-3 gap-4">
         {[...Array(6)].map((_, i) => (
           <div key={i} className="h-32 bg-white rounded-2xl border border-slate-100 animate-pulse" />
         ))}
@@ -300,6 +314,45 @@ export function DashboardGrid({ data }: Props) {
     )
   }
 
+  // ── Mobile: simple stacked layout, no drag/resize ──────────────────────────
+  if (isMobile) {
+    const MONEY_IDS = new Set<WidgetId>(["money-out", "money-in", "net", "savings-rate"])
+    const moneyCards = visible.filter((id) => MONEY_IDS.has(id))
+    const rest = visible.filter((id) => !MONEY_IDS.has(id))
+
+    return (
+      <div ref={containerRef}>
+        {moneyCards.length > 0 && (
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            {moneyCards.map((id) => (
+              <div key={id} className="bg-white rounded-2xl border border-slate-100 shadow-sm">
+                <div className="px-4 py-2.5 border-b border-slate-50 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                  {WIDGET_LABELS[id]}
+                </div>
+                <div className="px-4 py-3">
+                  <WidgetContent id={id} data={data} />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        <div className="flex flex-col gap-3">
+          {rest.map((id) => (
+            <div key={id} className="bg-white rounded-2xl border border-slate-100 shadow-sm">
+              <div className="px-5 py-3 border-b border-slate-50 text-sm font-semibold text-slate-700">
+                {WIDGET_LABELS[id]}
+              </div>
+              <div className="px-5 py-4" style={{ minHeight: MOBILE_MIN_H[id] }}>
+                <WidgetContent id={id} data={data} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  // ── Desktop: draggable/resizable grid ──────────────────────────────────────
   return (
     <div>
       {/* Toolbar */}
