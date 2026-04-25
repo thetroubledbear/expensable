@@ -1,4 +1,4 @@
-import { ActivityIndicator, View } from "react-native"
+import { ActivityIndicator, View, Text } from "react-native"
 import { NavigationContainer } from "@react-navigation/native"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
@@ -104,6 +104,10 @@ function RootNavigator() {
       </View>
     )
   }
+
+  // Apply Libre Baskerville globally — mirrors web where it's the base font-sans
+  if (!Text.defaultProps) Text.defaultProps = {}
+  Text.defaultProps.style = { fontFamily: "LibreBaskerville_400Regular" }
 
   if (!user) return <AuthNavigator />
   if (!onboardingCompleted) return <OnboardingScreen />
