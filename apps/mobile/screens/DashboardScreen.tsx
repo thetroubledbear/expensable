@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react"
+import { Mic, MicOff } from "lucide-react-native"
 import {
   View,
   Text,
@@ -150,16 +151,14 @@ export default function DashboardScreen() {
   const [voiceResult, setVoiceResult] = useState<QuickLogResult | null>(null)
   const [voiceTradeoffs, setVoiceTradeoffs] = useState<Tradeoff[]>([])
   const [voiceError, setVoiceError] = useState("")
+  const [isRecording, setIsRecording] = useState(false)
 
-  useSpeechRecognitionEvent("start", () => setVoiceState("listening"))
+  useSpeechRecognitionEvent("start", () => { setVoiceState("listening"); setIsRecording(true) })
   useSpeechRecognitionEvent("end", () => {
+    setIsRecording(false)
     setVoiceState((s) => {
       if (s !== "listening") return s
-      if (voiceTranscriptRef.current.trim()) {
-        submitVoiceText(voiceTranscriptRef.current.trim())
-        return "processing"
-      }
-      return "idle"
+      return voiceTranscriptRef.current.trim() ? "listening" : "idle"
     })
   })
   useSpeechRecognitionEvent("result", (event) => {
@@ -223,6 +222,7 @@ export default function DashboardScreen() {
   function resetVoice() {
     stopVoice()
     setVoiceState("idle")
+    setIsRecording(false)
     voiceTranscriptRef.current = ""
     setVoiceTranscript("")
     setVoiceResult(null)
@@ -354,7 +354,9 @@ async function enableSocialComparison() {
 
       {/* ── Voice Log button ── */}
       <TouchableOpacity style={styles.voiceLogBtn} onPress={() => setVoiceOpen(true)}>
-        <Text style={styles.voiceLogBtnIcon}>🎤</Text>
+        <View style={styles.voiceLogBtnIconWrap}>
+          <Mic size={20} color="#059669" />
+        </View>
         <Text style={styles.voiceLogBtnText}>Voice Log</Text>
         <Text style={styles.voiceLogBtnHint}>Tap to log by voice</Text>
       </TouchableOpacity>
@@ -376,7 +378,7 @@ async function enableSocialComparison() {
               <View style={styles.voiceCenter}>
                 <Text style={styles.voiceHint}>Say something like{"\n"}<Text style={styles.voiceHintItalic}>"I spent 12 euros on lunch"</Text></Text>
                 <TouchableOpacity style={styles.micBtn} onPress={startVoice}>
-                  <Text style={styles.micBtnIcon}>🎤</Text>
+                  <Mic size={28} color="#fff" />
                 </TouchableOpacity>
                 <Text style={styles.micTapHint}>Tap to start</Text>
               </View>
@@ -385,10 +387,10 @@ async function enableSocialComparison() {
             {/* ── listening ── */}
             {voiceState === "listening" && (
               <View style={styles.voiceCenter}>
-                <View style={[styles.micBtn, styles.micBtnActive]}>
-                  <Text style={styles.micBtnIcon}>🔴</Text>
+                <View style={[styles.micBtn, isRecording ? styles.micBtnActive : styles.micBtnReview]}>
+                  {isRecording ? <MicOff size={28} color="#fff" /> : <Mic size={28} color="#fff" />}
                 </View>
-                <Text style={styles.listeningLabel}>LISTENING…</Text>
+                <Text style={styles.listeningLabel}>{isRecording ? "LISTENING…" : "REVIEW"}</Text>
                 <Text style={styles.transcriptText}>{voiceTranscript || "Speak now…"}</Text>
                 <View style={styles.voiceActions}>
                   <TouchableOpacity style={styles.voiceSecondaryBtn} onPress={resetVoice}>
@@ -842,7 +844,7 @@ const styles = StyleSheet.create({
 
   // Voice log button
   voiceLogBtn: { flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: "#fff", borderRadius: 16, padding: 14, marginBottom: 12, shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 2 },
-  voiceLogBtnIcon: { fontSize: 22 },
+  voiceLogBtnIconWrap: { width: 36, height: 36, borderRadius: 10, backgroundColor: "#f0fdf4", alignItems: "center", justifyContent: "center" },
   voiceLogBtnText: { fontSize: 15, fontWeight: "600", color: "#059669", flex: 1 },
   voiceLogBtnHint: { fontSize: 12, color: "#94a3b8" },
 
@@ -857,7 +859,7 @@ const styles = StyleSheet.create({
   voiceHintItalic: { fontStyle: "italic", color: "#334155" },
   micBtn: { width: 64, height: 64, borderRadius: 32, backgroundColor: "#059669", alignItems: "center", justifyContent: "center", shadowColor: "#059669", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 6, marginBottom: 10 },
   micBtnActive: { backgroundColor: "#ef4444", shadowColor: "#ef4444" },
-  micBtnIcon: { fontSize: 26 },
+  micBtnReview: { backgroundColor: "#0f172a", shadowColor: "#0f172a" },
   micTapHint: { fontSize: 11, color: "#94a3b8" },
   listeningLabel: { fontSize: 10, color: "#94a3b8", letterSpacing: 1.5, fontWeight: "600", marginBottom: 10 },
   transcriptText: { fontSize: 14, color: "#334155", fontStyle: "italic", textAlign: "center", marginBottom: 16, minHeight: 40, paddingHorizontal: 8, lineHeight: 22 },
