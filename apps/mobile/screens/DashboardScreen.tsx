@@ -15,6 +15,7 @@ import {
 import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from "expo-speech-recognition"
 import { useAuth } from "../lib/auth"
 import { apiGet, apiPost, apiPatch } from "../lib/api"
+import { FONTS } from "../lib/fonts"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -812,13 +813,13 @@ const styles = StyleSheet.create({
   content: { padding: 16, paddingBottom: 40 },
   center: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#f8fafc" },
   header: { marginBottom: 16 },
-  greeting: { fontSize: 22, fontWeight: "700", color: "#0f172a" },
+  greeting: { fontSize: 22, fontWeight: "700", color: "#0f172a", fontFamily: FONTS.bold },
   headerSub: { fontSize: 13, color: "#64748b", marginTop: 2 },
   card: { backgroundColor: "#fff", borderRadius: 16, padding: 16, marginBottom: 12, shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 2 },
   statsRow: { flexDirection: "row", gap: 10, marginBottom: 2 },
   statCard: { flex: 1 },
   statLabel: { fontSize: 12, color: "#64748b", marginBottom: 4, fontWeight: "500" },
-  statValue: { fontSize: 22, fontWeight: "700", color: "#0f172a" },
+  statValue: { fontSize: 22, fontWeight: "700", color: "#0f172a", fontFamily: FONTS.bold },
   statSub: { fontSize: 11, color: "#94a3b8", marginTop: 3 },
   sectionTitle: { fontSize: 13, fontWeight: "600", color: "#64748b", marginBottom: 12, textTransform: "uppercase", letterSpacing: 0.5 },
   row: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: "#f1f5f9" },
@@ -899,7 +900,7 @@ const styles = StyleSheet.create({
   // Health score
   healthRow: { flexDirection: "row", gap: 16, alignItems: "center" },
   scoreRing: { width: 100, height: 100, borderRadius: 50, borderWidth: 8, alignItems: "center", justifyContent: "center", flexShrink: 0 },
-  scoreNum: { fontSize: 26, fontWeight: "700" },
+  scoreNum: { fontSize: 26, fontWeight: "700", fontFamily: FONTS.bold },
   scoreGrade: { fontSize: 14, fontWeight: "600" },
   healthBars: { flex: 1, gap: 8 },
   healthBarRow: { flexDirection: "row", alignItems: "center", gap: 6 },
@@ -932,7 +933,7 @@ const styles = StyleSheet.create({
   rewindLeft: { flex: 1, marginRight: 8 },
   rewindLabel: { fontSize: 13, color: "#334155", fontWeight: "500" },
   rewindPeriod: { fontSize: 11, color: "#94a3b8", marginTop: 2 },
-  rewindAmount: { fontSize: 16, fontWeight: "700", color: "#059669" },
+  rewindAmount: { fontSize: 16, fontWeight: "700", color: "#059669", fontFamily: FONTS.bold },
 
   // Social comparison
   socialOptInText: { fontSize: 13, color: "#64748b", lineHeight: 20, marginBottom: 12 },

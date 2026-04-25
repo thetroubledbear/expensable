@@ -10,9 +10,10 @@ import {
   TouchableOpacity,
   Modal,
   FlatList,
+  Alert,
 } from "react-native"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
-import { apiGet, apiPatch } from "../lib/api"
+import { apiGet, apiPatch, apiDelete } from "../lib/api"
 import { Search, X } from "lucide-react-native"
 
 interface Category {
@@ -65,6 +66,9 @@ export default function TransactionsScreen({ navigation }: Props) {
   const [needsReview, setNeedsReview] = useState(false)
   const [editingTx, setEditingTx] = useState<Transaction | null>(null)
   const [categoryModalOpen, setCategoryModalOpen] = useState(false)
+  const [selectMode, setSelectMode] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 400)
@@ -130,6 +134,64 @@ export default function TransactionsScreen({ navigation }: Props) {
     } catch {}
     setCategoryModalOpen(false)
     setEditingTx(null)
+  }
+
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  function handleLongPress(tx: Transaction) {
+    if (!selectMode) {
+      setSelectMode(true)
+      setSelectedIds(new Set([tx.id]))
+    }
+  }
+
+  function exitSelectMode() {
+    setSelectMode(false)
+    setSelectedIds(new Set())
+  }
+
+  async function deleteSelected() {
+    if (selectedIds.size === 0 || deleting) return
+    const count = selectedIds.size
+    Alert.alert(
+      `Delete ${count} transaction${count !== 1 ? "s" : ""}?`,
+      "This action cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            setDeleting(true)
+            try {
+              await apiDelete("/api/transactions", {
+                ids: Array.from(selectedIds),
+              })
+              setData((prev) => {
+                if (!prev) return prev
+                return {
+                  ...prev,
+                  data: prev.data.filter((tx) => !selectedIds.has(tx.id)),
+                  total: Math.max(0, prev.total - selectedIds.size),
+                }
+              })
+              exitSelectMode()
+            } catch {
+              Alert.alert("Error", "Failed to delete transactions")
+            } finally {
+              setDeleting(false)
+            }
+          },
+        },
+      ]
+    )
   }
 
   const catPills: { label: string; value: string }[] = [
@@ -213,7 +275,7 @@ export default function TransactionsScreen({ navigation }: Props) {
         </View>
       ) : (
         <ScrollView
-          contentContainerStyle={styles.list}
+          contentContainerStyle={[styles.list, selectMode && { paddingBottom: 100 }]}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#059669" />}
         >
           {!data?.data.length ? (
@@ -221,8 +283,23 @@ export default function TransactionsScreen({ navigation }: Props) {
               <Text style={styles.emptyText}>No transactions found</Text>
             </View>
           ) : (
-            data.data.map((tx) => (
-              <View key={tx.id} style={styles.txRow}>
+            data.data.map((tx) => {
+              const isSelected = selectedIds.has(tx.id)
+              return (
+              <TouchableOpacity
+                key={tx.id}
+                style={[styles.txRow, selectMode && isSelected && styles.txRowSelected]}
+                onLongPress={() => handleLongPress(tx)}
+                onPress={() => selectMode && toggleSelect(tx.id)}
+                activeOpacity={0.7}
+              >
+                {selectMode && (
+                  <View style={styles.checkbox}>
+                    <View style={[styles.checkboxInner, isSelected && styles.checkboxInnerSelected]}>
+                      {isSelected && <Text style={styles.checkmark}>✓</Text>}
+                    </View>
+                  </View>
+                )}
                 <View style={[styles.typeDot, tx.type === "credit" ? styles.dotGreen : styles.dotRed]} />
                 <View style={styles.txInfo}>
                   {/* Primary: merchant name (bold) */}
@@ -264,8 +341,8 @@ export default function TransactionsScreen({ navigation }: Props) {
                     <Text style={styles.reviewBadge}>⚠</Text>
                   ) : null}
                 </View>
-              </View>
-            ))
+              </TouchableOpacity>
+            )})
           )}
 
           {data && data.totalPages > 1 && (
@@ -290,9 +367,34 @@ export default function TransactionsScreen({ navigation }: Props) {
         </ScrollView>
       )}
 
-      <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate("AddTransaction")}>
-        <Text style={styles.fabText}>+</Text>
-      </TouchableOpacity>
+      {selectMode && (
+        <View style={styles.bottomBar}>
+          <TouchableOpacity
+            style={styles.cancelBtn}
+            onPress={exitSelectMode}
+            disabled={deleting}
+          >
+            <Text style={styles.cancelBtnText}>Cancel</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.deleteBtn, deleting && styles.deleteBtnDisabled]}
+            onPress={deleteSelected}
+            disabled={deleting || selectedIds.size === 0}
+          >
+            {deleting ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={styles.deleteBtnText}>Delete ({selectedIds.size})</Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {!selectMode && (
+        <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate("AddTransaction")}>
+          <Text style={styles.fabText}>+</Text>
+        </TouchableOpacity>
+      )}
 
       {/* Category assignment modal */}
       <Modal
@@ -383,6 +485,18 @@ const styles = StyleSheet.create({
   pageBtnDisabled: { opacity: 0.4 },
   pageBtnText: { fontSize: 13, color: "#0f172a", fontWeight: "500" },
   pageInfo: { fontSize: 13, color: "#64748b" },
+  // Select mode
+  checkbox: { width: 24, height: 24, marginRight: 8, justifyContent: "center", alignItems: "center", flexShrink: 0 },
+  checkboxInner: { width: 20, height: 20, borderRadius: 4, borderWidth: 2, borderColor: "#cbd5e1", justifyContent: "center", alignItems: "center" },
+  checkboxInnerSelected: { backgroundColor: "#059669", borderColor: "#059669" },
+  checkmark: { color: "#fff", fontSize: 12, fontWeight: "700" },
+  txRowSelected: { backgroundColor: "#f0fdf4" },
+  bottomBar: { position: "absolute", bottom: 0, left: 0, right: 0, flexDirection: "row", padding: 16, gap: 12, backgroundColor: "#fff", borderTopWidth: 1, borderTopColor: "#e2e8f0" },
+  cancelBtn: { flex: 1, paddingVertical: 12, borderRadius: 10, backgroundColor: "#f1f5f9", alignItems: "center", justifyContent: "center" },
+  cancelBtnText: { fontSize: 14, fontWeight: "600", color: "#0f172a" },
+  deleteBtn: { flex: 1, paddingVertical: 12, borderRadius: 10, backgroundColor: "#ef4444", alignItems: "center", justifyContent: "center" },
+  deleteBtnDisabled: { opacity: 0.5 },
+  deleteBtnText: { fontSize: 14, fontWeight: "600", color: "#fff" },
   // FAB
   fab: {
     position: "absolute",
