@@ -11,7 +11,7 @@ const bodySchema = z.object({
 })
 
 const MODEL = process.env.GEMINI_MODEL ?? "gemini-2.0-flash"
-const SUPPORTED_CURRENCIES = ["USD","EUR","GBP","CHF","CAD","AUD","JPY","NOK","SEK","DKK","NZD","SGD","HKD"]
+const SUPPORTED_CURRENCIES = ["USD","EUR","GBP","CHF","CAD","AUD","JPY","NOK","SEK","DKK","NZD","SGD","HKD","PLN"]
 
 async function parseTranscript(transcript: string, defaultCurrency: string, today: string) {
   if (!process.env.GEMINI_API_KEY) throw new Error("GEMINI_API_KEY not configured")

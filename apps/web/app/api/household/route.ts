@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth/config"
 import { db } from "@expensable/db"
 import { resolveHousehold } from "@/lib/auth/household"
 
-const SUPPORTED_CURRENCIES = ["USD","EUR","GBP","CHF","CAD","AUD","JPY","NOK","SEK","DKK","NZD","SGD","HKD"] as const
+const SUPPORTED_CURRENCIES = ["USD","EUR","GBP","CHF","CAD","AUD","JPY","NOK","SEK","DKK","NZD","SGD","HKD","PLN"] as const
 
 const patchSchema = z.object({
   name: z.string().min(1).max(128).optional(),
