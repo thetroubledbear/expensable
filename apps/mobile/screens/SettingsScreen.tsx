@@ -10,12 +10,13 @@ import {
   TextInput,
   Modal,
 } from "react-native"
+import { FONTS } from "../lib/fonts"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { useAuth } from "../lib/auth"
 import { apiGet, apiPatch } from "../lib/api"
 import {
   LogOut, Home, CreditCard, User, RefreshCw, ChevronRight,
-  UserPlus, BarChart2, Wallet, Pencil, Check, X,
+  UserPlus, BarChart2, Wallet, Pencil, Check, X, Zap,
 } from "lucide-react-native"
 
 const CURRENCIES = ["USD","EUR","PLN","GBP","CHF","CAD","AUD","JPY","NOK","SEK","DKK","NZD","SGD","HKD"]
@@ -247,6 +248,16 @@ export default function SettingsScreen({ navigation }: Props) {
                   </View>
                   {filesAtLimit && <Text style={styles.limitText}>Monthly limit reached — upgrade to upload more</Text>}
                 </View>
+                {isOwner && (
+                  <TouchableOpacity
+                    style={styles.manageSubBtn}
+                    onPress={() => navigation.navigate("Subscriptions")}
+                  >
+                    <Zap color="#059669" size={15} />
+                    <Text style={styles.manageSubText}>Manage Subscription</Text>
+                    <ChevronRight color="#059669" size={15} />
+                  </TouchableOpacity>
+                )}
               </View>
             </View>
 
@@ -349,7 +360,7 @@ export default function SettingsScreen({ navigation }: Props) {
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.version}>Expensable · v1.0.0</Text>
+        <Text style={styles.version}>Expensable · v2.5.0</Text>
       </ScrollView>
 
       {/* Currency picker modal */}
@@ -384,7 +395,7 @@ export default function SettingsScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f8fafc" },
   content: { padding: 16, paddingBottom: 48 },
-  title: { fontSize: 22, fontWeight: "700", color: "#0f172a", marginTop: 48, marginBottom: 24 },
+  title: { fontSize: 22, fontWeight: "700", color: "#0f172a", marginTop: 48, marginBottom: 24, fontFamily: FONTS.bold },
   section: { marginBottom: 20 },
   sectionLabel: { fontSize: 11, fontWeight: "600", color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8, paddingHorizontal: 4 },
   sectionHeaderRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 8, paddingHorizontal: 4 },
@@ -420,6 +431,8 @@ const styles = StyleSheet.create({
   progressTrack: { height: 4, backgroundColor: "#f1f5f9", borderRadius: 2, overflow: "hidden" },
   progressFill: { height: 4, borderRadius: 2 },
   limitText: { fontSize: 11, color: "#ef4444", marginTop: 6 },
+  manageSubBtn: { flexDirection: "row", alignItems: "center", gap: 6, borderTopWidth: 1, borderTopColor: "#f1f5f9", paddingHorizontal: 14, paddingVertical: 12 },
+  manageSubText: { flex: 1, fontSize: 13, fontWeight: "600", color: "#059669" },
 
   // Members
   memberRow: { flexDirection: "row", alignItems: "center", gap: 12, padding: 14 },

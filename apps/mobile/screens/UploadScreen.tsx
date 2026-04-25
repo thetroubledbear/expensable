@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { FONTS } from "../lib/fonts"
 import {
   View,
   Text,
@@ -218,7 +219,7 @@ export default function UploadScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f8fafc" },
   content: { padding: 16, paddingBottom: 40 },
-  title: { fontSize: 22, fontWeight: "700", color: "#0f172a", marginTop: 48, marginBottom: 4 },
+  title: { fontSize: 22, fontWeight: "700", color: "#0f172a", marginTop: 48, marginBottom: 4, fontFamily: FONTS.bold },
   subtitle: { fontSize: 14, color: "#64748b", marginBottom: 16 },
   usageCard: {
     backgroundColor: "#fff",

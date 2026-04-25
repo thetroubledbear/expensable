@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { FONTS } from "../lib/fonts"
 import {
   View,
   Text,
@@ -199,7 +200,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f8fafc" },
   content: { padding: 16, paddingBottom: 40 },
   center: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#f8fafc" },
-  title: { fontSize: 22, fontWeight: "700", color: "#0f172a", marginTop: 48, marginBottom: 20 },
+  title: { fontSize: 22, fontWeight: "700", color: "#0f172a", marginTop: 48, marginBottom: 20, fontFamily: FONTS.bold },
   empty: { alignItems: "center", paddingVertical: 48, gap: 12 },
   emptyTitle: { fontSize: 16, fontWeight: "600", color: "#64748b" },
   emptyText: { fontSize: 13, color: "#94a3b8", textAlign: "center", lineHeight: 20, maxWidth: 260 },
