@@ -360,7 +360,7 @@ export default function SettingsScreen({ navigation }: Props) {
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.version}>Expensable · v2.7.0</Text>
+        <Text style={styles.version}>Expensable · v2.8.0</Text>
       </ScrollView>
 
       {/* Currency picker modal */}
