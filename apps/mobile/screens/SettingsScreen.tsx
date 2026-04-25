@@ -40,7 +40,7 @@ interface Member {
 
 type Props = {
   navigation: NativeStackNavigationProp<
-    { SettingsMain: undefined; Subscriptions: undefined; Invite: undefined; Accounts: undefined },
+    { SettingsMain: undefined; Subscriptions: undefined; ManagePlan: undefined; Invite: undefined; Accounts: undefined },
     "SettingsMain"
   >
 }
@@ -251,7 +251,7 @@ export default function SettingsScreen({ navigation }: Props) {
                 {isOwner && (
                   <TouchableOpacity
                     style={styles.manageSubBtn}
-                    onPress={() => navigation.navigate("Subscriptions")}
+                    onPress={() => navigation.navigate("ManagePlan")}
                   >
                     <Zap color="#059669" size={15} />
                     <Text style={styles.manageSubText}>Manage Subscription</Text>
@@ -360,7 +360,7 @@ export default function SettingsScreen({ navigation }: Props) {
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.version}>Expensable · v2.5.0</Text>
+        <Text style={styles.version}>Expensable · v2.6.0</Text>
       </ScrollView>
 
       {/* Currency picker modal */}
