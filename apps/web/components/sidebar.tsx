@@ -11,13 +11,13 @@ import {
   Repeat2,
   Settings,
   LogOut,
-  Wallet,
   Landmark,
   Menu,
   X,
 } from "lucide-react"
 import { signOut } from "next-auth/react"
 import { NotificationsBell } from "@/components/notifications-bell"
+import { LogoMark } from "@/components/logo"
 
 const NAV = [
   { icon: LayoutDashboard, label: "Dashboard",     href: "/dashboard" },
@@ -42,9 +42,7 @@ export function Sidebar({ user }: SidebarProps) {
       {/* Logo */}
       <div className="px-5 py-5 border-b border-slate-800 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-emerald-500 flex items-center justify-center">
-            <Wallet className="w-4 h-4 text-white" />
-          </div>
+          <LogoMark className="w-7 h-7 rounded-lg" />
           <span className="text-white font-semibold text-[15px] tracking-tight">Expensable</span>
         </div>
         <button
@@ -116,9 +114,7 @@ export function Sidebar({ user }: SidebarProps) {
           <Menu className="w-5 h-5" />
         </button>
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-emerald-500 flex items-center justify-center">
-            <Wallet className="w-3.5 h-3.5 text-white" />
-          </div>
+          <LogoMark className="w-6 h-6 rounded-md" />
           <span className="text-white font-semibold text-sm">Expensable</span>
         </div>
         <div className="ml-auto [&_button]:text-slate-400 [&_button:hover]:text-slate-200 [&_button:hover]:bg-white/10">

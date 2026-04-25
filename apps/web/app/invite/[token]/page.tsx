@@ -1,6 +1,6 @@
 import { InvitePageClient } from "@/components/invite-page-client"
 import { db } from "@expensable/db"
-import { Wallet } from "lucide-react"
+import { LogoMark } from "@/components/logo"
 
 export default async function InvitePage({
   params,
@@ -19,9 +19,7 @@ export default async function InvitePage({
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
         <div className="w-full max-w-sm text-center">
           <div className="flex items-center justify-center gap-2.5 mb-8">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500 flex items-center justify-center">
-              <Wallet className="w-5 h-5 text-white" />
-            </div>
+            <LogoMark className="w-9 h-9 rounded-xl" />
             <span className="text-slate-900 font-bold text-xl tracking-tight">Expensable</span>
           </div>
           <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">

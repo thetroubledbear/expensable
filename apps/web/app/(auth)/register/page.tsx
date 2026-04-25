@@ -3,7 +3,8 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { signIn } from "next-auth/react"
-import { Wallet, Loader2, ArrowRight } from "lucide-react"
+import { Loader2, ArrowRight } from "lucide-react"
+import { LogoMark } from "@/components/logo"
 
 const CURRENCIES = [
   { code: "USD", label: "USD — US Dollar" },
@@ -97,15 +98,7 @@ export default function RegisterPage() {
       {/* ── Header ── */}
       <header className="relative z-10 px-6 pt-6 pb-0 flex items-center justify-between max-w-5xl mx-auto w-full">
         <div className="flex items-center gap-2.5">
-          <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-            style={{
-              background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-              boxShadow: "0 0 18px rgba(16,185,129,0.35)",
-            }}
-          >
-            <Wallet className="w-4 h-4 text-white" />
-          </div>
+          <LogoMark className="w-8 h-8 rounded-lg shrink-0" />
           <span className="font-semibold text-[15px] tracking-tight" style={{ color: "rgba(255,255,255,0.9)" }}>
             Expensable
           </span>
