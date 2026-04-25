@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import {
   View,
   Text,
@@ -146,16 +146,25 @@ export default function DashboardScreen() {
   const [voiceOpen, setVoiceOpen] = useState(false)
   const [voiceState, setVoiceState] = useState<VoiceState>("idle")
   const [voiceTranscript, setVoiceTranscript] = useState("")
+  const voiceTranscriptRef = useRef("")
   const [voiceResult, setVoiceResult] = useState<QuickLogResult | null>(null)
   const [voiceTradeoffs, setVoiceTradeoffs] = useState<Tradeoff[]>([])
   const [voiceError, setVoiceError] = useState("")
 
   useSpeechRecognitionEvent("start", () => setVoiceState("listening"))
   useSpeechRecognitionEvent("end", () => {
-    setVoiceState((s) => (s === "listening" ? "idle" : s))
+    setVoiceState((s) => {
+      if (s !== "listening") return s
+      if (voiceTranscriptRef.current.trim()) {
+        submitVoiceText(voiceTranscriptRef.current.trim())
+        return "processing"
+      }
+      return "idle"
+    })
   })
   useSpeechRecognitionEvent("result", (event) => {
     const t = event.results[0]?.transcript ?? ""
+    voiceTranscriptRef.current = t
     setVoiceTranscript(t)
   })
   useSpeechRecognitionEvent("error", (event) => {
@@ -181,11 +190,7 @@ export default function DashboardScreen() {
     ExpoSpeechRecognitionModule.stop()
   }
 
-  async function submitVoice() {
-    const text = voiceTranscript.trim()
-    if (!text) return
-    stopVoice()
-    setVoiceState("processing")
+  async function submitVoiceText(text: string) {
     try {
       const res = await apiPost<{ transaction?: QuickLogResult; error?: string }>(
         "/api/transactions/voice",
@@ -207,9 +212,18 @@ export default function DashboardScreen() {
     }
   }
 
+  async function submitVoice() {
+    const text = voiceTranscript.trim()
+    if (!text) return
+    stopVoice()
+    setVoiceState("processing")
+    await submitVoiceText(text)
+  }
+
   function resetVoice() {
     stopVoice()
     setVoiceState("idle")
+    voiceTranscriptRef.current = ""
     setVoiceTranscript("")
     setVoiceResult(null)
     setVoiceTradeoffs([])
