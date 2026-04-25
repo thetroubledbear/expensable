@@ -123,7 +123,7 @@ Bucket name via `GCS_BUCKET` env (default: `expensable`).
 ### Household & Currency API
 - `GET /api/household` — returns current user's household (name, defaultCurrency, etc.)
 - `PATCH /api/household` — owner-only; updates name and/or defaultCurrency
-- Supported currencies: USD, EUR, GBP, CHF, CAD, AUD, JPY, NOK, SEK, DKK, NZD, SGD, HKD
+- Supported currencies: USD, EUR, GBP, CHF, CAD, AUD, JPY, NOK, SEK, DKK, NZD, SGD, HKD, PLN
 
 ### UI Design System
 - **Sidebar**: dark (`bg-slate-950`), emerald active state, lucide-react icons

@@ -5,7 +5,7 @@ import { db } from "@expensable/db"
 import { resolveHousehold } from "@/lib/auth/household"
 
 const ACCOUNT_TYPES = ["checking", "savings", "credit", "cash", "investment"] as const
-const SUPPORTED_CURRENCIES = ["USD","EUR","GBP","CHF","CAD","AUD","JPY","NOK","SEK","DKK","NZD","SGD","HKD"] as const
+const SUPPORTED_CURRENCIES = ["USD","EUR","GBP","CHF","CAD","AUD","JPY","NOK","SEK","DKK","NZD","SGD","HKD","PLN"] as const
 
 const updateSchema = z.object({
   name: z.string().min(1).max(64).optional(),

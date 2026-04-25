@@ -5,7 +5,7 @@ import { db } from "@expensable/db"
 import { resolveHousehold } from "@/lib/auth/household"
 
 const ACCOUNT_TYPES = ["checking", "savings", "credit", "cash", "investment"] as const
-const SUPPORTED_CURRENCIES = ["USD","EUR","GBP","CHF","CAD","AUD","JPY","NOK","SEK","DKK","NZD","SGD","HKD"] as const
+const SUPPORTED_CURRENCIES = ["USD","EUR","GBP","CHF","CAD","AUD","JPY","NOK","SEK","DKK","NZD","SGD","HKD","PLN"] as const
 
 export async function GET() {
   const session = await auth()
