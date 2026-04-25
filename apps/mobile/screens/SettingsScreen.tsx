@@ -18,7 +18,7 @@ import {
   UserPlus, BarChart2, Wallet, Pencil, Check, X,
 } from "lucide-react-native"
 
-const CURRENCIES = ["USD","EUR","GBP","CHF","CAD","AUD","JPY","NOK","SEK","DKK","NZD","SGD","HKD"]
+const CURRENCIES = ["USD","EUR","PLN","GBP","CHF","CAD","AUD","JPY","NOK","SEK","DKK","NZD","SGD","HKD"]
 const PLAN_LIMITS: Record<string, number> = { free: 25, pro: 60, family: 1000 }
 
 interface HouseholdData {
