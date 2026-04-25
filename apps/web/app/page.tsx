@@ -2,9 +2,10 @@ import { redirect } from "next/navigation"
 import { getSession } from "@/lib/auth/session"
 import Link from "next/link"
 import {
-  Wallet, BrainCircuit, Users, FolderOpen, BarChart3,
+  BrainCircuit, Users, FolderOpen, BarChart3,
   ArrowRight, CheckCircle2, Upload, Sparkles, TrendingDown,
 } from "lucide-react"
+import { LogoMark } from "@/components/logo"
 
 export default async function Home() {
   const session = await getSession()
@@ -29,9 +30,7 @@ function Navbar() {
     <header className="fixed top-0 inset-x-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-emerald-500 flex items-center justify-center">
-            <Wallet className="w-4 h-4 text-white" />
-          </div>
+          <LogoMark className="w-7 h-7 rounded-lg" />
           <span className="text-slate-900 font-semibold text-[15px] tracking-tight">Expensable</span>
         </div>
         <nav className="flex items-center gap-2 sm:gap-3">
@@ -130,9 +129,7 @@ function DashboardMockup() {
           {/* Sidebar */}
           <div className="w-44 bg-slate-950 shrink-0 p-3 flex flex-col gap-0.5">
             <div className="flex items-center gap-2 px-2 py-2 mb-3">
-              <div className="w-5 h-5 rounded-md bg-emerald-500 flex items-center justify-center">
-                <Wallet className="w-3 h-3 text-white" />
-              </div>
+              <LogoMark className="w-5 h-5 rounded-md" />
               <span className="text-white text-xs font-semibold">Expensable</span>
             </div>
             {["Dashboard", "Upload", "Files", "Transactions", "Subscriptions", "Settings"].map((item, i) => (
@@ -386,9 +383,7 @@ function Footer() {
     <footer className="border-t border-slate-100 py-8 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-emerald-500 flex items-center justify-center">
-            <Wallet className="w-3.5 h-3.5 text-white" />
-          </div>
+          <LogoMark className="w-6 h-6 rounded-md" />
           <span className="text-sm font-semibold text-slate-700">Expensable</span>
         </div>
         <div className="flex items-center gap-6">
