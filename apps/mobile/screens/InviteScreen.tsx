@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { FONTS } from "../lib/fonts"
 import {
   View,
   Text,
@@ -112,7 +113,7 @@ const styles = StyleSheet.create({
   headerRow: { marginTop: 48, marginBottom: 24 },
   backBtn: { marginBottom: 8 },
   backText: { fontSize: 14, color: "#059669", fontWeight: "500" },
-  title: { fontSize: 22, fontWeight: "700", color: "#0f172a" },
+  title: { fontSize: 22, fontWeight: "700", color: "#0f172a", fontFamily: FONTS.bold },
   subtitle: { fontSize: 12, color: "#94a3b8", marginTop: 4 },
   card: {
     backgroundColor: "#fff",

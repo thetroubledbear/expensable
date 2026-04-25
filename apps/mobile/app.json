@@ -3,20 +3,23 @@
     "name": "Expensable",
     "slug": "expensable",
     "scheme": "expensable",
-    "version": "2.0.0",
+    "version": "2.5.0",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "newArchEnabled": false,
     "android": {
       "package": "com.expensable.app",
       "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#059669"
       }
     },
     "ios": {
       "bundleIdentifier": "com.expensable.app",
-      "supportsTablet": true
+      "supportsTablet": true,
+      "icon": "./assets/icon.png"
     },
-    "runtimeVersion": "2.0.0",
+    "runtimeVersion": "2.5.0",
     "updates": {
       "url": "https://u.expo.dev/7ec4980c-e686-4da6-b9f5-d01425cd0f1f"
     },

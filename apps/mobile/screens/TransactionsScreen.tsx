@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { FONTS } from "../lib/fonts"
 import {
   View,
   Text,
@@ -436,7 +437,7 @@ export default function TransactionsScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f8fafc" },
   header: { backgroundColor: "#fff", paddingTop: 56, paddingHorizontal: 16, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: "#e2e8f0" },
-  title: { fontSize: 22, fontWeight: "700", color: "#0f172a", marginBottom: 12 },
+  title: { fontSize: 22, fontWeight: "700", color: "#0f172a", marginBottom: 12, fontFamily: FONTS.bold },
   searchRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 10 },
   searchBox: { flex: 1, flexDirection: "row", alignItems: "center", backgroundColor: "#f8fafc", borderRadius: 10, borderWidth: 1, borderColor: "#e2e8f0", paddingHorizontal: 12, paddingVertical: 8, gap: 8 },
   searchInput: { flex: 1, fontSize: 14, color: "#0f172a" },
