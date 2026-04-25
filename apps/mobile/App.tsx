@@ -3,6 +3,7 @@ import { NavigationContainer } from "@react-navigation/native"
 import { createNativeStackNavigator } from "@react-navigation/native-stack"
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { Home, ArrowLeftRight, Upload, FolderOpen, Settings } from "lucide-react-native"
+import { useFonts, LibreBaskerville_400Regular, LibreBaskerville_700Bold } from "@expo-google-fonts/libre-baskerville"
 import { AuthProvider, useAuth } from "./lib/auth"
 import LoginScreen from "./screens/LoginScreen"
 import RegisterScreen from "./screens/RegisterScreen"
@@ -92,8 +93,9 @@ function TabNavigator() {
 
 function RootNavigator() {
   const { user, loading, onboardingCompleted } = useAuth()
+  const [fontsLoaded] = useFonts({ LibreBaskerville_400Regular, LibreBaskerville_700Bold })
 
-  if (loading) {
+  if (loading || !fontsLoaded) {
     return (
       <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#f8fafc" }}>
         <ActivityIndicator color="#059669" size="large" />

@@ -55,8 +55,15 @@ export default function SubscriptionsScreen() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [householdCurrency, setHouseholdCurrency] = useState("USD")
 
   useEffect(() => { load() }, [])
+
+  useEffect(() => {
+    apiGet<{ defaultCurrency?: string }>("/api/household")
+      .then((d) => { if (d.defaultCurrency) setHouseholdCurrency(d.defaultCurrency) })
+      .catch(() => {})
+  }, [])
 
   async function load() {
     try {
@@ -98,7 +105,6 @@ export default function SubscriptionsScreen() {
     )
   }
 
-  const currency = subs[0]?.currency ?? "USD"
   const monthlyTotal = subs.reduce((sum, s) => sum + toMonthly(s.amount, s.frequency), 0)
   const annualTotal = monthlyTotal * 12
 
@@ -131,12 +137,12 @@ export default function SubscriptionsScreen() {
           <View style={styles.summaryCard}>
             <View style={styles.summaryItem}>
               <Text style={styles.summaryLabel}>MONTHLY</Text>
-              <Text style={styles.summaryValue}>{fmt(monthlyTotal, currency)}</Text>
+              <Text style={styles.summaryValue}>{fmt(monthlyTotal, householdCurrency)}</Text>
             </View>
             <View style={styles.summaryDivider} />
             <View style={styles.summaryItem}>
               <Text style={styles.summaryLabel}>ANNUAL</Text>
-              <Text style={styles.summaryValue}>{fmt(annualTotal, currency)}</Text>
+              <Text style={styles.summaryValue}>{fmt(annualTotal, householdCurrency)}</Text>
             </View>
             <View style={styles.summaryDivider} />
             <View style={styles.summaryItem}>

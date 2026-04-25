@@ -19,6 +19,8 @@ import {
   CheckCircle2,
 } from "lucide-react-native"
 import { useAuth } from "../lib/auth"
+import { FONTS } from "../lib/fonts"
+import { LogoMark } from "../components/LogoMark"
 
 const { width } = Dimensions.get("window")
 
@@ -214,7 +216,7 @@ export default function OnboardingScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.logo}>
-          <Wallet size={16} color="white" />
+          <LogoMark size={16} />
         </View>
         <Text style={styles.logoText}>Expensable</Text>
         <TouchableOpacity
@@ -385,6 +387,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 10,
     lineHeight: 30,
+    fontFamily: FONTS.bold,
   },
   description: {
     fontSize: 14,
