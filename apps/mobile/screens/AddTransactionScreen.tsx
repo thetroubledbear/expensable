@@ -14,7 +14,7 @@ import {
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { apiGet, apiPost } from "../lib/api"
 
-const CURRENCIES = ["USD", "EUR", "GBP", "CHF", "CAD", "AUD", "JPY", "NOK", "SEK", "DKK", "NZD", "SGD", "HKD"]
+const CURRENCIES = ["USD", "EUR", "PLN", "GBP", "CHF", "CAD", "AUD", "JPY", "NOK", "SEK", "DKK", "NZD", "SGD", "HKD"]
 
 type Props = {
   navigation: NativeStackNavigationProp<{ TransactionsList: undefined; AddTransaction: undefined }, "AddTransaction">

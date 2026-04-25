@@ -9,6 +9,7 @@ import { Zap, Users, Check, ArrowUpCircle, ArrowDownCircle } from "lucide-react"
 const DISPLAY_PRICES: Record<string, { pro: number; family: number }> = {
   USD: { pro: 9,    family: 19   },
   EUR: { pro: 8,    family: 17   },
+  PLN: { pro: 39,   family: 81   },
   GBP: { pro: 7,    family: 15   },
   CHF: { pro: 8,    family: 17   },
   CAD: { pro: 12,   family: 26   },

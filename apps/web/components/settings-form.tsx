@@ -6,6 +6,7 @@ import { Settings, Loader2, CheckCircle2 } from "lucide-react"
 const CURRENCIES = [
   { code: "USD", label: "USD — US Dollar" },
   { code: "EUR", label: "EUR — Euro" },
+  { code: "PLN", label: "PLN — Polish Złoty" },
   { code: "GBP", label: "GBP — British Pound" },
   { code: "CHF", label: "CHF — Swiss Franc" },
   { code: "CAD", label: "CAD — Canadian Dollar" },

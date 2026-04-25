@@ -19,7 +19,7 @@ import { Pencil, Trash2 } from "lucide-react-native"
 const ACCOUNT_TYPES = ["checking", "savings", "credit", "cash", "investment"] as const
 type AccountType = typeof ACCOUNT_TYPES[number]
 
-const CURRENCIES = ["USD", "EUR", "GBP", "CHF", "CAD", "AUD", "JPY", "NOK", "SEK", "DKK", "NZD", "SGD", "HKD"]
+const CURRENCIES = ["USD", "EUR", "PLN", "GBP", "CHF", "CAD", "AUD", "JPY", "NOK", "SEK", "DKK", "NZD", "SGD", "HKD"]
 
 const TYPE_EMOJI: Record<AccountType, string> = {
   checking: "🏦",
