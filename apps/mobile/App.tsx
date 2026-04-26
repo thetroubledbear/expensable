@@ -61,7 +61,25 @@ function TabNavigator() {
         headerShown: false,
         tabBarActiveTintColor: "#059669",
         tabBarInactiveTintColor: "#94a3b8",
-        tabBarStyle: { backgroundColor: "#fff", borderTopColor: "#e2e8f0" },
+        tabBarStyle: {
+          backgroundColor: "#fff",
+          borderTopColor: "#f1f5f9",
+          borderTopWidth: 1,
+          elevation: 20,
+          shadowColor: "#0f172a",
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.1,
+          shadowRadius: 20,
+          height: 64,
+          paddingBottom: 10,
+          paddingTop: 6,
+        },
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontWeight: "600",
+          fontFamily: "LibreBaskerville_700Bold",
+          letterSpacing: 0.2,
+        },
       }}
     >
       <Tab.Screen
@@ -99,15 +117,14 @@ function RootNavigator() {
 
   if (loading || !fontsLoaded) {
     return (
-      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#f8fafc" }}>
-        <ActivityIndicator color="#059669" size="large" />
+      <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#0f172a" }}>
+        <ActivityIndicator color="#34d399" size="large" />
       </View>
     )
   }
 
-  // Apply Libre Baskerville globally — mirrors web where it's the base font-sans
-  if (!Text.defaultProps) Text.defaultProps = {}
-  Text.defaultProps.style = { fontFamily: "LibreBaskerville_400Regular" }
+  // Apply globally — must run after fonts are confirmed loaded
+  Text.defaultProps = { ...(Text.defaultProps ?? {}), style: { fontFamily: "LibreBaskerville_400Regular" } }
 
   if (!user) return <AuthNavigator />
   if (!onboardingCompleted) return <OnboardingScreen />
