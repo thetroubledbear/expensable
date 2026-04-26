@@ -2,13 +2,13 @@ import { useEffect, useState } from "react"
 import { FONTS } from "../lib/fonts"
 import {
   View,
-  Text,
   TouchableOpacity,
   StyleSheet,
   Alert,
   ActivityIndicator,
   ScrollView,
 } from "react-native"
+import { Text } from "../components/Text"
 import * as ImagePicker from "expo-image-picker"
 import * as DocumentPicker from "expo-document-picker"
 import { apiUploadFile, apiGet } from "../lib/api"

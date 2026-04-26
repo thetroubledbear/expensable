@@ -1,13 +1,13 @@
 import React, { useState } from "react"
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   SafeAreaView,
   StatusBar,
   Dimensions,
 } from "react-native"
+import { Text } from "../components/Text"
 import {
   Wallet,
   UploadCloud,

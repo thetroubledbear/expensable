@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react"
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
@@ -10,6 +9,7 @@ import {
   TextInput,
   Modal,
 } from "react-native"
+import { Text } from "../components/Text"
 import { FONTS } from "../lib/fonts"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { useAuth } from "../lib/auth"
