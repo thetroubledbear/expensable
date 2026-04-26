@@ -8,13 +8,13 @@ import {
   ActivityIndicator,
   Modal,
   TextInput,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   RefreshControl,
 } from "react-native"
 import { Text } from "../components/Text"
 import { apiGet, apiPost, apiPatch, apiDeleteById } from "../lib/api"
+import { useAlert } from "../lib/alert"
 import { Pencil, Trash2 } from "lucide-react-native"
 
 const ACCOUNT_TYPES = ["checking", "savings", "credit", "cash", "investment"] as const
@@ -68,6 +68,7 @@ const INITIAL_MODAL: ModalState = {
 }
 
 export default function AccountsScreen() {
+  const { alert } = useAlert()
   const [accounts, setAccounts] = useState<Account[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -118,7 +119,7 @@ export default function AccountsScreen() {
 
   async function handleSave() {
     if (!modal.name.trim()) {
-      Alert.alert("Validation", "Account name is required")
+      alert("Validation", "Account name is required")
       return
     }
     setSaving(true)
@@ -140,7 +141,7 @@ export default function AccountsScreen() {
           closeModal()
         } else {
           const err = created as unknown as { error?: string }
-          Alert.alert("Error", err.error ?? "Failed to create account")
+          alert("Error", err.error ?? "Failed to create account")
         }
       } else if (modal.editId) {
         const updated = await apiPatch<Account>(`/api/accounts/${modal.editId}`, {
@@ -161,18 +162,18 @@ export default function AccountsScreen() {
           closeModal()
         } else {
           const err = updated as unknown as { error?: string }
-          Alert.alert("Error", err.error ?? "Failed to update account")
+          alert("Error", err.error ?? "Failed to update account")
         }
       }
     } catch {
-      Alert.alert("Error", "Network error")
+      alert("Error", "Network error")
     } finally {
       setSaving(false)
     }
   }
 
   function handleDelete(account: Account) {
-    Alert.alert(
+    alert(
       "Delete account?",
       `"${account.name}" and its data will be removed.`,
       [
@@ -190,7 +191,7 @@ export default function AccountsScreen() {
                 e instanceof Error && e.message.includes("last")
                   ? "Cannot delete the last account"
                   : "Failed to delete account"
-              Alert.alert("Error", msg)
+              alert("Error", msg)
             } finally {
               setDeletingId(null)
             }

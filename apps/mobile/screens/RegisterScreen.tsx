@@ -7,12 +7,12 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
-  Alert,
   ScrollView,
 } from "react-native"
 import { Text } from "../components/Text"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { useAuth } from "../lib/auth"
+import { useAlert } from "../lib/alert"
 
 type Props = {
   navigation: NativeStackNavigationProp<{ Login: undefined; Register: undefined }, "Register">
@@ -20,6 +20,7 @@ type Props = {
 
 export default function RegisterScreen({ navigation }: Props) {
   const { register } = useAuth()
+  const { alert } = useAlert()
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -27,17 +28,17 @@ export default function RegisterScreen({ navigation }: Props) {
 
   async function handleRegister() {
     if (!name.trim() || !email.trim() || !password.trim()) {
-      Alert.alert("Error", "Please fill in all fields")
+      alert("Error", "Please fill in all fields")
       return
     }
     if (password.length < 8) {
-      Alert.alert("Error", "Password must be at least 8 characters")
+      alert("Error", "Password must be at least 8 characters")
       return
     }
     setLoading(true)
     const error = await register(name.trim(), email.trim(), password)
     setLoading(false)
-    if (error) Alert.alert("Registration failed", error)
+    if (error) alert("Registration failed", error)
   }
 
   return (

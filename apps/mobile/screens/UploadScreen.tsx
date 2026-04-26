@@ -4,11 +4,11 @@ import {
   View,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   ActivityIndicator,
   ScrollView,
 } from "react-native"
 import { Text } from "../components/Text"
+import { useAlert } from "../lib/alert"
 import * as ImagePicker from "expo-image-picker"
 import * as DocumentPicker from "expo-document-picker"
 import { apiUploadFile, apiGet } from "../lib/api"
@@ -33,6 +33,7 @@ const TIER_COLORS: Record<string, string> = {
 }
 
 export default function UploadScreen() {
+  const { alert } = useAlert()
   const [uploading, setUploading] = useState(false)
   const [results, setResults] = useState<UploadResult[]>([])
   const [billing, setBilling] = useState<{ tier: string; filesUploadedThisMonth: number } | null>(null)
@@ -61,7 +62,7 @@ export default function UploadScreen() {
   async function handleCamera() {
     const perm = await ImagePicker.requestCameraPermissionsAsync()
     if (!perm.granted) {
-      Alert.alert("Permission required", "Camera access is needed to take receipt photos.")
+      alert("Permission required", "Camera access is needed to take receipt photos.")
       return
     }
     const result = await ImagePicker.launchCameraAsync({
@@ -82,7 +83,7 @@ export default function UploadScreen() {
   async function handleGallery() {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync()
     if (!perm.granted) {
-      Alert.alert("Permission required", "Photo library access is needed.")
+      alert("Permission required", "Photo library access is needed.")
       return
     }
     const result = await ImagePicker.launchImageLibraryAsync({

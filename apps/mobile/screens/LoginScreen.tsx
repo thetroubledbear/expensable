@@ -7,11 +7,11 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
-  Alert,
 } from "react-native"
 import { Text } from "../components/Text"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { useAuth } from "../lib/auth"
+import { useAlert } from "../lib/alert"
 import { FONTS } from "../lib/fonts"
 import { LogoMark } from "../components/LogoMark"
 
@@ -21,19 +21,20 @@ type Props = {
 
 export default function LoginScreen({ navigation }: Props) {
   const { signIn, promptGoogleSignIn, googleLoading } = useAuth()
+  const { alert } = useAlert()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
 
   async function handleLogin() {
     if (!email.trim() || !password.trim()) {
-      Alert.alert("Error", "Please fill in all fields")
+      alert("Error", "Please fill in all fields")
       return
     }
     setLoading(true)
     const error = await signIn(email.trim(), password)
     setLoading(false)
-    if (error) Alert.alert("Sign in failed", error)
+    if (error) alert("Sign in failed", error)
   }
 
   return (

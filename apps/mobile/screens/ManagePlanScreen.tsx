@@ -7,10 +7,10 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Linking,
-  Alert,
 } from "react-native"
 import { Text } from "../components/Text"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
+import { useAlert } from "../lib/alert"
 import { ChevronLeft, Check, Zap, Users, Star } from "lucide-react-native"
 import { apiGet } from "../lib/api"
 import { BASE_URL } from "../lib/api"
@@ -62,6 +62,7 @@ type Props = {
 }
 
 export default function ManagePlanScreen({ navigation }: Props) {
+  const { alert } = useAlert()
   const [billing, setBilling] = useState<Billing | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -74,7 +75,7 @@ export default function ManagePlanScreen({ navigation }: Props) {
 
   function handleUpgrade(planId: string) {
     const url = `${BASE_URL}/settings/billing?plan=${planId}`
-    Alert.alert(
+    alert(
       "Upgrade Plan",
       `Manage your subscription on the Expensable web app.`,
       [

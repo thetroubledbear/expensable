@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
-  Alert,
   TextInput,
   Modal,
 } from "react-native"
@@ -13,6 +12,7 @@ import { Text } from "../components/Text"
 import { FONTS } from "../lib/fonts"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { useAuth } from "../lib/auth"
+import { useAlert } from "../lib/alert"
 import { apiGet, apiPatch } from "../lib/api"
 import {
   LogOut, Home, CreditCard, User, RefreshCw, ChevronRight,
@@ -47,6 +47,7 @@ type Props = {
 
 export default function SettingsScreen({ navigation }: Props) {
   const { user, signOut } = useAuth()
+  const { alert } = useAlert()
   const [household, setHousehold] = useState<HouseholdData | null>(null)
   const [members, setMembers] = useState<Member[]>([])
   const [isOwner, setIsOwner] = useState(false)
@@ -96,7 +97,7 @@ export default function SettingsScreen({ navigation }: Props) {
       if ("id" in updated) setHousehold(updated)
       setEditing(false)
     } catch {
-      Alert.alert("Error", "Failed to save changes")
+      alert("Error", "Failed to save changes")
     } finally { setSaving(false) }
   }
 
@@ -118,7 +119,7 @@ export default function SettingsScreen({ navigation }: Props) {
   }
 
   function handleSignOut() {
-    Alert.alert("Sign out", "Are you sure?", [
+    alert("Sign out", "Are you sure?", [
       { text: "Cancel", style: "cancel" },
       { text: "Sign out", style: "destructive", onPress: signOut },
     ])
