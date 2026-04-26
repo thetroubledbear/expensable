@@ -11,10 +11,10 @@ import {
   TouchableOpacity,
   Modal,
   FlatList,
-  Alert,
 } from "react-native"
 import { Text } from "../components/Text"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
+import { useAlert } from "../lib/alert"
 import { apiGet, apiPatch, apiDelete } from "../lib/api"
 import { Search, X } from "lucide-react-native"
 
@@ -71,6 +71,7 @@ export default function TransactionsScreen({ navigation }: Props) {
   const [selectMode, setSelectMode] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [deleting, setDeleting] = useState(false)
+  const { alert } = useAlert()
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 400)
@@ -165,7 +166,7 @@ export default function TransactionsScreen({ navigation }: Props) {
   async function deleteSelected() {
     if (selectedIds.size === 0 || deleting) return
     const count = selectedIds.size
-    Alert.alert(
+    alert(
       `Delete ${count} transaction${count !== 1 ? "s" : ""}?`,
       "This action cannot be undone.",
       [
@@ -189,7 +190,7 @@ export default function TransactionsScreen({ navigation }: Props) {
               })
               exitSelectMode()
             } catch {
-              Alert.alert("Error", "Failed to delete transactions")
+              alert("Error", "Failed to delete transactions")
             } finally {
               setDeleting(false)
             }

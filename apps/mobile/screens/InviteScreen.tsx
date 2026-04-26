@@ -6,11 +6,11 @@ import {
   TouchableOpacity,
   Share,
   ActivityIndicator,
-  Alert,
 } from "react-native"
 import { Text } from "../components/Text"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { apiPost, BASE_URL } from "../lib/api"
+import { useAlert } from "../lib/alert"
 import { Link2, Users } from "lucide-react-native"
 
 type Props = {
@@ -21,6 +21,7 @@ type Props = {
 }
 
 export default function InviteScreen({ navigation }: Props) {
+  const { alert } = useAlert()
   const [loading, setLoading] = useState(false)
   const [inviteLink, setInviteLink] = useState<string | null>(null)
   const [expiresAt, setExpiresAt] = useState<string | null>(null)
@@ -36,10 +37,10 @@ export default function InviteScreen({ navigation }: Props) {
         setInviteLink(`${BASE_URL}/invite/${res.token}`)
         setExpiresAt(res.expiresAt ?? null)
       } else {
-        Alert.alert("Error", res.error ?? "Failed to generate invite")
+        alert("Error", res.error ?? "Failed to generate invite")
       }
     } catch {
-      Alert.alert("Error", "Network error")
+      alert("Error", "Network error")
     } finally {
       setLoading(false)
     }

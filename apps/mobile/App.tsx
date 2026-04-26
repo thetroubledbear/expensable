@@ -5,6 +5,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { Home, ArrowLeftRight, Upload, FolderOpen, Settings } from "lucide-react-native"
 import { useFonts, LibreBaskerville_400Regular, LibreBaskerville_700Bold } from "@expo-google-fonts/libre-baskerville"
 import { AuthProvider, useAuth } from "./lib/auth"
+import { AlertProvider } from "./lib/alert"
 import LoginScreen from "./screens/LoginScreen"
 import RegisterScreen from "./screens/RegisterScreen"
 import DashboardScreen from "./screens/DashboardScreen"
@@ -73,6 +74,8 @@ function TabNavigator() {
           height: 64,
           paddingBottom: 10,
           paddingTop: 6,
+          paddingLeft: 2,
+          paddingRight: 2,
         },
         tabBarLabelStyle: {
           fontSize: 10,
@@ -134,9 +137,11 @@ function RootNavigator() {
 export default function App() {
   return (
     <AuthProvider>
-      <NavigationContainer>
-        <RootNavigator />
-      </NavigationContainer>
+      <AlertProvider>
+        <NavigationContainer>
+          <RootNavigator />
+        </NavigationContainer>
+      </AlertProvider>
     </AuthProvider>
   )
 }

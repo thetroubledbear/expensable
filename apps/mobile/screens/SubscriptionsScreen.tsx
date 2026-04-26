@@ -7,11 +7,11 @@ import {
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
-  Alert,
   TouchableOpacity,
 } from "react-native"
 import { Text } from "../components/Text"
 import { apiGet, apiDeleteById } from "../lib/api"
+import { useAlert } from "../lib/alert"
 import { RefreshCw, Trash2 } from "lucide-react-native"
 
 interface Subscription {
@@ -53,6 +53,7 @@ function freqBadgeColor(freq: string): string {
 }
 
 export default function SubscriptionsScreen() {
+  const { alert } = useAlert()
   const [subs, setSubs] = useState<Subscription[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -84,7 +85,7 @@ export default function SubscriptionsScreen() {
   }
 
   function handleDelete(sub: Subscription) {
-    Alert.alert(
+    alert(
       "Delete subscription?",
       "This will remove it from tracking.",
       [

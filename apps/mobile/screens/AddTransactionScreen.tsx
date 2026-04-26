@@ -6,7 +6,6 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
-  Alert,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
@@ -14,6 +13,7 @@ import {
 import { Text } from "../components/Text"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { apiGet, apiPost } from "../lib/api"
+import { useAlert } from "../lib/alert"
 
 const CURRENCIES = ["USD", "EUR", "PLN", "GBP", "CHF", "CAD", "AUD", "JPY", "NOK", "SEK", "DKK", "NZD", "SGD", "HKD"]
 
@@ -22,6 +22,7 @@ type Props = {
 }
 
 export default function AddTransactionScreen({ navigation }: Props) {
+  const { alert } = useAlert()
   const today = new Date().toISOString().slice(0, 10)
   const [date, setDate] = useState(today)
   const [description, setDescription] = useState("")
@@ -40,15 +41,15 @@ export default function AddTransactionScreen({ navigation }: Props) {
   async function handleSave() {
     const amt = parseFloat(amount)
     if (!description.trim()) {
-      Alert.alert("Validation", "Description is required")
+      alert("Validation", "Description is required")
       return
     }
     if (isNaN(amt) || amt <= 0) {
-      Alert.alert("Validation", "Enter a valid positive amount")
+      alert("Validation", "Enter a valid positive amount")
       return
     }
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-      Alert.alert("Validation", "Date must be in YYYY-MM-DD format")
+      alert("Validation", "Date must be in YYYY-MM-DD format")
       return
     }
     setSaving(true)
@@ -64,10 +65,10 @@ export default function AddTransactionScreen({ navigation }: Props) {
       if (res.id) {
         navigation.goBack()
       } else {
-        Alert.alert("Error", res.error ?? "Failed to create transaction")
+        alert("Error", res.error ?? "Failed to create transaction")
       }
     } catch {
-      Alert.alert("Error", "Network error")
+      alert("Error", "Network error")
     } finally {
       setSaving(false)
     }

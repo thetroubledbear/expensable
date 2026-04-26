@@ -8,9 +8,9 @@ import {
   ActivityIndicator,
   RefreshControl,
   TouchableOpacity,
-  Alert,
 } from "react-native"
 import { Text } from "../components/Text"
+import { useAlert } from "../lib/alert"
 import { apiGet, apiDeleteById } from "../lib/api"
 import {
   FileText,
@@ -62,6 +62,7 @@ function StatusIcon({ status }: { status: string }) {
 }
 
 export default function FilesScreen() {
+  const { alert } = useAlert()
   const [files, setFiles] = useState<UploadedFile[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -86,7 +87,7 @@ export default function FilesScreen() {
 
   function confirmDelete(file: UploadedFile) {
     const txCount = file._count.transactions
-    Alert.alert(
+    alert(
       "Delete file",
       `Delete "${file.name}"${txCount > 0 ? ` and its ${txCount} transaction${txCount !== 1 ? "s" : ""}` : ""}?`,
       [
@@ -99,7 +100,7 @@ export default function FilesScreen() {
               await apiDeleteById(`/api/files/${file.id}`)
               setFiles((prev) => prev.filter((f) => f.id !== file.id))
             } catch {
-              Alert.alert("Error", "Failed to delete file")
+              alert("Error", "Failed to delete file")
             }
           },
         },
