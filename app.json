@@ -7,6 +7,13 @@
     },
     "android": {
       "package": "com.thetroubledbear.expensable"
-    }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/7ec4980c-e686-4da6-b9f5-d01425cd0f1f"
+    },
+    "ios": {}
   }
 }
