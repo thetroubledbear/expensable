@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
+import { useFocusEffect } from "@react-navigation/native"
 import { FONTS } from "../lib/fonts"
 import {
   View,
@@ -76,7 +77,7 @@ export default function FilesScreen() {
     }
   }, [])
 
-  useEffect(() => { load() }, [load])
+  useFocusEffect(useCallback(() => { load() }, [load]))
 
   function onRefresh() {
     setRefreshing(true)
