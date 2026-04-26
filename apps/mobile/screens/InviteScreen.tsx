@@ -2,13 +2,13 @@ import { useState } from "react"
 import { FONTS } from "../lib/fonts"
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   Share,
   ActivityIndicator,
   Alert,
 } from "react-native"
+import { Text } from "../components/Text"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { apiPost, BASE_URL } from "../lib/api"
 import { Link2, Users } from "lucide-react-native"

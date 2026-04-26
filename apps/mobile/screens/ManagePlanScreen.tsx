@@ -2,7 +2,6 @@ import { useEffect, useState } from "react"
 import { FONTS } from "../lib/fonts"
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
@@ -10,6 +9,7 @@ import {
   Linking,
   Alert,
 } from "react-native"
+import { Text } from "../components/Text"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { ChevronLeft, Check, Zap, Users, Star } from "lucide-react-native"
 import { apiGet } from "../lib/api"

@@ -2,7 +2,6 @@ import { useEffect, useState } from "react"
 import { FONTS } from "../lib/fonts"
 import {
   View,
-  Text,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
@@ -14,6 +13,7 @@ import {
   Platform,
   RefreshControl,
 } from "react-native"
+import { Text } from "../components/Text"
 import { apiGet, apiPost, apiPatch, apiDeleteById } from "../lib/api"
 import { Pencil, Trash2 } from "lucide-react-native"
 

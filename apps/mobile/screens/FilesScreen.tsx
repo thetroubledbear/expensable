@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from "react"
 import { FONTS } from "../lib/fonts"
 import {
   View,
-  Text,
   ScrollView,
   StyleSheet,
   ActivityIndicator,
@@ -10,6 +9,7 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native"
+import { Text } from "../components/Text"
 import { apiGet, apiDeleteById } from "../lib/api"
 import {
   FileText,

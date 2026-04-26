@@ -2,7 +2,6 @@ import { useEffect, useState } from "react"
 import { FONTS } from "../lib/fonts"
 import {
   View,
-  Text,
   ScrollView,
   StyleSheet,
   ActivityIndicator,
@@ -13,6 +12,7 @@ import {
   FlatList,
   Alert,
 } from "react-native"
+import { Text } from "../components/Text"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { apiGet, apiPatch, apiDelete } from "../lib/api"
 import { Search, X } from "lucide-react-native"

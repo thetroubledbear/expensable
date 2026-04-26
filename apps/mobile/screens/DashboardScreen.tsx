@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react"
 import { Mic, MicOff } from "lucide-react-native"
 import {
   View,
-  Text,
   ScrollView,
   StyleSheet,
   ActivityIndicator,
@@ -12,6 +11,7 @@ import {
   Modal,
   Pressable,
 } from "react-native"
+import { Text } from "../components/Text"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from "expo-speech-recognition"
 import { useAuth } from "../lib/auth"
