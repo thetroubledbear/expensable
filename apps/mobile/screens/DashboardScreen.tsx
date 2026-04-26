@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { Mic, MicOff } from "lucide-react-native"
 import {
   View,
@@ -13,6 +13,7 @@ import {
 } from "react-native"
 import { Text } from "../components/Text"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
+import { useFocusEffect } from "@react-navigation/native"
 import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from "expo-speech-recognition"
 import { useAuth } from "../lib/auth"
 import { apiGet, apiPost, apiPatch } from "../lib/api"
@@ -243,8 +244,11 @@ export default function DashboardScreen() {
   const [socialData, setSocialData] = useState<{ optIn: boolean; comparisons?: SocialItem[] } | null>(null)
   const [socialOptInLoading, setSocialOptInLoading] = useState(false)
 
+  // Reload core stats whenever this tab comes into focus (picks up changes from other screens)
+  useFocusEffect(useCallback(() => { load() }, []))
+
+  // Load insights + extras once on mount — they're heavy and don't need per-focus refresh
   useEffect(() => {
-    load()
     loadInsights()
     loadExtras()
   }, [])

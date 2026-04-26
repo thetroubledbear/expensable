@@ -34,7 +34,13 @@ export async function apiDelete<T = unknown>(path: string, body?: unknown): Prom
     headers: body ? { "Content-Type": "application/json" } : undefined,
     body: body ? JSON.stringify(body) : undefined,
   })
-  return res.json() as Promise<T>
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` })) as { error?: string }
+    throw new Error(err.error ?? `HTTP ${res.status}`)
+  }
+  const text = await res.text()
+  if (!text.trim()) return {} as T
+  try { return JSON.parse(text) as T } catch { return {} as T }
 }
 
 export async function getCsrfToken(): Promise<string> {

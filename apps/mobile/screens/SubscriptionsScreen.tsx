@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
+import { useFocusEffect } from "@react-navigation/native"
 import { FONTS } from "../lib/fonts"
 import {
   View,
@@ -58,7 +59,7 @@ export default function SubscriptionsScreen() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [householdCurrency, setHouseholdCurrency] = useState("USD")
 
-  useEffect(() => { load() }, [])
+  useFocusEffect(useCallback(() => { load() }, []))
 
   useEffect(() => {
     apiGet<{ defaultCurrency?: string }>("/api/household")

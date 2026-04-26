@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
+import { useFocusEffect } from "@react-navigation/native"
 import { FONTS } from "../lib/fonts"
 import {
   View,
@@ -91,6 +92,9 @@ export default function TransactionsScreen({ navigation }: Props) {
   useEffect(() => { setPage(1) }, [debouncedSearch, typeFilter, categoryFilter, needsReview])
 
   useEffect(() => { load() }, [debouncedSearch, typeFilter, categoryFilter, needsReview, page])
+
+  // Reload when returning from AddTransaction screen
+  useFocusEffect(useCallback(() => { load() }, []))
 
   async function load() {
     try {
