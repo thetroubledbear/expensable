@@ -6,6 +6,13 @@ import { db } from "@expensable/db"
 const patchSchema = z.object({
   categoryId: z.string().cuid().nullable().optional(),
   needsReview: z.boolean().optional(),
+  isDuplicate: z.boolean().optional(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  merchantName: z.string().max(200).nullable().optional(),
+  description: z.string().min(1).max(500).optional(),
+  amount: z.number().positive().optional(),
+  type: z.enum(["debit", "credit"]).optional(),
+  currency: z.string().length(3).toUpperCase().optional(),
 })
 
 export async function PATCH(
@@ -35,7 +42,12 @@ export async function PATCH(
     return NextResponse.json({ error: "Invalid input" }, { status: 400 })
   }
 
-  if (parsed.data.categoryId === undefined && parsed.data.needsReview === undefined) {
+  const d = parsed.data
+  if (
+    d.categoryId === undefined && d.needsReview === undefined && d.isDuplicate === undefined &&
+    d.date === undefined && d.merchantName === undefined && d.description === undefined &&
+    d.amount === undefined && d.type === undefined && d.currency === undefined
+  ) {
     return NextResponse.json({ error: "Nothing to update" }, { status: 400 })
   }
 
@@ -57,8 +69,15 @@ export async function PATCH(
     const updated = await db.transaction.update({
       where: { id },
       data: {
-        ...(parsed.data.categoryId !== undefined ? { categoryId: parsed.data.categoryId } : {}),
-        ...(parsed.data.needsReview !== undefined ? { needsReview: parsed.data.needsReview } : {}),
+        ...(d.categoryId !== undefined ? { categoryId: d.categoryId } : {}),
+        ...(d.needsReview !== undefined ? { needsReview: d.needsReview } : {}),
+        ...(d.isDuplicate !== undefined ? { isDuplicate: d.isDuplicate } : {}),
+        ...(d.date !== undefined ? { date: new Date(d.date) } : {}),
+        ...(d.merchantName !== undefined ? { merchantName: d.merchantName } : {}),
+        ...(d.description !== undefined ? { description: d.description } : {}),
+        ...(d.amount !== undefined ? { amount: d.amount } : {}),
+        ...(d.type !== undefined ? { type: d.type } : {}),
+        ...(d.currency !== undefined ? { currency: d.currency } : {}),
       },
       include: {
         category: { select: { id: true, name: true, icon: true, color: true } },

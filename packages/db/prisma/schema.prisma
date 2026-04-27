@@ -152,6 +152,7 @@ model Transaction {
   categoryId         String?
   merchantName       String?
   needsReview        Boolean   @default(false)
+  isDuplicate        Boolean   @default(false)
   financialAccountId String?
   transferPairId     String?
   createdAt          DateTime  @default(now())
@@ -161,6 +162,10 @@ model Transaction {
   file             UploadedFile?     @relation(fields: [fileId], references: [id], onDelete: Cascade)
   category         Category?         @relation(fields: [categoryId], references: [id])
   financialAccount FinancialAccount? @relation(fields: [financialAccountId], references: [id], onDelete: SetNull)
+
+  @@index([householdId, date])
+  @@index([householdId, type, date])
+  @@index([householdId, needsReview])
 }
 
 // ─── Categories ───────────────────────────────────────────────────────────────

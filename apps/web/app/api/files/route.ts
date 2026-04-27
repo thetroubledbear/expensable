@@ -342,12 +342,50 @@ async function processFile(
         if (!acct) financialAccountId = null
       }
 
+      // Intra-batch duplicate detection
+      const batchKeys = new Set<string>()
+      const batchDupeFlags = result.transactions.map((t) => {
+        const key = `${(t.date ?? "").slice(0, 10)}|${t.amount ?? 0}|${t.type}|${(t.description ?? "").toLowerCase()}`
+        const isDup = batchKeys.has(key)
+        batchKeys.add(key)
+        return isDup
+      })
+
+      // Cross-file duplicate detection against existing transactions
+      const validDates = result.transactions
+        .map((t) => (t.date ? new Date(t.date) : null))
+        .filter((d): d is Date => d !== null && !isNaN(d.getTime()))
+      const existingKeys = new Set<string>()
+      if (validDates.length > 0) {
+        const minDate = new Date(Math.min(...validDates.map((d) => d.getTime())))
+        const maxDate = new Date(Math.max(...validDates.map((d) => d.getTime())))
+        const existing = await db.transaction.findMany({
+          where: {
+            householdId,
+            date: {
+              gte: new Date(minDate.getTime() - 86_400_000),
+              lte: new Date(maxDate.getTime() + 86_400_000),
+            },
+          },
+          select: { date: true, amount: true, type: true, description: true },
+        })
+        for (const e of existing) {
+          existingKeys.add(
+            `${e.date.toISOString().slice(0, 10)}|${e.amount}|${e.type}|${(e.description ?? "").toLowerCase()}`
+          )
+        }
+      }
+
+      let duplicateCount = 0
       await db.transaction.createMany({
-        data: result.transactions.map((t) => {
+        data: result.transactions.map((t, i) => {
           const hint = t.categoryHint?.toLowerCase()
           const catName = hint ? HINT_TO_CATEGORY[hint] : null
           const categoryId = catName ? (catByName.get(catName) ?? null) : null
           const uncertain = !hint || hint === "other" || hint === "transfer" || !categoryId
+          const key = `${(t.date ?? "").slice(0, 10)}|${t.amount ?? 0}|${t.type}|${(t.description ?? "").toLowerCase()}`
+          const isDuplicate = batchDupeFlags[i] || existingKeys.has(key)
+          if (isDuplicate) duplicateCount++
           return {
             householdId,
             fileId,
@@ -359,10 +397,22 @@ async function processFile(
             merchantName: normalizeMerchant(t.merchantName) ?? null,
             categoryId,
             financialAccountId,
-            needsReview: Boolean(uncertain || t.needsReview || !t.date || !t.currency),
+            isDuplicate,
+            needsReview: Boolean(uncertain || t.needsReview || !t.date || !t.currency || isDuplicate),
           }
         }),
       })
+
+      if (duplicateCount > 0) {
+        await db.notification.create({
+          data: {
+            householdId,
+            type: "duplicate",
+            title: `${duplicateCount} possible duplicate${duplicateCount > 1 ? "s" : ""} detected`,
+            body: `${duplicateCount} transaction${duplicateCount > 1 ? "s" : ""} in the uploaded file may already exist. Review flagged items in the Transactions page.`,
+          },
+        })
+      }
 
       // Fetch created IDs for anomaly detection
       const createdIds = await db.transaction.findMany({

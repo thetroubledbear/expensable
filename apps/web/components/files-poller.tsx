@@ -8,6 +8,7 @@ interface FileStatus {
   id: string
   name: string
   status: string
+  processedAt: string | null
 }
 
 interface Toast {
@@ -35,6 +36,15 @@ export function FilesPoller() {
         for (const f of data) map[f.id] = f.status
         prevStatuses.current = map
         initialized.current = true
+        // Refresh if any file was recently processed — page may have rendered before it finished
+        const fiveMinAgo = Date.now() - 5 * 60 * 1000
+        const hasRecentlyDone = data.some(
+          (f) =>
+            (f.status === "done" || f.status === "failed") &&
+            f.processedAt != null &&
+            new Date(f.processedAt).getTime() > fiveMinAgo
+        )
+        if (hasRecentlyDone) router.refresh()
         return
       }
 
