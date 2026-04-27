@@ -9,19 +9,14 @@
     "start": "next start",
     "lint": "eslint .",
     "type-check": "tsc --noEmit",
-    "db:generate": "cd ../../packages/db && npx prisma generate",
-    "cap:sync": "cap sync android",
-    "cap:open": "cap open android"
+    "db:generate": "cd ../../packages/db && npx prisma generate"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",
-    "@expensable/api-client": "*",
     "@expensable/db": "*",
     "@expensable/types": "*",
-    "@expensable/utils": "*",
     "@google-cloud/storage": "^7.19.0",
     "@google/generative-ai": "^0.24.0",
-    "@stripe/stripe-js": "^9.2.0",
     "@types/bcryptjs": "^2.4.6",
     "bcryptjs": "^3.0.3",
     "lucide-react": "^1.8.0",
@@ -37,9 +32,6 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@capacitor/android": "^8.3.1",
-    "@capacitor/cli": "^8.3.1",
-    "@capacitor/core": "^8.3.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

@@ -13,7 +13,7 @@ type FinancialAccount = {
 
 type Transaction = {
   id: string
-  date: string
+  date: string | Date
   description: string
   merchantName: string | null
   amount: number
