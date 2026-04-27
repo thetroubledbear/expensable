@@ -53,7 +53,9 @@ Rules:
 function extractJson(text: string): ParseResult {
   const match = text.match(/\{[\s\S]*\}/)
   if (!match) throw new Error("No parseable JSON in response")
-  return JSON.parse(match[0]) as ParseResult
+  // Strip control chars invalid in JSON (keep tab/LF/CR which are structural whitespace)
+  const cleaned = match[0].replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "")
+  return JSON.parse(cleaned) as ParseResult
 }
 
 export async function parseFileContent(

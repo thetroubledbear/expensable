@@ -35,6 +35,8 @@ interface FinancialAccount {
 const ACCEPT = {
   "text/csv": [".csv"],
   "application/csv": [".csv"],
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+  "application/vnd.ms-excel": [".xls"],
   "application/pdf": [".pdf"],
   "image/jpeg": [".jpg", ".jpeg"],
   "image/png": [".png"],
@@ -228,7 +230,7 @@ export function UploadDropzone() {
         </p>
         <p className="text-sm text-slate-400 mb-5">or click to browse your files</p>
         <div className="flex items-center gap-2">
-          {["CSV", "PDF", "JPEG · PNG · WebP"].map((t) => (
+          {["CSV · XLSX", "PDF", "JPEG · PNG · WebP"].map((t) => (
             <span
               key={t}
               className="px-3 py-1 rounded-full bg-slate-100 text-slate-500 text-xs font-medium"
