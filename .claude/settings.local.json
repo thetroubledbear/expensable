@@ -54,7 +54,8 @@
       "PowerShell(Select-String -Path \"C:\\\\Users\\\\vtoto\\\\Desktop\\\\Expensable\\\\package-lock.json\" -Pattern \"expo-updates\" | ForEach-Object { $_.Line } | Select-Object -First 30)",
       "mcp__claude_ai_Notion__notion-update-page",
       "Bash(eas update *)",
-      "Bash(xargs grep *)"
+      "Bash(xargs grep *)",
+      "mcp__ide__getDiagnostics"
     ]
   },
   "enableAllProjectMcpServers": true,

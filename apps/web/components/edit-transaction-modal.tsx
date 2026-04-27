@@ -24,7 +24,7 @@ const COLOR_CLASSES: Record<string, string> = {
 
 export interface EditableTransaction {
   id: string
-  date: string
+  date: string | Date
   description: string
   merchantName: string | null
   amount: number
@@ -44,7 +44,9 @@ interface Props {
 }
 
 export function EditTransactionModal({ tx, categories, onSave, onClose }: Props) {
-  const [date, setDate] = useState(tx.date.slice(0, 10))
+  const [date, setDate] = useState(() =>
+    new Date(tx.date instanceof Date ? tx.date : new Date(tx.date)).toISOString().slice(0, 10)
+  )
   const [merchantName, setMerchantName] = useState(tx.merchantName ?? "")
   const [description, setDescription] = useState(tx.description)
   const [amount, setAmount] = useState(String(tx.amount))
