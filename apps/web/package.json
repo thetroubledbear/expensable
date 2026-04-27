@@ -33,6 +33,7 @@
     "react-grid-layout": "^2.2.3",
     "recharts": "^3.8.1",
     "stripe": "^22.0.2",
+    "xlsx": "^0.18.5",
     "zod": "^4.3.6"
   },
   "devDependencies": {

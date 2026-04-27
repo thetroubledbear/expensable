@@ -15,6 +15,8 @@ const MIME_TO_TYPE: Record<string, FileType> = {
   "text/csv": "csv",
   "application/csv": "csv",
   "text/plain": "csv",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "csv",
+  "application/vnd.ms-excel": "csv",
   "application/pdf": "pdf",
   "image/jpeg": "image",
   "image/jpg": "image",
@@ -22,6 +24,11 @@ const MIME_TO_TYPE: Record<string, FileType> = {
   "image/webp": "image",
   "image/heic": "image",
 }
+
+const XLSX_MIMES = new Set([
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.ms-excel",
+])
 
 const MAX_BYTES = 20 * 1024 * 1024
 
@@ -77,6 +84,10 @@ function validateMagicBytes(buffer: Buffer, fileType: FileType, mimeType: string
   }
 
   if (fileType === "csv") {
+    // XLSX is a ZIP file — accept if PK magic bytes present
+    if (buffer[0] === 0x50 && buffer[1] === 0x4b && buffer[2] === 0x03 && buffer[3] === 0x04) {
+      return XLSX_MIMES.has(mimeType)
+    }
     // Must be valid UTF-8 text; reject if it looks like a binary file
     try {
       const sample = buffer.slice(0, 4096).toString("utf-8")
@@ -257,6 +268,22 @@ export async function POST(req: NextRequest) {
   return NextResponse.json(updated, { status: 201 })
 }
 
+const CSV_CHUNK_SIZE = 300
+
+function splitCsvChunks(csv: string): string[] {
+  const lines = csv.split("\n")
+  const headerIdx = lines.findIndex((l) => l.trim().length > 0)
+  if (headerIdx === -1) return [csv]
+  const header = lines[headerIdx]
+  const dataLines = lines.slice(headerIdx + 1).filter((l) => l.trim().length > 0)
+  if (dataLines.length <= CSV_CHUNK_SIZE) return [csv]
+  const chunks: string[] = []
+  for (let i = 0; i < dataLines.length; i += CSV_CHUNK_SIZE) {
+    chunks.push([header, ...dataLines.slice(i, i + CSV_CHUNK_SIZE)].join("\n"))
+  }
+  return chunks
+}
+
 async function processFile(
   fileId: string,
   storageKey: string,
@@ -272,7 +299,27 @@ async function processFile(
     let result: ParseResult
 
     if (fileType === "csv") {
-      result = await parseFileContent(buffer.toString("utf-8"), "csv")
+      let csvText: string
+      if (XLSX_MIMES.has(mimeType)) {
+        const XLSX = await import("xlsx")
+        const wb = XLSX.read(buffer, { type: "buffer" })
+        csvText = XLSX.utils.sheet_to_csv(wb.Sheets[wb.SheetNames[0]])
+      } else {
+        csvText = buffer.toString("utf-8")
+      }
+      const chunks = splitCsvChunks(csvText)
+      const allResults: ParseResult[] = []
+      for (const chunk of chunks) {
+        allResults.push(await parseFileContent(chunk, "csv"))
+      }
+      result = {
+        transactions: allResults.flatMap((r) => r.transactions),
+        confidence: allResults.some((r) => r.confidence === "low")
+          ? "low"
+          : allResults.some((r) => r.confidence === "medium")
+            ? "medium"
+            : "high",
+      }
     } else if (fileType === "pdf") {
       result = await parseFileContent({ type: "pdf", data: buffer.toString("base64") }, "pdf")
     } else {
