@@ -23,6 +23,8 @@ function estimateMonthly(amount: number, frequency: string): number {
   return amount
 }
 
+export const dynamic = "force-dynamic"
+
 export default async function DashboardPage() {
   const session = await requireAuth()
 

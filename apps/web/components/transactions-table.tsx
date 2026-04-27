@@ -1,8 +1,9 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Search, AlertTriangle, ChevronLeft, ChevronRight, Loader2, X, Receipt, Trash2 } from "lucide-react"
+import { Search, AlertTriangle, ChevronLeft, ChevronRight, Loader2, X, Receipt, Trash2, Pencil } from "lucide-react"
 import { CategoryPicker, type Category } from "./category-picker"
+import { EditTransactionModal, type EditableTransaction } from "./edit-transaction-modal"
 
 type FinancialAccount = {
   id: string
@@ -21,6 +22,7 @@ type Transaction = {
   categoryId: string | null
   category: Category | null
   needsReview: boolean
+  isDuplicate: boolean
   financialAccountId: string | null
   financialAccount: FinancialAccount | null
 }
@@ -69,6 +71,7 @@ export function TransactionsTable({ initialData, categories, accounts, defaultCu
 
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [deleting, setDeleting] = useState(false)
+  const [editingTx, setEditingTx] = useState<Transaction | null>(null)
 
   const isMounted = useRef(false)
 
@@ -127,6 +130,29 @@ export function TransactionsTable({ initialData, categories, accounts, defaultCu
     setTransactions((prev) =>
       prev.map((tx) => (tx.id === txId ? { ...tx, category, categoryId: category?.id ?? null } : tx))
     )
+  }
+
+  function handleEditSave(updated: EditableTransaction) {
+    setTransactions((prev) =>
+      prev.map((t) =>
+        t.id === updated.id
+          ? {
+              ...t,
+              date: updated.date,
+              merchantName: updated.merchantName,
+              description: updated.description,
+              amount: updated.amount,
+              type: updated.type,
+              currency: updated.currency,
+              categoryId: updated.categoryId,
+              category: updated.category,
+              needsReview: updated.needsReview,
+              isDuplicate: updated.isDuplicate,
+            }
+          : t
+      )
+    )
+    setEditingTx(null)
   }
 
   async function toggleReview(tx: Transaction) {
@@ -384,6 +410,11 @@ export function TransactionsTable({ initialData, categories, accounts, defaultCu
                       {tx.merchantName && tx.description !== tx.merchantName && (
                         <p className="text-xs text-slate-400 truncate max-w-xs">{tx.description}</p>
                       )}
+                      {tx.isDuplicate && (
+                        <span className="inline-flex items-center mt-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-600 border border-amber-100">
+                          Possible duplicate
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3.5 text-right tabular-nums whitespace-nowrap">
                       <span
@@ -415,17 +446,26 @@ export function TransactionsTable({ initialData, categories, accounts, defaultCu
                       </td>
                     )}
                     <td className="px-4 py-3.5 text-right">
-                      <button
-                        onClick={() => toggleReview(tx)}
-                        title={tx.needsReview ? "Mark as reviewed" : "Flag for review"}
-                        className={`p-1.5 rounded-lg transition-all ${
-                          tx.needsReview
-                            ? "text-amber-500 bg-amber-50 hover:bg-amber-100"
-                            : "text-slate-200 hover:text-amber-400 opacity-0 group-hover:opacity-100"
-                        }`}
-                      >
-                        <AlertTriangle className="w-3.5 h-3.5" />
-                      </button>
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          onClick={() => setEditingTx(tx)}
+                          title="Edit transaction"
+                          className="p-1.5 rounded-lg text-slate-300 hover:text-emerald-600 hover:bg-emerald-50 opacity-0 group-hover:opacity-100 transition-all"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => toggleReview(tx)}
+                          title={tx.needsReview ? "Mark as reviewed" : "Flag for review"}
+                          className={`p-1.5 rounded-lg transition-all ${
+                            tx.needsReview
+                              ? "text-amber-500 bg-amber-50 hover:bg-amber-100"
+                              : "text-slate-200 hover:text-amber-400 opacity-0 group-hover:opacity-100"
+                          }`}
+                        >
+                          <AlertTriangle className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 )
@@ -458,6 +498,15 @@ export function TransactionsTable({ initialData, categories, accounts, defaultCu
             </div>
           )}
         </div>
+      )}
+
+      {editingTx && (
+        <EditTransactionModal
+          tx={editingTx}
+          categories={categories}
+          onSave={handleEditSave}
+          onClose={() => setEditingTx(null)}
+        />
       )}
     </div>
   )
