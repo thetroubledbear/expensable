@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { Mic, MicOff } from "lucide-react-native"
+import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs"
 import {
   View,
   ScrollView,
@@ -124,7 +125,15 @@ function Badge({ text, up }: { text: string; up: boolean }) {
 
 // ─── Main Screen ─────────────────────────────────────────────────────────────
 
-export default function DashboardScreen() {
+type TabParamList = {
+  Dashboard: undefined
+  Transactions: { screen: string; params: { initialSearch?: string } }
+  Upload: undefined
+  Files: undefined
+  Settings: undefined
+}
+
+export default function DashboardScreen({ navigation }: { navigation: BottomTabNavigationProp<TabParamList, "Dashboard"> }) {
   const { user } = useAuth()
   const insets = useSafeAreaInsets()
 
@@ -539,7 +548,12 @@ export default function DashboardScreen() {
               <Card>
                 <SectionTitle>Recent Transactions</SectionTitle>
                 {data!.recentTx.map((tx) => (
-                  <View key={tx.id} style={styles.row}>
+                  <TouchableOpacity
+                    key={tx.id}
+                    style={styles.row}
+                    onPress={() => navigation.navigate("Transactions", { screen: "TransactionsList", params: { initialSearch: tx.merchantName ?? tx.description ?? "" } })}
+                    activeOpacity={0.6}
+                  >
                     <View style={styles.rowLeft}>
                       <Text style={styles.rowTitle} numberOfLines={1}>{tx.merchantName ?? tx.description ?? "Unknown"}</Text>
                       <Text style={styles.rowSub}>{new Date(tx.date).toLocaleDateString("en", { month: "short", day: "numeric" })}</Text>
@@ -547,7 +561,7 @@ export default function DashboardScreen() {
                     <Text style={[styles.rowAmount, tx.type === "credit" ? styles.green : styles.red]}>
                       {tx.type === "credit" ? "+" : "-"}{fmt(tx.amount, data!.currency)}
                     </Text>
-                  </View>
+                  </TouchableOpacity>
                 ))}
               </Card>
             )}
@@ -557,13 +571,18 @@ export default function DashboardScreen() {
               <Card>
                 <SectionTitle>Top Spending</SectionTitle>
                 {data!.topMerchants.map((m, i) => (
-                  <View key={i} style={styles.merchantRow}>
+                  <TouchableOpacity
+                    key={i}
+                    style={styles.merchantRow}
+                    onPress={() => navigation.navigate("Transactions", { screen: "TransactionsList", params: { initialSearch: m.merchantName ?? "" } })}
+                    activeOpacity={0.6}
+                  >
                     <View style={styles.merchantTop}>
                       <Text style={styles.rowTitle} numberOfLines={1}>{m.merchantName ?? "Unknown"}</Text>
                       <Text style={styles.rowAmount}>{fmt(m.amount, data!.currency)}</Text>
                     </View>
                     <Bar pct={m.pct} />
-                  </View>
+                  </TouchableOpacity>
                 ))}
               </Card>
             )}

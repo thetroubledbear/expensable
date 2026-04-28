@@ -1,5 +1,7 @@
-import { useCallback, useEffect, useState } from "react"
+"use no memo"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useFocusEffect } from "@react-navigation/native"
+import type { RouteProp } from "@react-navigation/native"
 import { FONTS } from "../lib/fonts"
 import {
   View,
@@ -11,6 +13,8 @@ import {
   TouchableOpacity,
   Modal,
   FlatList,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native"
 import { Text } from "../components/Text"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
@@ -22,6 +26,7 @@ interface Category {
   id: string
   name: string
   color: string
+  icon?: string
 }
 
 interface Transaction {
@@ -50,11 +55,23 @@ function fmt(amount: number, currency: string): string {
   }
 }
 
-type Props = {
-  navigation: NativeStackNavigationProp<{ TransactionsList: undefined; AddTransaction: undefined }, "TransactionsList">
+type TransactionsStackParams = {
+  TransactionsList: { initialSearch?: string } | undefined
+  AddTransaction: undefined
 }
 
-export default function TransactionsScreen({ navigation }: Props) {
+type Props = {
+  navigation: NativeStackNavigationProp<TransactionsStackParams, "TransactionsList">
+  route: RouteProp<TransactionsStackParams, "TransactionsList">
+}
+
+interface UndoQueue {
+  ids: Set<string>
+  snapshots: Transaction[]
+  countdown: number
+}
+
+export default function TransactionsScreen({ navigation, route }: Props) {
   const [data, setData] = useState<ApiResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -66,12 +83,44 @@ export default function TransactionsScreen({ navigation }: Props) {
   const [categories, setCategories] = useState<Category[]>([])
   const [categoryFilter, setCategoryFilter] = useState("")
   const [needsReview, setNeedsReview] = useState(false)
+
+  // Category assignment
   const [editingTx, setEditingTx] = useState<Transaction | null>(null)
   const [categoryModalOpen, setCategoryModalOpen] = useState(false)
+  const [categoryPickerFor, setCategoryPickerFor] = useState<"inline" | "edit">("inline")
+
+  // Select & delete
   const [selectMode, setSelectMode] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
-  const [deleting, setDeleting] = useState(false)
+
+  // Undo delete
+  const [undoQueue, setUndoQueue] = useState<UndoQueue | null>(null)
+  const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const undoIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  // Edit modal
+  const [editModal, setEditModal] = useState<Transaction | null>(null)
+  const [editForm, setEditForm] = useState({
+    merchantName: "",
+    description: "",
+    amount: "",
+    type: "debit" as "debit" | "credit",
+    date: "",
+    categoryId: null as string | null,
+    category: null as Category | null,
+  })
+  const [editSaving, setEditSaving] = useState(false)
+
   const { alert } = useAlert()
+
+  // Apply initialSearch param from navigation
+  useEffect(() => {
+    const q = route.params?.initialSearch
+    if (q) {
+      setSearch(q)
+      navigation.setParams({ initialSearch: undefined })
+    }
+  }, [route.params?.initialSearch])
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 400)
@@ -91,10 +140,8 @@ export default function TransactionsScreen({ navigation }: Props) {
   }, [])
 
   useEffect(() => { setPage(1) }, [debouncedSearch, typeFilter, categoryFilter, needsReview])
-
   useEffect(() => { load() }, [debouncedSearch, typeFilter, categoryFilter, needsReview, page])
 
-  // Reload when returning from AddTransaction screen
   useFocusEffect(useCallback(() => { load() }, []))
 
   async function load() {
@@ -118,12 +165,25 @@ export default function TransactionsScreen({ navigation }: Props) {
     load()
   }
 
+  // ── Category picker ──────────────────────────────────────────────────────────
+
   function openCategoryModal(tx: Transaction) {
     setEditingTx(tx)
+    setCategoryPickerFor("inline")
+    setCategoryModalOpen(true)
+  }
+
+  function openEditCategoryPicker() {
+    setCategoryPickerFor("edit")
     setCategoryModalOpen(true)
   }
 
   async function assignCategory(cat: Category | null) {
+    if (categoryPickerFor === "edit") {
+      setEditForm((f) => ({ ...f, categoryId: cat?.id ?? null, category: cat }))
+      setCategoryModalOpen(false)
+      return
+    }
     if (!editingTx) return
     const body = cat ? { categoryId: cat.id } : { categoryId: null }
     try {
@@ -141,6 +201,8 @@ export default function TransactionsScreen({ navigation }: Props) {
     setCategoryModalOpen(false)
     setEditingTx(null)
   }
+
+  // ── Select mode ──────────────────────────────────────────────────────────────
 
   function toggleSelect(id: string) {
     setSelectedIds((prev) => {
@@ -163,41 +225,138 @@ export default function TransactionsScreen({ navigation }: Props) {
     setSelectedIds(new Set())
   }
 
+  // ── Undo delete ──────────────────────────────────────────────────────────────
+
+  function clearUndoTimers() {
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current)
+    if (undoIntervalRef.current) clearInterval(undoIntervalRef.current)
+  }
+
+  function handleUndo() {
+    if (!undoQueue) return
+    clearUndoTimers()
+    setData((prev) => {
+      if (!prev) return prev
+      return {
+        ...prev,
+        data: [...undoQueue.snapshots, ...prev.data],
+        total: prev.total + undoQueue.snapshots.length,
+      }
+    })
+    setUndoQueue(null)
+  }
+
   async function deleteSelected() {
-    if (selectedIds.size === 0 || deleting) return
-    const count = selectedIds.size
-    alert(
-      `Delete ${count} transaction${count !== 1 ? "s" : ""}?`,
-      "This action cannot be undone.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            setDeleting(true)
-            try {
-              await apiDelete("/api/transactions", {
-                ids: Array.from(selectedIds),
-              })
-              setData((prev) => {
-                if (!prev) return prev
-                return {
-                  ...prev,
-                  data: prev.data.filter((tx) => !selectedIds.has(tx.id)),
-                  total: Math.max(0, prev.total - selectedIds.size),
+    if (selectedIds.size === 0) return
+    const snapshots = data?.data.filter((tx) => selectedIds.has(tx.id)) ?? []
+    const ids = new Set(selectedIds)
+
+    // Optimistic remove
+    setData((prev) => {
+      if (!prev) return prev
+      return {
+        ...prev,
+        data: prev.data.filter((tx) => !ids.has(tx.id)),
+        total: Math.max(0, prev.total - ids.size),
+      }
+    })
+    exitSelectMode()
+    clearUndoTimers()
+
+    setUndoQueue({ ids, snapshots, countdown: 5 })
+
+    undoIntervalRef.current = setInterval(() => {
+      setUndoQueue((prev) => {
+        if (!prev) return null
+        if (prev.countdown <= 1) {
+          clearInterval(undoIntervalRef.current!)
+          return null
+        }
+        return { ...prev, countdown: prev.countdown - 1 }
+      })
+    }, 1000)
+
+    undoTimerRef.current = setTimeout(async () => {
+      clearInterval(undoIntervalRef.current!)
+      setUndoQueue(null)
+      try {
+        await apiDelete("/api/transactions", { ids: Array.from(ids) })
+      } catch {
+        // Restore on error
+        setData((prev) => {
+          if (!prev) return prev
+          return {
+            ...prev,
+            data: [...snapshots, ...prev.data],
+            total: prev.total + snapshots.length,
+          }
+        })
+        alert("Error", "Failed to delete transactions. Changes restored.")
+      }
+    }, 5000)
+  }
+
+  // ── Edit modal ───────────────────────────────────────────────────────────────
+
+  function openEdit(tx: Transaction) {
+    setEditModal(tx)
+    setEditForm({
+      merchantName: tx.merchantName ?? "",
+      description: tx.description ?? "",
+      amount: tx.amount.toString(),
+      type: tx.type,
+      date: tx.date.slice(0, 10),
+      categoryId: tx.category?.id ?? null,
+      category: tx.category,
+    })
+  }
+
+  async function saveEdit() {
+    if (!editModal || editSaving) return
+    setEditSaving(true)
+    const body: Record<string, unknown> = {}
+    if (editForm.merchantName !== (editModal.merchantName ?? "")) body.merchantName = editForm.merchantName || null
+    if (editForm.description !== (editModal.description ?? "")) body.description = editForm.description
+    const amt = parseFloat(editForm.amount)
+    if (!isNaN(amt) && amt > 0 && amt !== editModal.amount) body.amount = amt
+    if (editForm.type !== editModal.type) body.type = editForm.type
+    if (editForm.date !== editModal.date.slice(0, 10)) body.date = editForm.date
+    if (editForm.categoryId !== (editModal.category?.id ?? null)) body.categoryId = editForm.categoryId
+
+    if (Object.keys(body).length === 0) {
+      setEditModal(null)
+      setEditSaving(false)
+      return
+    }
+
+    try {
+      await apiPatch(`/api/transactions/${editModal.id}`, body)
+      setData((prev) => {
+        if (!prev) return prev
+        return {
+          ...prev,
+          data: prev.data.map((tx) =>
+            tx.id === editModal.id
+              ? {
+                  ...tx,
+                  merchantName: editForm.merchantName || null,
+                  description: editForm.description || null,
+                  amount: parseFloat(editForm.amount) || tx.amount,
+                  type: editForm.type,
+                  date: editForm.date,
+                  category: editForm.category,
+                  needsReview: editForm.categoryId ? false : tx.needsReview,
                 }
-              })
-              exitSelectMode()
-            } catch {
-              alert("Error", "Failed to delete transactions")
-            } finally {
-              setDeleting(false)
-            }
-          },
-        },
-      ]
-    )
+              : tx
+          ),
+        }
+      })
+      setEditModal(null)
+    } catch {
+      alert("Error", "Failed to save changes")
+    } finally {
+      setEditSaving(false)
+    }
   }
 
   const catPills: { label: string; value: string }[] = [
@@ -211,7 +370,6 @@ export default function TransactionsScreen({ navigation }: Props) {
       <View style={styles.header}>
         <Text style={styles.title}>Transactions</Text>
 
-        {/* Search row + Needs Review toggle */}
         <View style={styles.searchRow}>
           <View style={styles.searchBox}>
             <Search color="#94a3b8" size={16} />
@@ -234,12 +392,11 @@ export default function TransactionsScreen({ navigation }: Props) {
             onPress={() => setNeedsReview((v) => !v)}
           >
             <Text style={[styles.reviewBtnText, needsReview ? { color: "#92400e" } : { color: "#64748b" }]}>
-              ⚠ Needs review
+              ⚠ Review
             </Text>
           </TouchableOpacity>
         </View>
 
-        {/* Type filter pills */}
         <View style={styles.filters}>
           {(["", "debit", "credit"] as const).map((f) => (
             <TouchableOpacity
@@ -254,7 +411,6 @@ export default function TransactionsScreen({ navigation }: Props) {
           ))}
         </View>
 
-        {/* Category filter pills */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -281,7 +437,7 @@ export default function TransactionsScreen({ navigation }: Props) {
         </View>
       ) : (
         <ScrollView
-          contentContainerStyle={[styles.list, selectMode && { paddingBottom: 100 }]}
+          contentContainerStyle={[styles.list, (selectMode || undoQueue) && { paddingBottom: 120 }]}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#059669" />}
         >
           {!data?.data.length ? (
@@ -292,63 +448,56 @@ export default function TransactionsScreen({ navigation }: Props) {
             data.data.map((tx) => {
               const isSelected = selectedIds.has(tx.id)
               return (
-              <TouchableOpacity
-                key={tx.id}
-                style={[styles.txRow, selectMode && isSelected && styles.txRowSelected]}
-                onLongPress={() => handleLongPress(tx)}
-                onPress={() => selectMode && toggleSelect(tx.id)}
-                activeOpacity={0.7}
-              >
-                {selectMode && (
-                  <View style={styles.checkbox}>
-                    <View style={[styles.checkboxInner, isSelected && styles.checkboxInnerSelected]}>
-                      {isSelected && <Text style={styles.checkmark}>✓</Text>}
+                <TouchableOpacity
+                  key={tx.id}
+                  style={[styles.txRow, selectMode && isSelected && styles.txRowSelected]}
+                  onLongPress={() => handleLongPress(tx)}
+                  onPress={() => {
+                    if (selectMode) toggleSelect(tx.id)
+                    else openEdit(tx)
+                  }}
+                  activeOpacity={0.7}
+                >
+                  {selectMode && (
+                    <View style={styles.checkbox}>
+                      <View style={[styles.checkboxInner, isSelected && styles.checkboxInnerSelected]}>
+                        {isSelected && <Text style={styles.checkmark}>✓</Text>}
+                      </View>
                     </View>
+                  )}
+                  <View style={[styles.typeDot, tx.type === "credit" ? styles.dotGreen : styles.dotRed]} />
+                  <View style={styles.txInfo}>
+                    <Text style={styles.txName} numberOfLines={1}>
+                      {tx.merchantName ?? tx.description ?? "Unknown"}
+                    </Text>
+                    {tx.description && tx.description !== tx.merchantName ? (
+                      <Text style={styles.txDescription} numberOfLines={1}>{tx.description}</Text>
+                    ) : null}
+                    <Text style={styles.txMeta}>
+                      {new Date(tx.date).toLocaleDateString("en", { month: "short", day: "numeric", year: "numeric" })}
+                    </Text>
+                    <TouchableOpacity
+                      style={styles.catBadge}
+                      onPress={() => openCategoryModal(tx)}
+                      activeOpacity={0.7}
+                    >
+                      <View style={[styles.catBadgeDot, { backgroundColor: tx.category?.color ?? "#94a3b8" }]} />
+                      <Text style={styles.catBadgeText}>{tx.category?.name ?? "Uncategorized"}</Text>
+                    </TouchableOpacity>
                   </View>
-                )}
-                <View style={[styles.typeDot, tx.type === "credit" ? styles.dotGreen : styles.dotRed]} />
-                <View style={styles.txInfo}>
-                  {/* Primary: merchant name (bold) */}
-                  <Text style={styles.txName} numberOfLines={1}>
-                    {tx.merchantName ?? tx.description ?? "Unknown"}
-                  </Text>
-                  {/* Secondary: description (if different from merchantName) */}
-                  {tx.description && tx.description !== tx.merchantName ? (
-                    <Text style={styles.txDescription} numberOfLines={1}>
-                      {tx.description}
+                  <View style={styles.amountCol}>
+                    <Text style={[styles.txAmount, tx.type === "credit" ? styles.green : styles.dark]}>
+                      {tx.type === "credit" ? "+" : "-"}{fmt(tx.amount, currency)}
                     </Text>
-                  ) : null}
-                  {/* Date */}
-                  <Text style={styles.txMeta}>
-                    {new Date(tx.date).toLocaleDateString("en", { month: "short", day: "numeric", year: "numeric" })}
-                  </Text>
-                  {/* Category badge (tappable) */}
-                  <TouchableOpacity
-                    style={styles.catBadge}
-                    onPress={() => openCategoryModal(tx)}
-                    activeOpacity={0.7}
-                  >
-                    <View
-                      style={[
-                        styles.catBadgeDot,
-                        { backgroundColor: tx.category?.color ?? "#94a3b8" },
-                      ]}
-                    />
-                    <Text style={styles.catBadgeText}>
-                      {tx.category?.name ?? "Uncategorized"}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-                <View style={styles.amountCol}>
-                  <Text style={[styles.txAmount, tx.type === "credit" ? styles.green : styles.dark]}>
-                    {tx.type === "credit" ? "+" : "-"}{fmt(tx.amount, currency)}
-                  </Text>
-                  {tx.needsReview ? (
-                    <Text style={styles.reviewBadge}>⚠</Text>
-                  ) : null}
-                </View>
-              </TouchableOpacity>
-            )})
+                    {tx.needsReview ? (
+                      <Text style={styles.reviewBadge}>
+                        ⚠ {tx.category ? "Verify details" : "Missing category"}
+                      </Text>
+                    ) : null}
+                  </View>
+                </TouchableOpacity>
+              )
+            })
           )}
 
           {data && data.totalPages > 1 && (
@@ -373,36 +522,41 @@ export default function TransactionsScreen({ navigation }: Props) {
         </ScrollView>
       )}
 
+      {/* Select mode bottom bar */}
       {selectMode && (
         <View style={styles.bottomBar}>
-          <TouchableOpacity
-            style={styles.cancelBtn}
-            onPress={exitSelectMode}
-            disabled={deleting}
-          >
+          <TouchableOpacity style={styles.cancelBtn} onPress={exitSelectMode}>
             <Text style={styles.cancelBtnText}>Cancel</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.deleteBtn, deleting && styles.deleteBtnDisabled]}
+            style={[styles.deleteBtn, selectedIds.size === 0 && styles.deleteBtnDisabled]}
             onPress={deleteSelected}
-            disabled={deleting || selectedIds.size === 0}
+            disabled={selectedIds.size === 0}
           >
-            {deleting ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Text style={styles.deleteBtnText}>Delete ({selectedIds.size})</Text>
-            )}
+            <Text style={styles.deleteBtnText}>Delete ({selectedIds.size})</Text>
           </TouchableOpacity>
         </View>
       )}
 
-      {!selectMode && (
+      {/* Undo toast */}
+      {undoQueue && (
+        <View style={styles.undoToast}>
+          <Text style={styles.undoToastText}>
+            Deleted {undoQueue.snapshots.length} transaction{undoQueue.snapshots.length !== 1 ? "s" : ""} · {undoQueue.countdown}s
+          </Text>
+          <TouchableOpacity onPress={handleUndo} style={styles.undoBtn}>
+            <Text style={styles.undoBtnText}>Undo</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {!selectMode && !undoQueue && (
         <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate("AddTransaction")}>
           <Text style={styles.fabText}>+</Text>
         </TouchableOpacity>
       )}
 
-      {/* Category assignment modal */}
+      {/* Category picker modal */}
       <Modal
         visible={categoryModalOpen}
         transparent
@@ -416,24 +570,116 @@ export default function TransactionsScreen({ navigation }: Props) {
               data={[null, ...categories] as (Category | null)[]}
               keyExtractor={(item) => item?.id ?? "__uncategorized__"}
               renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.categoryItem}
-                  onPress={() => assignCategory(item)}
-                >
-                  <View
-                    style={[
-                      styles.categoryDot,
-                      { backgroundColor: item?.color ?? "#94a3b8" },
-                    ]}
-                  />
-                  <Text style={styles.categoryName}>
-                    {item?.name ?? "Uncategorized"}
-                  </Text>
+                <TouchableOpacity style={styles.categoryItem} onPress={() => assignCategory(item)}>
+                  <View style={[styles.categoryDot, { backgroundColor: item?.color ?? "#94a3b8" }]} />
+                  <Text style={styles.categoryName}>{item?.name ?? "Uncategorized"}</Text>
                 </TouchableOpacity>
               )}
             />
           </View>
         </View>
+      </Modal>
+
+      {/* Edit transaction modal */}
+      <Modal
+        visible={editModal !== null}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setEditModal(null)}
+      >
+        <KeyboardAvoidingView
+          style={styles.editModalOverlay}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+        >
+          <View style={styles.editModalCard}>
+            <View style={styles.editModalHeader}>
+              <Text style={styles.editModalTitle}>Edit Transaction</Text>
+              <TouchableOpacity onPress={() => setEditModal(null)}>
+                <X color="#94a3b8" size={20} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <Text style={styles.editLabel}>Merchant</Text>
+              <TextInput
+                style={styles.editInput}
+                value={editForm.merchantName}
+                onChangeText={(v) => setEditForm((f) => ({ ...f, merchantName: v }))}
+                placeholder="Merchant name"
+                placeholderTextColor="#94a3b8"
+              />
+
+              <Text style={styles.editLabel}>Description</Text>
+              <TextInput
+                style={styles.editInput}
+                value={editForm.description}
+                onChangeText={(v) => setEditForm((f) => ({ ...f, description: v }))}
+                placeholder="Description"
+                placeholderTextColor="#94a3b8"
+              />
+
+              <Text style={styles.editLabel}>Amount</Text>
+              <TextInput
+                style={styles.editInput}
+                value={editForm.amount}
+                onChangeText={(v) => setEditForm((f) => ({ ...f, amount: v }))}
+                placeholder="0.00"
+                placeholderTextColor="#94a3b8"
+                keyboardType="decimal-pad"
+              />
+
+              <Text style={styles.editLabel}>Type</Text>
+              <View style={styles.typeToggle}>
+                {(["debit", "credit"] as const).map((t) => (
+                  <TouchableOpacity
+                    key={t}
+                    style={[styles.typeBtn, editForm.type === t && (t === "debit" ? styles.typeBtnDebit : styles.typeBtnCredit)]}
+                    onPress={() => setEditForm((f) => ({ ...f, type: t }))}
+                  >
+                    <Text style={[styles.typeBtnText, editForm.type === t && styles.typeBtnTextActive]}>
+                      {t === "debit" ? "Expense" : "Income"}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <Text style={styles.editLabel}>Date</Text>
+              <TextInput
+                style={styles.editInput}
+                value={editForm.date}
+                onChangeText={(v) => setEditForm((f) => ({ ...f, date: v }))}
+                placeholder="YYYY-MM-DD"
+                placeholderTextColor="#94a3b8"
+              />
+
+              <Text style={styles.editLabel}>Category</Text>
+              <TouchableOpacity style={styles.catPickerRow} onPress={openEditCategoryPicker}>
+                {editForm.category && (
+                  <View style={[styles.catBadgeDot, { backgroundColor: editForm.category.color }]} />
+                )}
+                <Text style={styles.catPickerText}>
+                  {editForm.category ? editForm.category.name : "Uncategorized"}
+                </Text>
+                <Text style={styles.catPickerChevron}>›</Text>
+              </TouchableOpacity>
+            </ScrollView>
+
+            <View style={styles.editActions}>
+              <TouchableOpacity style={styles.editCancelBtn} onPress={() => setEditModal(null)}>
+                <Text style={styles.editCancelBtnText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.editSaveBtn, editSaving && { opacity: 0.6 }]}
+                onPress={saveEdit}
+                disabled={editSaving}
+              >
+                {editSaving
+                  ? <ActivityIndicator color="#fff" size="small" />
+                  : <Text style={styles.editSaveBtnText}>Save</Text>}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   )
@@ -451,22 +697,18 @@ const styles = StyleSheet.create({
   filterBtnActive: { backgroundColor: "#059669" },
   filterText: { fontSize: 13, color: "#64748b", fontWeight: "500" },
   filterTextActive: { color: "#fff" },
-  // Category filter row
   catFilterRow: { marginBottom: 8 },
   catPill: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 16, backgroundColor: "#f1f5f9", marginRight: 6 },
   catPillActive: { backgroundColor: "#059669" },
   catPillText: { fontSize: 12, color: "#64748b" },
   catPillTextActive: { color: "#fff" },
-  // Needs review button
   reviewBtn: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 16, backgroundColor: "#f1f5f9" },
   reviewBtnActive: { backgroundColor: "#fffbeb", borderWidth: 1, borderColor: "#fde68a" },
   reviewBtnText: { fontSize: 12 },
-  // Layout
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
   list: { padding: 16, paddingBottom: 100 },
   empty: { alignItems: "center", paddingVertical: 48 },
   emptyText: { color: "#94a3b8", fontSize: 14 },
-  // Transaction row
   txRow: { flexDirection: "row", alignItems: "flex-start", backgroundColor: "#fff", borderRadius: 12, padding: 14, marginBottom: 8, shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 3, elevation: 1 },
   typeDot: { width: 8, height: 8, borderRadius: 4, marginRight: 12, marginTop: 4, flexShrink: 0 },
   dotGreen: { backgroundColor: "#059669" },
@@ -475,23 +717,19 @@ const styles = StyleSheet.create({
   txName: { fontSize: 14, fontWeight: "600", color: "#0f172a" },
   txDescription: { fontSize: 12, color: "#64748b", marginTop: 1 },
   txMeta: { fontSize: 12, color: "#94a3b8", marginTop: 2 },
-  // Category badge in row
   catBadge: { flexDirection: "row", alignItems: "center", gap: 4, marginTop: 5, alignSelf: "flex-start" },
   catBadgeDot: { width: 8, height: 8, borderRadius: 4 },
   catBadgeText: { fontSize: 11, color: "#475569" },
-  // Amount column
-  amountCol: { alignItems: "flex-end", gap: 4 },
+  amountCol: { alignItems: "flex-end", gap: 4, maxWidth: 120 },
   txAmount: { fontSize: 14, fontWeight: "600" },
   green: { color: "#059669" },
   dark: { color: "#0f172a" },
-  reviewBadge: { fontSize: 14, color: "#d97706" },
-  // Pagination
+  reviewBadge: { fontSize: 11, color: "#d97706", textAlign: "right" },
   pagination: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 8, paddingVertical: 8 },
   pageBtn: { paddingHorizontal: 16, paddingVertical: 8, backgroundColor: "#fff", borderRadius: 8, borderWidth: 1, borderColor: "#e2e8f0" },
   pageBtnDisabled: { opacity: 0.4 },
   pageBtnText: { fontSize: 13, color: "#0f172a", fontWeight: "500" },
   pageInfo: { fontSize: 13, color: "#64748b" },
-  // Select mode
   checkbox: { width: 24, height: 24, marginRight: 8, justifyContent: "center", alignItems: "center", flexShrink: 0 },
   checkboxInner: { width: 20, height: 20, borderRadius: 4, borderWidth: 2, borderColor: "#cbd5e1", justifyContent: "center", alignItems: "center" },
   checkboxInnerSelected: { backgroundColor: "#059669", borderColor: "#059669" },
@@ -503,29 +741,38 @@ const styles = StyleSheet.create({
   deleteBtn: { flex: 1, paddingVertical: 12, borderRadius: 10, backgroundColor: "#ef4444", alignItems: "center", justifyContent: "center" },
   deleteBtnDisabled: { opacity: 0.5 },
   deleteBtnText: { fontSize: 14, fontWeight: "600", color: "#fff" },
-  // FAB
-  fab: {
-    position: "absolute",
-    right: 20,
-    bottom: 24,
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    backgroundColor: "#059669",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
-  },
+  // Undo toast
+  undoToast: { position: "absolute", bottom: 24, left: 16, right: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between", backgroundColor: "#1e293b", borderRadius: 14, paddingHorizontal: 16, paddingVertical: 14, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 12, elevation: 8 },
+  undoToastText: { fontSize: 13, color: "#e2e8f0", flex: 1 },
+  undoBtn: { paddingHorizontal: 12, paddingVertical: 6, backgroundColor: "#059669", borderRadius: 8 },
+  undoBtnText: { fontSize: 13, fontWeight: "700", color: "#fff" },
+  fab: { position: "absolute", right: 20, bottom: 24, width: 52, height: 52, borderRadius: 26, backgroundColor: "#059669", alignItems: "center", justifyContent: "center", shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 4 },
   fabText: { fontSize: 30, color: "#fff", lineHeight: 34, fontWeight: "300" },
-  // Category modal
   categoryModal: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.4)" },
   categoryModalCard: { backgroundColor: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, maxHeight: 400 },
   categoryModalTitle: { fontSize: 16, fontWeight: "600", color: "#0f172a", marginBottom: 16 },
   categoryItem: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: "#f1f5f9" },
   categoryDot: { width: 10, height: 10, borderRadius: 5 },
   categoryName: { fontSize: 14, color: "#0f172a" },
+  // Edit modal
+  editModalOverlay: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.4)" },
+  editModalCard: { backgroundColor: "#fff", borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, maxHeight: "85%" as const },
+  editModalHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
+  editModalTitle: { fontSize: 17, fontWeight: "700", color: "#0f172a" },
+  editLabel: { fontSize: 11, fontWeight: "600", color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6, marginTop: 14 },
+  editInput: { borderWidth: 1, borderColor: "#e2e8f0", borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14, color: "#0f172a", backgroundColor: "#f8fafc" },
+  typeToggle: { flexDirection: "row", gap: 8 },
+  typeBtn: { flex: 1, paddingVertical: 10, borderRadius: 10, backgroundColor: "#f1f5f9", alignItems: "center" },
+  typeBtnDebit: { backgroundColor: "#fef2f2" },
+  typeBtnCredit: { backgroundColor: "#f0fdf4" },
+  typeBtnText: { fontSize: 13, fontWeight: "600", color: "#64748b" },
+  typeBtnTextActive: { color: "#0f172a" },
+  catPickerRow: { flexDirection: "row", alignItems: "center", gap: 8, borderWidth: 1, borderColor: "#e2e8f0", borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, backgroundColor: "#f8fafc" },
+  catPickerText: { flex: 1, fontSize: 14, color: "#0f172a" },
+  catPickerChevron: { fontSize: 20, color: "#94a3b8" },
+  editActions: { flexDirection: "row", gap: 10, marginTop: 20 },
+  editCancelBtn: { flex: 1, paddingVertical: 12, borderRadius: 12, backgroundColor: "#f1f5f9", alignItems: "center" },
+  editCancelBtnText: { fontSize: 14, fontWeight: "600", color: "#64748b" },
+  editSaveBtn: { flex: 1, paddingVertical: 12, borderRadius: 12, backgroundColor: "#059669", alignItems: "center" },
+  editSaveBtnText: { fontSize: 14, fontWeight: "700", color: "#fff" },
 })

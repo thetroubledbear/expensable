@@ -8,11 +8,15 @@ import {
   ActivityIndicator,
   RefreshControl,
   TouchableOpacity,
+  Modal,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native"
 import { Text } from "../components/Text"
-import { apiGet, apiDeleteById } from "../lib/api"
+import { apiGet, apiDeleteById, apiPost } from "../lib/api"
 import { useAlert } from "../lib/alert"
-import { RefreshCw, Trash2 } from "lucide-react-native"
+import { RefreshCw, Trash2, Plus, X } from "lucide-react-native"
 
 interface Subscription {
   id: string
@@ -52,6 +56,9 @@ function freqBadgeColor(freq: string): string {
   return "#f59e0b"
 }
 
+const CURRENCIES = ["USD", "EUR", "GBP", "PLN", "CHF", "CAD", "AUD", "JPY", "NOK", "SEK"]
+const FREQUENCIES = ["monthly", "annual", "weekly"] as const
+
 export default function SubscriptionsScreen() {
   const { alert } = useAlert()
   const [subs, setSubs] = useState<Subscription[]>([])
@@ -60,11 +67,17 @@ export default function SubscriptionsScreen() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [householdCurrency, setHouseholdCurrency] = useState("USD")
 
+  // Add modal
+  const [addOpen, setAddOpen] = useState(false)
+  const [addForm, setAddForm] = useState({ merchantName: "", amount: "", currency: "USD", frequency: "monthly" as typeof FREQUENCIES[number] })
+  const [adding, setAdding] = useState(false)
+  const [addError, setAddError] = useState("")
+
   useFocusEffect(useCallback(() => { load() }, []))
 
   useEffect(() => {
     apiGet<{ defaultCurrency?: string }>("/api/household")
-      .then((d) => { if (d.defaultCurrency) setHouseholdCurrency(d.defaultCurrency) })
+      .then((d) => { if (d.defaultCurrency) { setHouseholdCurrency(d.defaultCurrency); setAddForm((f) => ({ ...f, currency: d.defaultCurrency! })) } })
       .catch(() => {})
   }, [])
 
@@ -99,13 +112,40 @@ export default function SubscriptionsScreen() {
               await apiDeleteById("/api/subscriptions/" + sub.id)
               setSubs((prev) => prev.filter((s) => s.id !== sub.id))
             } catch {}
-            finally {
-              setDeletingId(null)
-            }
+            finally { setDeletingId(null) }
           },
         },
       ]
     )
+  }
+
+  function openAdd() {
+    setAddForm((f) => ({ ...f, merchantName: "", amount: "", frequency: "monthly" }))
+    setAddError("")
+    setAddOpen(true)
+  }
+
+  async function handleAdd() {
+    if (!addForm.merchantName.trim()) { setAddError("Merchant name is required"); return }
+    const amt = parseFloat(addForm.amount)
+    if (isNaN(amt) || amt <= 0) { setAddError("Enter a valid amount"); return }
+    setAdding(true)
+    setAddError("")
+    try {
+      const sub = await apiPost<Subscription & { error?: string }>("/api/subscriptions", {
+        merchantName: addForm.merchantName.trim(),
+        amount: amt,
+        currency: addForm.currency,
+        frequency: addForm.frequency,
+      })
+      if ("error" in sub && sub.error) { setAddError(sub.error); return }
+      setSubs((prev) => [sub, ...prev])
+      setAddOpen(false)
+    } catch {
+      setAddError("Failed to add subscription")
+    } finally {
+      setAdding(false)
+    }
   }
 
   const monthlyTotal = subs.reduce((sum, s) => sum + toMonthly(s.amount, s.frequency), 0)
@@ -120,81 +160,176 @@ export default function SubscriptionsScreen() {
   }
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#059669" />}
-    >
-      <Text style={styles.title}>Subscriptions</Text>
-
-      {subs.length === 0 ? (
-        <View style={styles.empty}>
-          <RefreshCw color="#cbd5e1" size={36} />
-          <Text style={styles.emptyTitle}>No subscriptions detected</Text>
-          <Text style={styles.emptyText}>
-            Recurring payments appear here once identified from your transaction history.
-          </Text>
+    <>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#059669" />}
+      >
+        <View style={styles.titleRow}>
+          <Text style={styles.title}>Subscriptions</Text>
+          <TouchableOpacity style={styles.addBtn} onPress={openAdd}>
+            <Plus color="#fff" size={16} />
+            <Text style={styles.addBtnText}>Add</Text>
+          </TouchableOpacity>
         </View>
-      ) : (
-        <>
-          <View style={styles.summaryCard}>
-            <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>MONTHLY</Text>
-              <Text style={styles.summaryValue}>{fmt(monthlyTotal, householdCurrency)}</Text>
-            </View>
-            <View style={styles.summaryDivider} />
-            <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>ANNUAL</Text>
-              <Text style={styles.summaryValue}>{fmt(annualTotal, householdCurrency)}</Text>
-            </View>
-            <View style={styles.summaryDivider} />
-            <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>COUNT</Text>
-              <Text style={styles.summaryValue}>{subs.length}</Text>
-            </View>
-          </View>
 
-          {subs.map((sub) => (
-            <View key={sub.id} style={styles.card}>
-              <View style={styles.cardHeader}>
-                <View style={styles.initials}>
-                  <Text style={styles.initialsText}>
-                    {sub.merchantName.slice(0, 2).toUpperCase()}
-                  </Text>
-                </View>
-                <View style={styles.cardInfo}>
-                  <Text style={styles.merchant}>{sub.merchantName}</Text>
-                  <Text style={styles.meta}>
-                    Since {new Date(sub.firstSeenAt).toLocaleDateString("en", { month: "short", year: "numeric" })}
-                    {" · last "}
-                    {new Date(sub.lastSeenAt).toLocaleDateString("en", { month: "short", day: "numeric" })}
-                  </Text>
-                </View>
-                <View style={styles.amountCol}>
-                  <Text style={styles.amount}>{fmt(sub.amount, sub.currency)}</Text>
-                  <View style={[styles.freqBadge, { backgroundColor: freqBadgeColor(sub.frequency) + "20" }]}>
-                    <Text style={[styles.freqText, { color: freqBadgeColor(sub.frequency) }]}>
-                      {freqLabel(sub.frequency)}
-                    </Text>
-                  </View>
-                </View>
-                <TouchableOpacity
-                  style={styles.trashBtn}
-                  onPress={() => handleDelete(sub)}
-                  disabled={deletingId === sub.id}
-                >
-                  {deletingId === sub.id ? (
-                    <ActivityIndicator size="small" color="#ef4444" />
-                  ) : (
-                    <Trash2 color="#ef4444" size={16} />
-                  )}
-                </TouchableOpacity>
+        {subs.length === 0 ? (
+          <View style={styles.empty}>
+            <RefreshCw color="#cbd5e1" size={36} />
+            <Text style={styles.emptyTitle}>No subscriptions detected</Text>
+            <Text style={styles.emptyText}>
+              Recurring payments appear here once identified, or add one manually.
+            </Text>
+          </View>
+        ) : (
+          <>
+            <View style={styles.summaryCard}>
+              <View style={styles.summaryItem}>
+                <Text style={styles.summaryLabel}>MONTHLY</Text>
+                <Text style={styles.summaryValue}>{fmt(monthlyTotal, householdCurrency)}</Text>
+              </View>
+              <View style={styles.summaryDivider} />
+              <View style={styles.summaryItem}>
+                <Text style={styles.summaryLabel}>ANNUAL</Text>
+                <Text style={styles.summaryValue}>{fmt(annualTotal, householdCurrency)}</Text>
+              </View>
+              <View style={styles.summaryDivider} />
+              <View style={styles.summaryItem}>
+                <Text style={styles.summaryLabel}>COUNT</Text>
+                <Text style={styles.summaryValue}>{subs.length}</Text>
               </View>
             </View>
-          ))}
-        </>
-      )}
-    </ScrollView>
+
+            {subs.map((sub) => (
+              <View key={sub.id} style={styles.card}>
+                <View style={styles.cardHeader}>
+                  <View style={styles.initials}>
+                    <Text style={styles.initialsText}>
+                      {sub.merchantName.slice(0, 2).toUpperCase()}
+                    </Text>
+                  </View>
+                  <View style={styles.cardInfo}>
+                    <Text style={styles.merchant}>{sub.merchantName}</Text>
+                    <Text style={styles.meta}>
+                      Since {new Date(sub.firstSeenAt).toLocaleDateString("en", { month: "short", year: "numeric" })}
+                      {" · last "}
+                      {new Date(sub.lastSeenAt).toLocaleDateString("en", { month: "short", day: "numeric" })}
+                    </Text>
+                  </View>
+                  <View style={styles.amountCol}>
+                    <Text style={styles.amount}>{fmt(sub.amount, sub.currency)}</Text>
+                    <View style={[styles.freqBadge, { backgroundColor: freqBadgeColor(sub.frequency) + "20" }]}>
+                      <Text style={[styles.freqText, { color: freqBadgeColor(sub.frequency) }]}>
+                        {freqLabel(sub.frequency)}
+                      </Text>
+                    </View>
+                  </View>
+                  <TouchableOpacity
+                    style={styles.trashBtn}
+                    onPress={() => handleDelete(sub)}
+                    disabled={deletingId === sub.id}
+                  >
+                    {deletingId === sub.id ? (
+                      <ActivityIndicator size="small" color="#ef4444" />
+                    ) : (
+                      <Trash2 color="#ef4444" size={16} />
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ))}
+          </>
+        )}
+      </ScrollView>
+
+      {/* Add subscription modal */}
+      <Modal visible={addOpen} transparent animationType="slide" onRequestClose={() => setAddOpen(false)}>
+        <KeyboardAvoidingView
+          style={styles.modalOverlay}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+        >
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Add Subscription</Text>
+              <TouchableOpacity onPress={() => setAddOpen(false)}>
+                <X color="#94a3b8" size={20} />
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.fieldLabel}>Merchant name</Text>
+            <TextInput
+              style={styles.fieldInput}
+              value={addForm.merchantName}
+              onChangeText={(v) => setAddForm((f) => ({ ...f, merchantName: v }))}
+              placeholder="Netflix, Spotify…"
+              placeholderTextColor="#94a3b8"
+              autoFocus
+            />
+
+            <View style={styles.amountRow}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.fieldLabel}>Amount</Text>
+                <TextInput
+                  style={styles.fieldInput}
+                  value={addForm.amount}
+                  onChangeText={(v) => setAddForm((f) => ({ ...f, amount: v }))}
+                  placeholder="9.99"
+                  placeholderTextColor="#94a3b8"
+                  keyboardType="decimal-pad"
+                />
+              </View>
+              <View style={{ width: 90 }}>
+                <Text style={styles.fieldLabel}>Currency</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.currencyRow}>
+                  {CURRENCIES.map((c) => (
+                    <TouchableOpacity
+                      key={c}
+                      style={[styles.currencyBtn, addForm.currency === c && styles.currencyBtnActive]}
+                      onPress={() => setAddForm((f) => ({ ...f, currency: c }))}
+                    >
+                      <Text style={[styles.currencyBtnText, addForm.currency === c && styles.currencyBtnTextActive]}>{c}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            </View>
+
+            <Text style={styles.fieldLabel}>Frequency</Text>
+            <View style={styles.freqRow}>
+              {FREQUENCIES.map((f) => (
+                <TouchableOpacity
+                  key={f}
+                  style={[styles.freqBtn, addForm.frequency === f && styles.freqBtnActive]}
+                  onPress={() => setAddForm((prev) => ({ ...prev, frequency: f }))}
+                >
+                  <Text style={[styles.freqBtnText, addForm.frequency === f && styles.freqBtnTextActive]}>
+                    {f.charAt(0).toUpperCase() + f.slice(1)}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {addError ? <Text style={styles.errorText}>{addError}</Text> : null}
+
+            <View style={styles.modalActions}>
+              <TouchableOpacity style={styles.modalCancelBtn} onPress={() => setAddOpen(false)}>
+                <Text style={styles.modalCancelBtnText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalSaveBtn, adding && { opacity: 0.6 }]}
+                onPress={handleAdd}
+                disabled={adding}
+              >
+                {adding
+                  ? <ActivityIndicator color="#fff" size="small" />
+                  : <Text style={styles.modalSaveBtnText}>Save</Text>}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+    </>
   )
 }
 
@@ -202,42 +337,21 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f8fafc" },
   content: { padding: 16, paddingBottom: 40 },
   center: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: "#f8fafc" },
-  title: { fontSize: 22, fontWeight: "700", color: "#0f172a", marginTop: 48, marginBottom: 20, fontFamily: FONTS.bold },
+  titleRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 48, marginBottom: 20 },
+  title: { fontSize: 22, fontWeight: "700", color: "#0f172a", fontFamily: FONTS.bold },
+  addBtn: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "#059669", borderRadius: 12, paddingHorizontal: 14, paddingVertical: 8 },
+  addBtnText: { fontSize: 13, fontWeight: "700", color: "#fff" },
   empty: { alignItems: "center", paddingVertical: 48, gap: 12 },
   emptyTitle: { fontSize: 16, fontWeight: "600", color: "#64748b" },
   emptyText: { fontSize: 13, color: "#94a3b8", textAlign: "center", lineHeight: 20, maxWidth: 260 },
-  summaryCard: {
-    backgroundColor: "#059669",
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
-    flexDirection: "row",
-    alignItems: "center",
-  },
+  summaryCard: { backgroundColor: "#059669", borderRadius: 16, padding: 20, marginBottom: 16, flexDirection: "row", alignItems: "center" },
   summaryItem: { flex: 1, alignItems: "center" },
   summaryLabel: { fontSize: 9, fontWeight: "700", color: "#a7f3d0", letterSpacing: 1, marginBottom: 6 },
   summaryValue: { fontSize: 18, fontWeight: "700", color: "#fff" },
   summaryDivider: { width: 1, height: 36, backgroundColor: "#34d399", opacity: 0.4 },
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 14,
-    marginBottom: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
+  card: { backgroundColor: "#fff", borderRadius: 16, padding: 14, marginBottom: 10, shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 2 },
   cardHeader: { flexDirection: "row", alignItems: "center", gap: 12 },
-  initials: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-    backgroundColor: "#f0fdf4",
-    alignItems: "center",
-    justifyContent: "center",
-  },
+  initials: { width: 40, height: 40, borderRadius: 10, backgroundColor: "#f0fdf4", alignItems: "center", justifyContent: "center" },
   initialsText: { fontSize: 14, fontWeight: "700", color: "#059669" },
   cardInfo: { flex: 1 },
   merchant: { fontSize: 15, fontWeight: "600", color: "#0f172a" },
@@ -247,4 +361,28 @@ const styles = StyleSheet.create({
   freqBadge: { borderRadius: 6, paddingHorizontal: 8, paddingVertical: 3, marginTop: 4 },
   freqText: { fontSize: 11, fontWeight: "700" },
   trashBtn: { padding: 8 },
+  // Modal
+  modalOverlay: { flex: 1, justifyContent: "flex-end", backgroundColor: "rgba(0,0,0,0.4)" },
+  modalCard: { backgroundColor: "#fff", borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20 },
+  modalHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
+  modalTitle: { fontSize: 17, fontWeight: "700", color: "#0f172a" },
+  fieldLabel: { fontSize: 11, fontWeight: "600", color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6, marginTop: 14 },
+  fieldInput: { borderWidth: 1, borderColor: "#e2e8f0", borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 14, color: "#0f172a", backgroundColor: "#f8fafc" },
+  amountRow: { flexDirection: "row", gap: 10 },
+  currencyRow: { marginTop: 0 },
+  currencyBtn: { paddingHorizontal: 10, paddingVertical: 10, borderWidth: 1, borderColor: "#e2e8f0", borderRadius: 8, marginRight: 6, backgroundColor: "#f8fafc" },
+  currencyBtnActive: { backgroundColor: "#059669", borderColor: "#059669" },
+  currencyBtnText: { fontSize: 12, color: "#64748b", fontWeight: "600" },
+  currencyBtnTextActive: { color: "#fff" },
+  freqRow: { flexDirection: "row", gap: 8 },
+  freqBtn: { flex: 1, paddingVertical: 10, borderRadius: 10, backgroundColor: "#f1f5f9", alignItems: "center" },
+  freqBtnActive: { backgroundColor: "#059669" },
+  freqBtnText: { fontSize: 13, fontWeight: "600", color: "#64748b" },
+  freqBtnTextActive: { color: "#fff" },
+  errorText: { fontSize: 12, color: "#ef4444", marginTop: 10 },
+  modalActions: { flexDirection: "row", gap: 10, marginTop: 20 },
+  modalCancelBtn: { flex: 1, paddingVertical: 12, borderRadius: 12, backgroundColor: "#f1f5f9", alignItems: "center" },
+  modalCancelBtnText: { fontSize: 14, fontWeight: "600", color: "#64748b" },
+  modalSaveBtn: { flex: 1, paddingVertical: 12, borderRadius: 12, backgroundColor: "#059669", alignItems: "center" },
+  modalSaveBtnText: { fontSize: 14, fontWeight: "700", color: "#fff" },
 })

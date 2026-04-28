@@ -13,14 +13,35 @@ import { FONTS } from "../lib/fonts"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { useAuth } from "../lib/auth"
 import { useAlert } from "../lib/alert"
-import { apiGet, apiPatch } from "../lib/api"
+import { apiGet, apiPatch, apiPost, apiDeleteById } from "../lib/api"
 import {
   LogOut, Home, CreditCard, User, RefreshCw, ChevronRight,
-  UserPlus, BarChart2, Wallet, Pencil, Check, X, Zap,
+  UserPlus, BarChart2, Wallet, Pencil, Check, X, Zap, Plus, Tag,
 } from "lucide-react-native"
 
 const CURRENCIES = ["USD","EUR","PLN","GBP","CHF","CAD","AUD","JPY","NOK","SEK","DKK","NZD","SGD","HKD"]
 const PLAN_LIMITS: Record<string, number> = { free: 25, pro: 60, family: 1000 }
+
+const CATEGORY_COLOR_MAP: Record<string, string> = {
+  amber:"#f59e0b", slate:"#64748b", indigo:"#6366f1", orange:"#f97316",
+  pink:"#ec4899", emerald:"#10b981", rose:"#f43f5e", green:"#22c55e",
+  zinc:"#71717a", violet:"#8b5cf6", blue:"#3b82f6", sky:"#0ea5e9",
+  teal:"#14b8a6", purple:"#a855f7",
+}
+const COLOR_OPTIONS = [
+  { name: "emerald" }, { name: "blue" }, { name: "violet" }, { name: "rose" },
+  { name: "amber" }, { name: "orange" }, { name: "pink" }, { name: "sky" },
+  { name: "indigo" }, { name: "slate" }, { name: "teal" }, { name: "purple" },
+] as const
+type ColorName = (typeof COLOR_OPTIONS)[number]["name"]
+
+interface CustomCategory {
+  id: string
+  name: string
+  icon: string
+  color: string
+  isSystem: boolean
+}
 
 interface HouseholdData {
   id: string
@@ -64,13 +85,22 @@ export default function SettingsScreen({ navigation }: Props) {
   const [socialComparison, setSocialComparison] = useState(false)
   const [togglingComparison, setTogglingComparison] = useState(false)
 
+  // Custom categories
+  const [customCats, setCustomCats] = useState<CustomCategory[]>([])
+  const [catFormOpen, setCatFormOpen] = useState(false)
+  const [catForm, setCatForm] = useState({ name: "", icon: "🏷️", color: "blue" as ColorName })
+  const [catSaving, setCatSaving] = useState(false)
+  const [catError, setCatError] = useState("")
+  const [deletingCatId, setDeletingCatId] = useState<string | null>(null)
+
   useEffect(() => { load() }, [])
 
   async function load() {
     try {
-      const [h, m] = await Promise.all([
+      const [h, m, cats] = await Promise.all([
         apiGet<HouseholdData & { error?: string }>("/api/household"),
         apiGet<{ members?: Member[]; isOwner?: boolean; error?: string }>("/api/household/members"),
+        apiGet<CustomCategory[]>("/api/categories"),
       ])
       if ("id" in h) {
         setHousehold(h)
@@ -82,8 +112,50 @@ export default function SettingsScreen({ navigation }: Props) {
         setMembers(m.members)
         setIsOwner(m.isOwner ?? false)
       }
+      if (Array.isArray(cats)) {
+        setCustomCats(cats.filter((c) => !c.isSystem))
+      }
     } catch {}
     finally { setLoading(false) }
+  }
+
+  async function addCustomCategory() {
+    if (!catForm.name.trim()) { setCatError("Name is required"); return }
+    setCatSaving(true)
+    setCatError("")
+    try {
+      const cat = await apiPost<CustomCategory & { error?: string }>("/api/categories", {
+        name: catForm.name.trim(),
+        icon: catForm.icon,
+        color: catForm.color,
+      })
+      if ("error" in cat && cat.error) { setCatError(cat.error); return }
+      setCustomCats((prev) => [...prev, cat])
+      setCatForm({ name: "", icon: "🏷️", color: "blue" })
+      setCatFormOpen(false)
+    } catch {
+      setCatError("Failed to create category")
+    } finally {
+      setCatSaving(false)
+    }
+  }
+
+  function confirmDeleteCategory(cat: CustomCategory) {
+    alert("Delete category?", `Remove "${cat.name}"? Transactions won't be deleted.`, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          setDeletingCatId(cat.id)
+          try {
+            await apiDeleteById(`/api/categories/${cat.id}`)
+            setCustomCats((prev) => prev.filter((c) => c.id !== cat.id))
+          } catch {}
+          finally { setDeletingCatId(null) }
+        },
+      },
+    ])
   }
 
   async function saveHousehold() {
@@ -353,6 +425,118 @@ export default function SettingsScreen({ navigation }: Props) {
           </View>
         </View>
 
+        {/* ── Custom Categories ── */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeaderRow}>
+            <Text style={styles.sectionLabel}>Custom Categories</Text>
+            {isOwner && !catFormOpen && (
+              <TouchableOpacity
+                style={styles.editBtn}
+                onPress={() => { setCatFormOpen(true); setCatError("") }}
+              >
+                <Plus color="#059669" size={12} />
+                <Text style={styles.editBtnText}>Add</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+          <View style={styles.card}>
+            {customCats.length === 0 && !catFormOpen ? (
+              <View style={[styles.row, { gap: 10 }]}>
+                <Tag color="#94a3b8" size={16} />
+                <Text style={styles.rowSub}>No custom categories yet.</Text>
+              </View>
+            ) : (
+              customCats.map((cat, i) => {
+                const hex = CATEGORY_COLOR_MAP[cat.color] ?? "#94a3b8"
+                return (
+                  <View
+                    key={cat.id}
+                    style={[styles.row, i > 0 && styles.rowBorder, { paddingVertical: 10 }]}
+                  >
+                    <View style={[styles.iconBox, { backgroundColor: hex + "20" }]}>
+                      <Text style={{ fontSize: 16 }}>{cat.icon}</Text>
+                    </View>
+                    <Text style={[styles.rowTitle, { flex: 1 }]}>{cat.name}</Text>
+                    {isOwner && (
+                      <TouchableOpacity
+                        onPress={() => confirmDeleteCategory(cat)}
+                        disabled={deletingCatId === cat.id}
+                        style={{ padding: 6 }}
+                      >
+                        {deletingCatId === cat.id
+                          ? <ActivityIndicator size="small" color="#ef4444" />
+                          : <X color="#ef4444" size={16} />}
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                )
+              })
+            )}
+
+            {catFormOpen && isOwner && (
+              <View style={styles.catFormArea}>
+                <View style={styles.catFormRow}>
+                  <View style={{ width: 70 }}>
+                    <Text style={styles.editLabel}>Emoji</Text>
+                    <TextInput
+                      style={styles.editInput}
+                      value={catForm.icon}
+                      onChangeText={(v) => setCatForm((f) => ({ ...f, icon: v }))}
+                      maxLength={10}
+                    />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.editLabel}>Name</Text>
+                    <TextInput
+                      style={styles.editInput}
+                      value={catForm.name}
+                      onChangeText={(v) => setCatForm((f) => ({ ...f, name: v }))}
+                      placeholder="Pets, Sports…"
+                      placeholderTextColor="#94a3b8"
+                      autoFocus
+                    />
+                  </View>
+                </View>
+                <Text style={[styles.editLabel, { marginTop: 10 }]}>Color</Text>
+                <View style={styles.colorRow}>
+                  {COLOR_OPTIONS.map((c) => {
+                    const hex = CATEGORY_COLOR_MAP[c.name] ?? "#94a3b8"
+                    return (
+                      <TouchableOpacity
+                        key={c.name}
+                        style={[
+                          styles.colorDot,
+                          { backgroundColor: hex },
+                          catForm.color === c.name && styles.colorDotSelected,
+                        ]}
+                        onPress={() => setCatForm((f) => ({ ...f, color: c.name }))}
+                      />
+                    )
+                  })}
+                </View>
+                {catError ? <Text style={styles.catErrorText}>{catError}</Text> : null}
+                <View style={styles.editActions}>
+                  <TouchableOpacity
+                    style={styles.cancelBtn}
+                    onPress={() => { setCatFormOpen(false); setCatError("") }}
+                  >
+                    <Text style={styles.cancelBtnText}>Cancel</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.saveBtn, catSaving && { opacity: 0.5 }]}
+                    onPress={addCustomCategory}
+                    disabled={catSaving}
+                  >
+                    {catSaving
+                      ? <ActivityIndicator color="#fff" size="small" />
+                      : <Text style={styles.saveBtnText}>Save</Text>}
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+          </View>
+        </View>
+
         {/* ── Sign out ── */}
         <View style={styles.section}>
           <TouchableOpacity style={styles.signOutBtn} onPress={handleSignOut}>
@@ -456,6 +640,14 @@ const styles = StyleSheet.create({
   toggleOn: { backgroundColor: "#3b82f6" },
   toggleOff: { backgroundColor: "#cbd5e1" },
   toggleThumb: { width: 18, height: 18, borderRadius: 9, backgroundColor: "#fff" },
+
+  // Custom categories
+  catFormArea: { padding: 14, borderTopWidth: 1, borderTopColor: "#f1f5f9" },
+  catFormRow: { flexDirection: "row", gap: 10 },
+  colorRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 12 },
+  colorDot: { width: 24, height: 24, borderRadius: 12 },
+  colorDotSelected: { borderWidth: 2.5, borderColor: "#0f172a" },
+  catErrorText: { fontSize: 12, color: "#ef4444", marginBottom: 6 },
 
   // Currency modal
   modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.4)", justifyContent: "flex-end" },
