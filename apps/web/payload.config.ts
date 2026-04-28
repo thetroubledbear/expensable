@@ -4,12 +4,12 @@ import { lexicalEditor } from "@payloadcms/richtext-lexical"
 import { gcsStorage } from "@payloadcms/storage-gcs"
 import path from "path"
 import { fileURLToPath } from "url"
-import { CMSUsers } from "./cms/collections/CMSUsers"
-import { Media } from "./cms/collections/Media"
-import { Pages } from "./cms/collections/Pages"
-import { Posts } from "./cms/collections/Posts"
-import { Notices } from "./cms/collections/Notices"
-import { HomePage } from "./cms/globals/HomePage"
+import { CMSUsers } from "./cms/collections/CMSUsers.js"
+import { Media } from "./cms/collections/Media.js"
+import { Pages } from "./cms/collections/Pages.js"
+import { Posts } from "./cms/collections/Posts.js"
+import { Notices } from "./cms/collections/Notices.js"
+import { HomePage } from "./cms/globals/HomePage.js"
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -32,6 +32,7 @@ export default buildConfig({
       connectionString: process.env.DIRECT_URL ?? process.env.DATABASE_URL ?? "",
     },
     migrationDir: path.resolve(dirname, "cms/migrations"),
+    push: true,
   }),
   secret: process.env.PAYLOAD_SECRET ?? "change-me-in-production",
   typescript: {
