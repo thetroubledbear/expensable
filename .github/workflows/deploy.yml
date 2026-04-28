@@ -67,6 +67,11 @@ jobs:
           fetch-depth: 2
 
       # ── Web ──
+      - uses: actions/setup-node@v4
+        if: needs.changes.outputs.web == 'true'
+        with:
+          node-version: 22
+
       - name: Install Vercel CLI
         if: needs.changes.outputs.web == 'true'
         run: npm install -g vercel
@@ -126,6 +131,11 @@ jobs:
           fetch-depth: 2
 
       # ── Web ──
+      - uses: actions/setup-node@v4
+        if: needs.changes.outputs.web == 'true'
+        with:
+          node-version: 22
+
       - name: Install Vercel CLI
         if: needs.changes.outputs.web == 'true'
         run: npm install -g vercel
