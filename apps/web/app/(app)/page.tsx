@@ -1,23 +1,49 @@
 import { redirect } from "next/navigation"
 import { getSession } from "@/lib/auth/session"
+import { getPayload } from "payload"
+import config from "@payload-config"
 import Link from "next/link"
 import {
   BrainCircuit, Users, FolderOpen, BarChart3,
   ArrowRight, CheckCircle2, Upload, Sparkles, TrendingDown,
+  Shield, Zap,
 } from "lucide-react"
 import { LogoMark } from "@/components/logo"
 
+export const revalidate = 60
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+type CMSFeature = { title?: string | null; description?: string | null; icon?: string | null; iconColor?: string | null }
+type CMSStep    = { title?: string | null; description?: string | null }
+
+async function getHomeData() {
+  try {
+    const payload = await getPayload({ config })
+    return await payload.findGlobal({ slug: "home-page" })
+  } catch {
+    return null
+  }
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
 export default async function Home() {
-  const session = await getSession()
+  const [session, cms] = await Promise.all([getSession(), getHomeData()])
   if (session) redirect("/dashboard")
+
+  const hero = (cms as any)?.hero ?? {}
+  const featSec = (cms as any)?.featuresSection ?? {}
+  const stepsSec = (cms as any)?.stepsSection ?? {}
+  const ctaSec = (cms as any)?.ctaSection ?? {}
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <Navbar />
-      <Hero />
-      <Features />
-      <HowItWorks />
-      <CtaSection />
+      <Hero hero={hero} />
+      <Features featSec={featSec} />
+      <HowItWorks stepsSec={stepsSec} />
+      <CtaSection ctaSec={ctaSec} />
       <Footer />
     </div>
   )
@@ -34,16 +60,10 @@ function Navbar() {
           <span className="text-slate-900 font-semibold text-[15px] tracking-tight">Expensable</span>
         </div>
         <nav className="flex items-center gap-2 sm:gap-3">
-          <Link
-            href="/login"
-            className="px-3 sm:px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
-          >
+          <Link href="/login" className="px-3 sm:px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
             Sign in
           </Link>
-          <Link
-            href="/register"
-            className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition-colors"
-          >
+          <Link href="/register" className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition-colors">
             Get started
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
@@ -55,50 +75,51 @@ function Navbar() {
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 
-function Hero() {
+function Hero({ hero }: { hero: Record<string, string | undefined> }) {
+  const badge        = hero.badge        ?? "AI-Powered Expense Tracking"
+  const headline     = hero.headline     ?? "Stop guessing where your money goes"
+  const highlight    = hero.headlineHighlight ?? "money goes"
+  const subheadline  = hero.subheadline  ?? "Upload bank statements, receipts, and CSV exports. Our AI extracts every transaction automatically — no manual entry, no spreadsheets."
+  const ctaPrimary   = hero.ctaPrimary   ?? "Start for free"
+  const ctaSecondary = hero.ctaSecondary ?? "Sign in"
+  const trustLine    = hero.trustLine    ?? "Free plan available · No credit card required"
+
+  // Split headline into before/highlight/after parts
+  const highlightIdx = headline.indexOf(highlight)
+  const before = highlightIdx >= 0 ? headline.slice(0, highlightIdx) : headline
+  const after  = highlightIdx >= 0 ? headline.slice(highlightIdx + highlight.length) : ""
+
   return (
     <section className="pt-28 sm:pt-32 pb-12 sm:pb-16 px-4 sm:px-6 bg-gradient-to-b from-slate-50 via-white to-white">
       <div className="max-w-6xl mx-auto">
-        {/* Badge */}
         <div className="flex justify-center mb-6">
           <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs font-semibold">
             <Sparkles className="w-3 h-3" />
-            AI-Powered Expense Tracking
+            {badge}
           </span>
         </div>
 
-        {/* Headline */}
         <h1 className="text-center text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 tracking-tight leading-[1.1] max-w-3xl mx-auto">
-          Stop guessing where your{" "}
-          <span className="text-emerald-600">money goes</span>
+          {before}
+          {highlight && <span className="text-emerald-600">{highlight}</span>}
+          {after}
         </h1>
         <p className="text-center text-base sm:text-lg text-slate-500 mt-6 max-w-2xl mx-auto leading-relaxed">
-          Upload bank statements, receipts, and CSV exports. Our AI extracts every transaction automatically — no manual entry, no spreadsheets.
+          {subheadline}
         </p>
 
-        {/* CTAs */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
-          <Link
-            href="/register"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition-colors shadow-sm"
-          >
-            Start for free
+          <Link href="/register" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition-colors shadow-sm">
+            {ctaPrimary}
             <ArrowRight className="w-4 h-4" />
           </Link>
-          <Link
-            href="/login"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition-colors"
-          >
-            Sign in
+          <Link href="/login" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition-colors">
+            {ctaSecondary}
           </Link>
         </div>
 
-        {/* Trust line */}
-        <p className="text-center text-xs text-slate-400 mt-4">
-          Free plan available · No credit card required
-        </p>
+        <p className="text-center text-xs text-slate-400 mt-4">{trustLine}</p>
 
-        {/* Dashboard mockup — hidden on small phones */}
         <div className="hidden sm:block">
           <DashboardMockup />
         </div>
@@ -110,11 +131,8 @@ function Hero() {
 function DashboardMockup() {
   return (
     <div className="relative mt-16 max-w-5xl mx-auto">
-      {/* Glow */}
       <div className="absolute -inset-4 bg-gradient-to-r from-emerald-400/20 via-sky-400/10 to-violet-400/20 blur-3xl rounded-3xl pointer-events-none" />
-
       <div className="relative rounded-2xl border border-slate-200/80 shadow-2xl overflow-hidden bg-white">
-        {/* Fake browser chrome */}
         <div className="flex items-center gap-1.5 px-4 py-3 bg-slate-50 border-b border-slate-100">
           <div className="w-3 h-3 rounded-full bg-red-300" />
           <div className="w-3 h-3 rounded-full bg-amber-300" />
@@ -123,34 +141,20 @@ function DashboardMockup() {
             <span className="text-[10px] text-slate-400">app.expensable.io/dashboard</span>
           </div>
         </div>
-
-        {/* App shell */}
         <div className="flex" style={{ minHeight: 340 }}>
-          {/* Sidebar */}
           <div className="w-44 bg-slate-950 shrink-0 p-3 flex flex-col gap-0.5">
             <div className="flex items-center gap-2 px-2 py-2 mb-3">
               <LogoMark className="w-5 h-5 rounded-md" />
               <span className="text-white text-xs font-semibold">Expensable</span>
             </div>
             {["Dashboard", "Upload", "Files", "Transactions", "Subscriptions", "Settings"].map((item, i) => (
-              <div
-                key={item}
-                className={`px-2.5 py-1.5 rounded-md text-[11px] font-medium ${
-                  i === 0
-                    ? "bg-emerald-500/10 text-emerald-400"
-                    : "text-slate-500"
-                }`}
-              >
+              <div key={item} className={`px-2.5 py-1.5 rounded-md text-[11px] font-medium ${i === 0 ? "bg-emerald-500/10 text-emerald-400" : "text-slate-500"}`}>
                 {item}
               </div>
             ))}
           </div>
-
-          {/* Main content */}
           <div className="flex-1 bg-slate-50 p-5 overflow-hidden">
             <p className="text-sm font-semibold text-slate-700 mb-4">Good morning, Alex · April overview</p>
-
-            {/* KPI cards */}
             <div className="grid grid-cols-4 gap-3 mb-4">
               {[
                 { label: "Money out", value: "$3,240", color: "text-red-600", bg: "bg-red-50" },
@@ -167,8 +171,6 @@ function DashboardMockup() {
                 </div>
               ))}
             </div>
-
-            {/* Chart + list row */}
             <div className="grid grid-cols-5 gap-3">
               <div className="col-span-3 bg-white rounded-xl border border-slate-100 p-3 shadow-sm">
                 <p className="text-[10px] font-semibold text-slate-500 mb-3">6-Month Trend</p>
@@ -206,63 +208,46 @@ function DashboardMockup() {
 
 // ─── Features ─────────────────────────────────────────────────────────────────
 
-const FEATURES = [
-  {
-    icon: BrainCircuit,
-    iconBg: "bg-violet-50",
-    iconColor: "text-violet-600",
-    title: "AI-Powered Parsing",
-    desc: "Upload any file — PDFs, receipt photos, or CSV exports. Claude AI reads every transaction automatically, no templates or mapping needed.",
-  },
-  {
-    icon: Users,
-    iconBg: "bg-sky-50",
-    iconColor: "text-sky-600",
-    title: "Family Finances",
-    desc: "Invite up to 6 household members on the Family plan. Everyone sees shared data. Only owners can delete — no accidental data loss.",
-  },
-  {
-    icon: FolderOpen,
-    iconBg: "bg-amber-50",
-    iconColor: "text-amber-600",
-    title: "Files Vault",
-    desc: "Every receipt and statement organized in a searchable gallery. Filter by type, preview PDFs and images inline, download anytime.",
-  },
-  {
-    icon: BarChart3,
-    iconBg: "bg-emerald-50",
-    iconColor: "text-emerald-600",
-    title: "Smart Analytics",
-    desc: "6-month spending trends, category breakdowns, subscription tracker, and savings rate — all on a customizable drag-and-drop dashboard.",
-  },
+const ICON_MAP: Record<string, React.ElementType> = {
+  BrainCircuit, Users, FolderOpen, BarChart3, Shield, Zap,
+}
+const COLOR_MAP: Record<string, { iconBg: string; iconColor: string }> = {
+  violet:  { iconBg: "bg-violet-50",  iconColor: "text-violet-600" },
+  sky:     { iconBg: "bg-sky-50",     iconColor: "text-sky-600" },
+  amber:   { iconBg: "bg-amber-50",   iconColor: "text-amber-600" },
+  emerald: { iconBg: "bg-emerald-50", iconColor: "text-emerald-600" },
+}
+
+const DEFAULT_FEATURES = [
+  { title: "AI-Powered Parsing", description: "Upload any file — PDFs, receipt photos, or CSV exports. Claude AI reads every transaction automatically, no templates or mapping needed.", icon: "BrainCircuit", iconColor: "violet" },
+  { title: "Family Finances",    description: "Invite up to 6 household members on the Family plan. Everyone sees shared data. Only owners can delete — no accidental data loss.", icon: "Users",       iconColor: "sky" },
+  { title: "Files Vault",        description: "Every receipt and statement organized in a searchable gallery. Filter by type, preview PDFs and images inline, download anytime.", icon: "FolderOpen", iconColor: "amber" },
+  { title: "Smart Analytics",    description: "6-month spending trends, category breakdowns, subscription tracker, and savings rate — all on a customizable drag-and-drop dashboard.", icon: "BarChart3",  iconColor: "emerald" },
 ]
 
-function Features() {
+function Features({ featSec }: { featSec: Record<string, any> }) {
+  const heading    = featSec.heading    ?? "Everything you need, nothing you don't"
+  const subheading = featSec.subheading ?? "Built for people who want real insight into their finances without the spreadsheet headache."
+  const cmsFeatures: CMSFeature[] = featSec.features?.length ? featSec.features : DEFAULT_FEATURES
+
   return (
     <section className="py-16 sm:py-20 px-4 sm:px-6 bg-white">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-10 sm:mb-12">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 tracking-tight">
-            Everything you need, nothing you don&apos;t
-          </h2>
-          <p className="text-slate-500 mt-3 max-w-xl mx-auto text-sm sm:text-base">
-            Built for people who want real insight into their finances without the spreadsheet headache.
-          </p>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 tracking-tight">{heading}</h2>
+          <p className="text-slate-500 mt-3 max-w-xl mx-auto text-sm sm:text-base">{subheading}</p>
         </div>
-
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-          {FEATURES.map((f) => {
-            const Icon = f.icon
+          {cmsFeatures.map((f, i) => {
+            const Icon = ICON_MAP[f.icon ?? ""] ?? BrainCircuit
+            const colors = COLOR_MAP[f.iconColor ?? ""] ?? COLOR_MAP.violet
             return (
-              <div
-                key={f.title}
-                className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 sm:p-6 hover:shadow-md hover:border-slate-200 transition-all"
-              >
-                <div className={`w-10 h-10 rounded-xl ${f.iconBg} flex items-center justify-center mb-4`}>
-                  <Icon className={`w-5 h-5 ${f.iconColor}`} />
+              <div key={i} className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 sm:p-6 hover:shadow-md hover:border-slate-200 transition-all">
+                <div className={`w-10 h-10 rounded-xl ${colors.iconBg} flex items-center justify-center mb-4`}>
+                  <Icon className={`w-5 h-5 ${colors.iconColor}`} />
                 </div>
                 <h3 className="text-sm font-semibold text-slate-900 mb-2">{f.title}</h3>
-                <p className="text-sm text-slate-500 leading-relaxed">{f.desc}</p>
+                <p className="text-sm text-slate-500 leading-relaxed">{f.description}</p>
               </div>
             )
           })}
@@ -274,55 +259,44 @@ function Features() {
 
 // ─── How It Works ─────────────────────────────────────────────────────────────
 
-const STEPS = [
-  {
-    icon: Upload,
-    iconBg: "bg-emerald-600",
-    step: "01",
-    title: "Upload your files",
-    desc: "Drag and drop bank statements, receipts, or CSV exports. Supports PDF, JPEG, PNG, and CSV — up to 20 MB each.",
-  },
-  {
-    icon: BrainCircuit,
-    iconBg: "bg-violet-600",
-    step: "02",
-    title: "AI extracts transactions",
-    desc: "Claude AI reads your files and extracts every transaction with date, amount, merchant, and category — automatically.",
-  },
-  {
-    icon: TrendingDown,
-    iconBg: "bg-sky-600",
-    step: "03",
-    title: "Get full visibility",
-    desc: "Your dashboard fills with insights: spending trends, top merchants, subscription costs, savings rate, and more.",
-  },
+const STEP_ICONS = [
+  { icon: Upload,      bg: "bg-emerald-600" },
+  { icon: BrainCircuit, bg: "bg-violet-600" },
+  { icon: TrendingDown, bg: "bg-sky-600" },
 ]
 
-function HowItWorks() {
+const DEFAULT_STEPS = [
+  { title: "Upload your files",       description: "Drag and drop bank statements, receipts, or CSV exports. Supports PDF, JPEG, PNG, and CSV — up to 20 MB each." },
+  { title: "AI extracts transactions", description: "Claude AI reads your files and extracts every transaction with date, amount, merchant, and category — automatically." },
+  { title: "Get full visibility",      description: "Your dashboard fills with insights: spending trends, top merchants, subscription costs, savings rate, and more." },
+]
+
+function HowItWorks({ stepsSec }: { stepsSec: Record<string, any> }) {
+  const heading = stepsSec.heading ?? "From upload to insight in seconds"
+  const cmsSteps: CMSStep[] = stepsSec.steps?.length ? stepsSec.steps : DEFAULT_STEPS
+  const steps = cmsSteps.slice(0, 3)
+
   return (
     <section className="py-16 sm:py-20 px-4 sm:px-6 bg-slate-50">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-10 sm:mb-12">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 tracking-tight">
-            From upload to insight in seconds
-          </h2>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 tracking-tight">{heading}</h2>
         </div>
-
-        <div className="grid sm:grid-cols-3 gap-8 sm:gap-8">
-          {STEPS.map((s, i) => {
-            const Icon = s.icon
+        <div className="grid sm:grid-cols-3 gap-8">
+          {steps.map((s, i) => {
+            const { icon: Icon, bg } = STEP_ICONS[i] ?? STEP_ICONS[0]
             return (
-              <div key={s.step} className="relative">
-                {i < STEPS.length - 1 && (
+              <div key={i} className="relative">
+                {i < steps.length - 1 && (
                   <div className="hidden sm:block absolute top-5 left-[calc(50%+2rem)] right-[-calc(50%-2rem)] h-px bg-slate-200" />
                 )}
                 <div className="flex flex-col items-center text-center">
-                  <div className={`w-10 h-10 rounded-xl ${s.iconBg} flex items-center justify-center mb-4 relative z-10`}>
+                  <div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center mb-4 relative z-10`}>
                     <Icon className="w-5 h-5 text-white" />
                   </div>
-                  <span className="text-xs font-bold text-slate-300 tracking-widest mb-2">{s.step}</span>
+                  <span className="text-xs font-bold text-slate-300 tracking-widest mb-2">0{i + 1}</span>
                   <h3 className="text-base font-semibold text-slate-900 mb-2">{s.title}</h3>
-                  <p className="text-sm text-slate-500 leading-relaxed max-w-xs">{s.desc}</p>
+                  <p className="text-sm text-slate-500 leading-relaxed max-w-xs">{s.description}</p>
                 </div>
               </div>
             )
@@ -335,35 +309,34 @@ function HowItWorks() {
 
 // ─── CTA Section ──────────────────────────────────────────────────────────────
 
-function CtaSection() {
+const DEFAULT_TRUST_ITEMS = ["No credit card required", "Free plan forever", "Cancel anytime"]
+
+function CtaSection({ ctaSec }: { ctaSec: Record<string, any> }) {
+  const heading      = ctaSec.heading      ?? "Start tracking today"
+  const subheading   = ctaSec.subheading   ?? "Free plan included. Upgrade to Pro or Family when you need more."
+  const ctaPrimary   = ctaSec.ctaPrimary   ?? "Create free account"
+  const ctaSecondary = ctaSec.ctaSecondary ?? "Already have an account"
+  const trustItems: string[] = ctaSec.trustItems?.length
+    ? ctaSec.trustItems.map((t: { text?: string }) => t.text ?? "").filter(Boolean)
+    : DEFAULT_TRUST_ITEMS
+
   return (
     <section className="py-16 sm:py-20 px-4 sm:px-6 bg-white">
       <div className="max-w-2xl mx-auto text-center">
         <div className="bg-gradient-to-br from-emerald-50 to-slate-50 rounded-3xl border border-emerald-100 p-8 sm:p-12">
-          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-3">
-            Start tracking today
-          </h2>
-          <p className="text-slate-500 mb-8 text-sm sm:text-base">
-            Free plan included. Upgrade to Pro or Family when you need more.
-          </p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mb-3">{heading}</h2>
+          <p className="text-slate-500 mb-8 text-sm sm:text-base">{subheading}</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link
-              href="/register"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition-colors shadow-sm"
-            >
-              Create free account
+            <Link href="/register" className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition-colors shadow-sm">
+              {ctaPrimary}
               <ArrowRight className="w-4 h-4" />
             </Link>
-            <Link
-              href="/login"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition-colors"
-            >
-              Already have an account
+            <Link href="/login" className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition-colors">
+              {ctaSecondary}
             </Link>
           </div>
-
           <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mt-8">
-            {["No credit card required", "Free plan forever", "Cancel anytime"].map((t) => (
+            {trustItems.map((t) => (
               <div key={t} className="flex items-center gap-1.5 text-xs text-slate-400">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                 {t}
@@ -387,12 +360,8 @@ function Footer() {
           <span className="text-sm font-semibold text-slate-700">Expensable</span>
         </div>
         <div className="flex items-center gap-6">
-          <Link href="/login" className="text-sm text-slate-400 hover:text-slate-600 transition-colors">
-            Sign in
-          </Link>
-          <Link href="/register" className="text-sm text-slate-400 hover:text-slate-600 transition-colors">
-            Register
-          </Link>
+          <Link href="/login" className="text-sm text-slate-400 hover:text-slate-600 transition-colors">Sign in</Link>
+          <Link href="/register" className="text-sm text-slate-400 hover:text-slate-600 transition-colors">Register</Link>
         </div>
         <p className="text-xs text-slate-400">© {new Date().getFullYear()} Expensable</p>
       </div>
