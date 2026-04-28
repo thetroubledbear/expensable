@@ -1,0 +1,51 @@
+import { buildConfig } from "payload"
+import { postgresAdapter } from "@payloadcms/db-postgres"
+import { lexicalEditor } from "@payloadcms/richtext-lexical"
+import { gcsStorage } from "@payloadcms/storage-gcs"
+import path from "path"
+import { fileURLToPath } from "url"
+import { CMSUsers } from "./cms/collections/CMSUsers"
+import { Media } from "./cms/collections/Media"
+import { Pages } from "./cms/collections/Pages"
+import { Posts } from "./cms/collections/Posts"
+import { Notices } from "./cms/collections/Notices"
+import { HomePage } from "./cms/globals/HomePage"
+
+const filename = fileURLToPath(import.meta.url)
+const dirname = path.dirname(filename)
+
+export default buildConfig({
+  admin: {
+    user: CMSUsers.slug,
+    importMap: { baseDir: path.resolve(dirname) },
+    meta: { titleSuffix: " | ExpCMS" },
+  },
+  routes: {
+    admin: "/expcms",
+    api: "/cms-api",
+  },
+  collections: [CMSUsers, Media, Pages, Posts, Notices],
+  globals: [HomePage],
+  editor: lexicalEditor(),
+  db: postgresAdapter({
+    pool: {
+      connectionString: process.env.DIRECT_URL ?? process.env.DATABASE_URL ?? "",
+    },
+    migrationDir: path.resolve(dirname, "cms/migrations"),
+  }),
+  secret: process.env.PAYLOAD_SECRET ?? "change-me-in-production",
+  typescript: {
+    outputFile: path.resolve(dirname, "cms/payload-types.ts"),
+  },
+  plugins: [
+    gcsStorage({
+      collections: { media: true },
+      bucket: process.env.GCS_BUCKET ?? "expensable",
+      options: {
+        credentials: process.env.GCS_SERVICE_ACCOUNT_KEY
+          ? (JSON.parse(process.env.GCS_SERVICE_ACCOUNT_KEY) as object)
+          : undefined,
+      },
+    }),
+  ],
+})
