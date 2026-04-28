@@ -48,5 +48,35 @@ export const SYSTEM_CATEGORIES = [
 ]
 
 export async function ensureCategories() {
-  await db.category.createMany({ data: SYSTEM_CATEGORIES, skipDuplicates: true })
+  const existing = await db.category.findMany({
+    where: { isSystem: true },
+    select: { id: true, name: true },
+    orderBy: { id: "asc" },
+  })
+
+  // Build name → first-id map; collect duplicate ids
+  const keepMap = new Map<string, string>()
+  const deleteIds: string[] = []
+  for (const cat of existing) {
+    if (!keepMap.has(cat.name)) keepMap.set(cat.name, cat.id)
+    else deleteIds.push(cat.id)
+  }
+
+  // Migrate FK refs on duplicates, then delete them
+  if (deleteIds.length > 0) {
+    for (const dupId of deleteIds) {
+      const dup = existing.find((c) => c.id === dupId)!
+      const keepId = keepMap.get(dup.name)!
+      await db.transaction.updateMany({ where: { categoryId: dupId }, data: { categoryId: keepId } }).catch(() => {})
+    }
+    await db.category.deleteMany({ where: { id: { in: deleteIds } } }).catch(() => {})
+  }
+
+  // Create any system categories that don't exist yet
+  const toCreate = SYSTEM_CATEGORIES
+    .filter((c) => !keepMap.has(c.name))
+    .map((c) => ({ ...c, isSystem: true }))
+  if (toCreate.length > 0) {
+    await db.category.createMany({ data: toCreate })
+  }
 }

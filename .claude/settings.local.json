@@ -57,7 +57,8 @@
       "Bash(xargs grep *)",
       "mcp__ide__getDiagnostics",
       "mcp__claude_ai_Notion__notion-search",
-      "mcp__claude_ai_Notion__notion-fetch"
+      "mcp__claude_ai_Notion__notion-fetch",
+      "Bash(awk '{print $NF}')"
     ]
   },
   "enableAllProjectMcpServers": true,
