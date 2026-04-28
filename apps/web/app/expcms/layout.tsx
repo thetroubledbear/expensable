@@ -13,7 +13,7 @@ type Args = {
 export default async function Layout({ children }: Args) {
   const resolvedConfig = await config
   const i18n = await getNextRequestI18n({ config: resolvedConfig })
-  const clientConfig = getClientConfig({ config: resolvedConfig, i18n, importMap })
+  const clientConfig = getClientConfig({ config: resolvedConfig, i18n, importMap, user: null })
   return (
     <PayloadConfigProvider config={clientConfig}>
       {children}
