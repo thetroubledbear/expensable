@@ -12,7 +12,8 @@
     "start": "next start",
     "lint": "eslint .",
     "type-check": "tsc --noEmit",
-    "db:generate": "cd ../../packages/db && npx prisma generate"
+    "db:generate": "cd ../../packages/db && npx prisma generate",
+    "generate:importmap": "NODE_OPTIONS='--experimental-strip-types' node ../../node_modules/payload/bin.js generate:importmap --disable-transpile"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",
