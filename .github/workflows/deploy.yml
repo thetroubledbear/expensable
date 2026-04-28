@@ -163,7 +163,7 @@ jobs:
 
       - name: Push OTA update (production)
         if: needs.changes.outputs.mobile_update == 'true'
-        run: cd apps/mobile && eas update --branch production --message "Deploy from CI" --clear-cache
+        run: cd apps/mobile && eas update --branch production --clear-cache --message "Clear cache rebuild"
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           CI: '1'
