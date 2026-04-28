@@ -3,21 +3,17 @@ import { postgresAdapter } from "@payloadcms/db-postgres"
 import { lexicalEditor } from "@payloadcms/richtext-lexical"
 import { gcsStorage } from "@payloadcms/storage-gcs"
 import path from "path"
-import { fileURLToPath } from "url"
-import { CMSUsers } from "./cms/collections/CMSUsers"
-import { Media } from "./cms/collections/Media"
-import { Pages } from "./cms/collections/Pages"
-import { Posts } from "./cms/collections/Posts"
-import { Notices } from "./cms/collections/Notices"
-import { HomePage } from "./cms/globals/HomePage"
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
+import { CMSUsers } from "./cms/collections/CMSUsers.ts"
+import { Media } from "./cms/collections/Media.ts"
+import { Pages } from "./cms/collections/Pages.ts"
+import { Posts } from "./cms/collections/Posts.ts"
+import { Notices } from "./cms/collections/Notices.ts"
+import { HomePage } from "./cms/globals/HomePage.ts"
 
 export default buildConfig({
   admin: {
     user: CMSUsers.slug,
-    importMap: { baseDir: path.resolve(dirname) },
+    importMap: { baseDir: path.resolve(".") },
     meta: { titleSuffix: " | ExpCMS" },
   },
   routes: {
@@ -31,12 +27,12 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DIRECT_URL ?? process.env.DATABASE_URL ?? "",
     },
-    migrationDir: path.resolve(dirname, "cms/migrations"),
+    migrationDir: path.resolve("cms/migrations"),
     push: true,
   }),
   secret: process.env.PAYLOAD_SECRET ?? "change-me-in-production",
   typescript: {
-    outputFile: path.resolve(dirname, "cms/payload-types.ts"),
+    outputFile: path.resolve("cms/payload-types.ts"),
   },
   plugins: [
     gcsStorage({
