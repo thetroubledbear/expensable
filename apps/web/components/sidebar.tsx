@@ -62,13 +62,13 @@ export function Sidebar({ user }: SidebarProps) {
               key={href}
               href={href}
               onClick={() => setOpen(false)}
-              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-[15px] font-medium transition-colors ${
                 active
                   ? "bg-emerald-500/10 text-emerald-400"
                   : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
               }`}
             >
-              <Icon className="w-4 h-4 shrink-0" />
+              <Icon className="w-5 h-5 shrink-0" />
               {label}
             </Link>
           )

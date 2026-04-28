@@ -55,7 +55,9 @@
       "mcp__claude_ai_Notion__notion-update-page",
       "Bash(eas update *)",
       "Bash(xargs grep *)",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "mcp__claude_ai_Notion__notion-search",
+      "mcp__claude_ai_Notion__notion-fetch"
     ]
   },
   "enableAllProjectMcpServers": true,

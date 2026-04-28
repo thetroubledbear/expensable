@@ -86,6 +86,7 @@ model Household {
   financialAccounts FinancialAccount[]
   budgets           Budget[]
   notifications     Notification[]
+  categories        Category[]
 }
 
 model HouseholdMember {
@@ -171,14 +172,18 @@ model Transaction {
 // ─── Categories ───────────────────────────────────────────────────────────────
 
 model Category {
-  id       String  @id @default(cuid())
-  name     String  @unique
-  icon     String
-  color    String
-  isSystem Boolean @default(true)
+  id          String   @id @default(cuid())
+  name        String
+  icon        String
+  color       String
+  isSystem    Boolean  @default(true)
+  householdId String?
 
+  household    Household?    @relation(fields: [householdId], references: [id], onDelete: Cascade)
   transactions Transaction[]
   budgets      Budget[]
+
+  @@unique([householdId, name])
 }
 
 // ─── Subscriptions ────────────────────────────────────────────────────────────

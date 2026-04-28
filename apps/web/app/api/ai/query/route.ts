@@ -58,7 +58,9 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const [catTotals, topMerchants, recentTx, subscriptions] = await Promise.all([
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+
+  const [catTotals, catTotalsMonth, topMerchants, topMerchantsMonth, recentTx, subscriptions] = await Promise.all([
     db.transaction.groupBy({
       by: ["categoryId"],
       where: { householdId, type: "debit" },
@@ -67,8 +69,22 @@ export async function POST(req: NextRequest) {
       take: 10,
     }),
     db.transaction.groupBy({
+      by: ["categoryId"],
+      where: { householdId, type: "debit", date: { gte: monthStart } },
+      _sum: { amount: true },
+      orderBy: { _sum: { amount: "desc" } },
+      take: 10,
+    }),
+    db.transaction.groupBy({
       by: ["merchantName"],
       where: { householdId, type: "debit", merchantName: { not: null } },
+      _sum: { amount: true },
+      orderBy: { _sum: { amount: "desc" } },
+      take: 10,
+    }),
+    db.transaction.groupBy({
+      by: ["merchantName"],
+      where: { householdId, type: "debit", merchantName: { not: null }, date: { gte: monthStart } },
       _sum: { amount: true },
       orderBy: { _sum: { amount: "desc" } },
       take: 10,
@@ -85,9 +101,13 @@ export async function POST(req: NextRequest) {
     }),
   ])
 
-  const catIds = catTotals.map((c) => c.categoryId).filter(Boolean) as string[]
-  const cats = catIds.length > 0
-    ? await db.category.findMany({ where: { id: { in: catIds } }, select: { id: true, name: true } })
+  const allCatIds = [
+    ...catTotals.map((c) => c.categoryId),
+    ...catTotalsMonth.map((c) => c.categoryId),
+  ].filter(Boolean) as string[]
+  const uniqueCatIds = [...new Set(allCatIds)]
+  const cats = uniqueCatIds.length > 0
+    ? await db.category.findMany({ where: { id: { in: uniqueCatIds } }, select: { id: true, name: true } })
     : []
   const catById = new Map(cats.map((c) => [c.id, c.name]))
 
@@ -95,7 +115,15 @@ export async function POST(req: NextRequest) {
     .map((c) => `${catById.get(c.categoryId ?? "") ?? "Uncategorized"}: ${currency} ${(c._sum.amount ?? 0).toFixed(2)}`)
     .join("\n")
 
+  const spendingByCategoryMonth = catTotalsMonth
+    .map((c) => `${catById.get(c.categoryId ?? "") ?? "Uncategorized"}: ${currency} ${(c._sum.amount ?? 0).toFixed(2)}`)
+    .join("\n")
+
   const topMerchantsText = topMerchants
+    .map((m) => `${m.merchantName}: ${currency} ${(m._sum.amount ?? 0).toFixed(2)}`)
+    .join("\n")
+
+  const topMerchantsMonthText = topMerchantsMonth
     .map((m) => `${m.merchantName}: ${currency} ${(m._sum.amount ?? 0).toFixed(2)}`)
     .join("\n")
 
@@ -107,7 +135,17 @@ export async function POST(req: NextRequest) {
     .map((s) => `${s.merchantName}: ${s.currency} ${s.amount.toFixed(2)}/${s.frequency}`)
     .join("\n")
 
-  const context = `Household financial data (currency: ${currency}):
+  const monthLabel = now.toLocaleString("en", { month: "long", year: "numeric" })
+
+  const context = `Today's date: ${now.toISOString().slice(0, 10)}
+Current month: ${monthLabel} (starts ${monthStart.toISOString().slice(0, 10)})
+Household currency: ${currency}
+
+SPENDING BY CATEGORY — ${monthLabel}:
+${spendingByCategoryMonth || "No data this month"}
+
+TOP MERCHANTS — ${monthLabel}:
+${topMerchantsMonthText || "No data this month"}
 
 ALL-TIME SPENDING BY CATEGORY:
 ${spendingByCategory || "No data"}
@@ -115,7 +153,7 @@ ${spendingByCategory || "No data"}
 TOP MERCHANTS ALL-TIME:
 ${topMerchantsText || "No data"}
 
-RECENT TRANSACTIONS (last 20):
+RECENT TRANSACTIONS (last 20, most recent first):
 ${recentTxText || "No data"}
 
 DETECTED SUBSCRIPTIONS:

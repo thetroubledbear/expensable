@@ -1,4 +1,11 @@
+import Link from "next/link"
 import { ArrowDownLeft, ArrowUpRight, Minus, TrendingUp, TrendingDown } from "lucide-react"
+
+const VARIANT_HREF: Record<string, string> = {
+  out: "/transactions?type=debit",
+  in: "/transactions?type=credit",
+  net: "/transactions",
+}
 
 interface Props {
   variant: "out" | "in" | "net"
@@ -58,12 +65,12 @@ export function MoneyCardWidget({ variant, amount, currency, monthName, momPct }
       : (cfg.amountColor as string)
 
   return (
-    <div className="h-full flex flex-col justify-center">
+    <Link href={VARIANT_HREF[variant]} className="h-full flex flex-col justify-center group">
       <div className={`w-9 h-9 rounded-xl ${iconBg} flex items-center justify-center mb-4`}>
         <Icon className={`w-4 h-4 ${iconColor}`} />
       </div>
-      <p className={`text-xl font-bold tabular-nums ${amountColor}`}>{fmt(amount, currency)}</p>
-      <p className="text-sm text-slate-500 mt-0.5">{cfg.label}</p>
+      <p className={`text-xl font-bold tabular-nums ${amountColor} group-hover:opacity-80 transition-opacity`}>{fmt(amount, currency)}</p>
+      <p className="text-sm text-slate-500 mt-0.5 group-hover:text-emerald-600 transition-colors">{cfg.label}</p>
       <p className="text-xs text-slate-400">{monthName}</p>
       {momPct !== null && momPct !== undefined && (
         <div
@@ -79,6 +86,6 @@ export function MoneyCardWidget({ variant, amount, currency, monthName, momPct }
           {Math.abs(momPct)}% vs last month
         </div>
       )}
-    </div>
+    </Link>
   )
 }

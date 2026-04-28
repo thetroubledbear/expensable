@@ -6,6 +6,8 @@ import { SettingsForm } from "@/components/settings-form"
 import { BillingSection } from "@/components/billing-section"
 import { MembersSection } from "@/components/members-section"
 import { AvatarUpload } from "@/components/avatar-upload"
+import { CustomCategoriesSection } from "@/components/custom-categories-section"
+import { ensureCategories } from "@/lib/categories"
 import { PLANS, type PlanTier } from "@expensable/types"
 import { CheckCircle2, Users } from "lucide-react"
 
@@ -52,6 +54,15 @@ export default async function SettingsPage({
   const billing = household?.billing
   const tier = (billing?.tier ?? "free") as PlanTier
   const plan = PLANS[tier]
+  const hid = baseMembership?.householdId
+
+  await ensureCategories()
+  const allCategories = hid
+    ? await db.category.findMany({
+        where: { OR: [{ householdId: null }, { householdId: hid }] },
+        orderBy: [{ isSystem: "desc" }, { name: "asc" }],
+      })
+    : []
 
   // Use 0 if the billing cycle has rolled into a new calendar month
   let filesUsed = billing?.filesUploadedThisMonth ?? 0
@@ -126,6 +137,10 @@ export default async function SettingsPage({
             maxMembers={plan.maxHouseholdMembers}
           />
         )}
+        <CustomCategoriesSection
+          initialCategories={allCategories}
+          isOwner={membership?.role === "owner"}
+        />
       </div>
     </div>
   )
