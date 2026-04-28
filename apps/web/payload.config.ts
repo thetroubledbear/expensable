@@ -25,7 +25,7 @@ export default buildConfig({
   editor: lexicalEditor(),
   db: postgresAdapter({
     pool: {
-      connectionString: process.env.DIRECT_URL ?? process.env.DATABASE_URL ?? "",
+      connectionString: process.env.DATABASE_URL_UNPOOLED ?? process.env.DIRECT_URL ?? process.env.DATABASE_URL ?? "",
     },
     migrationDir: path.resolve("cms/migrations"),
     push: true,
