@@ -29,6 +29,10 @@ export default buildConfig({
     },
     migrationDir: path.resolve("cms/migrations"),
     push: true,
+    // Restrict schema introspection to Payload-owned tables only.
+    // Without this, drizzle-kit sees all Prisma tables and asks interactive
+    // rename questions when creating Payload tables → hangs in serverless.
+    tablesFilter: ["cms_*", "payload_*", "media", "media_*", "pages", "pages_*", "posts", "posts_*", "notices", "notices_*", "home_page", "home_page_*"],
   }),
   secret: process.env.PAYLOAD_SECRET ?? "change-me-in-production",
   typescript: {
