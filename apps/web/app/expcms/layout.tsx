@@ -13,7 +13,8 @@ type Args = {
 export default async function Layout({ children }: Args) {
   const resolvedConfig = await config
   const i18n = await getNextRequestI18n({ config: resolvedConfig })
-  const clientConfig = getClientConfig({ config: resolvedConfig, i18n, importMap, user: null })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const clientConfig = getClientConfig({ config: resolvedConfig, i18n, importMap, user: undefined as any })
   return (
     <PayloadConfigProvider config={clientConfig}>
       {children}
