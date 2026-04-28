@@ -1,3 +1,5 @@
+import Link from "next/link"
+
 interface Merchant {
   merchantName: string | null
   amount: number
@@ -33,9 +35,13 @@ export function TopSpendingWidget({ merchants, currency, monthName }: Props) {
       <p className="text-xs text-slate-400 mb-3">{monthName}</p>
       <div className="space-y-3 flex-1 overflow-auto">
         {merchants.map((m, i) => (
-          <div key={i}>
+          <Link
+            key={i}
+            href={`/transactions?search=${encodeURIComponent(m.merchantName ?? "")}&type=debit`}
+            className="block group"
+          >
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs text-slate-600 truncate max-w-[110px]">
+              <span className="text-xs text-slate-600 truncate max-w-[110px] group-hover:text-emerald-600 transition-colors">
                 {m.merchantName}
               </span>
               <span className="text-xs font-medium text-slate-700 tabular-nums">
@@ -48,7 +54,7 @@ export function TopSpendingWidget({ merchants, currency, monthName }: Props) {
                 style={{ width: `${m.pct}%` }}
               />
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>

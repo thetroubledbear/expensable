@@ -289,24 +289,32 @@ export function UploadDropzone() {
 
       {/* Upload button */}
       {pendingCount > 0 && (
-        <button
-          onClick={uploadAll}
-          disabled={uploading}
-          className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white rounded-xl py-3 text-sm font-semibold transition-colors"
-        >
-          {uploading ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Uploading…
-            </>
-          ) : (
-            <>
-              <UploadCloud className="w-4 h-4" />
-              Upload {pendingCount} {pendingCount === 1 ? "file" : "files"}
-              {selectedAccount ? ` → ${selectedAccount.name}` : ""}
-            </>
+        <div className="relative">
+          {!uploading && (
+            <span className="absolute -top-1 -right-1 flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500" />
+            </span>
           )}
-        </button>
+          <button
+            onClick={uploadAll}
+            disabled={uploading}
+            className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white rounded-xl py-3.5 text-sm font-semibold transition-colors shadow-lg shadow-emerald-500/20"
+          >
+            {uploading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Uploading…
+              </>
+            ) : (
+              <>
+                <UploadCloud className="w-4 h-4" />
+                Tap to upload {pendingCount} {pendingCount === 1 ? "file" : "files"}
+                {selectedAccount ? ` → ${selectedAccount.name}` : ""}
+              </>
+            )}
+          </button>
+        </div>
       )}
     </div>
   )

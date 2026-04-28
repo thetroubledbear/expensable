@@ -40,29 +40,33 @@ export function RecentTransactionsWidget({ transactions, currency }: Props) {
         </Link>
       </div>
       <div className="space-y-1 flex-1 overflow-auto">
-        {transactions.map((tx) => (
-          <div
-            key={tx.id}
-            className="flex items-center justify-between py-2 border-b border-slate-50 last:border-0"
-          >
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-slate-700 truncate max-w-[220px]">
-                {tx.merchantName ?? tx.description}
-              </p>
-              <p className="text-xs text-slate-400">
-                {new Date(tx.date).toLocaleDateString("en", { month: "short", day: "numeric" })}
-              </p>
-            </div>
-            <span
-              className={`text-sm font-semibold tabular-nums shrink-0 ml-4 ${
-                tx.type === "credit" ? "text-emerald-600" : "text-slate-700"
-              }`}
+        {transactions.map((tx) => {
+          const searchName = tx.merchantName ?? tx.description
+          return (
+            <Link
+              key={tx.id}
+              href={`/transactions?search=${encodeURIComponent(searchName)}`}
+              className="flex items-center justify-between py-2 border-b border-slate-50 last:border-0 hover:bg-slate-50 rounded-lg px-1 -mx-1 transition-colors"
             >
-              {tx.type === "credit" ? "+" : "−"}
-              {fmt(tx.amount, currency)}
-            </span>
-          </div>
-        ))}
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-slate-700 truncate max-w-[220px]">
+                  {searchName}
+                </p>
+                <p className="text-xs text-slate-400">
+                  {new Date(tx.date).toLocaleDateString("en", { month: "short", day: "numeric" })}
+                </p>
+              </div>
+              <span
+                className={`text-sm font-semibold tabular-nums shrink-0 ml-4 ${
+                  tx.type === "credit" ? "text-emerald-600" : "text-slate-700"
+                }`}
+              >
+                {tx.type === "credit" ? "+" : "−"}
+                {fmt(tx.amount, currency)}
+              </span>
+            </Link>
+          )
+        })}
       </div>
     </div>
   )

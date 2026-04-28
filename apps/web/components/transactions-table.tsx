@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { Search, AlertTriangle, ChevronLeft, ChevronRight, Loader2, X, Receipt, Trash2, Pencil } from "lucide-react"
+import { Search, AlertTriangle, ChevronLeft, ChevronRight, Loader2, X, Receipt, Trash2, Pencil, Undo2 } from "lucide-react"
 import { CategoryPicker, type Category } from "./category-picker"
 import { EditTransactionModal, type EditableTransaction } from "./edit-transaction-modal"
 
@@ -72,6 +72,9 @@ export function TransactionsTable({ initialData, categories, accounts, defaultCu
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [deleting, setDeleting] = useState(false)
   const [editingTx, setEditingTx] = useState<Transaction | null>(null)
+  const [undoState, setUndoState] = useState<{ ids: string[]; txs: Transaction[]; countdown: number } | null>(null)
+  const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const undoIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const isMounted = useRef(false)
 
@@ -185,21 +188,47 @@ export function TransactionsTable({ initialData, categories, accounts, defaultCu
     }
   }
 
-  async function deleteSelected() {
+  function deleteSelected() {
     if (selected.size === 0 || deleting) return
-    setDeleting(true)
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current)
+    if (undoIntervalRef.current) clearInterval(undoIntervalRef.current)
+
     const ids = [...selected]
-    const res = await fetch("/api/transactions", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ids }),
-    })
-    setDeleting(false)
-    if (res.ok) {
-      setTransactions((prev) => prev.filter((t) => !selected.has(t.id)))
-      setTotal((prev) => Math.max(0, prev - selected.size))
-      setSelected(new Set())
-    }
+    const txsToDelete = transactions.filter((t) => selected.has(t.id))
+
+    setTransactions((prev) => prev.filter((t) => !selected.has(t.id)))
+    setTotal((prev) => Math.max(0, prev - ids.length))
+    setSelected(new Set())
+    setUndoState({ ids, txs: txsToDelete, countdown: 5 })
+
+    undoIntervalRef.current = setInterval(() => {
+      setUndoState((prev) => (prev ? { ...prev, countdown: Math.max(0, prev.countdown - 1) } : null))
+    }, 1000)
+
+    undoTimerRef.current = setTimeout(async () => {
+      clearInterval(undoIntervalRef.current!)
+      setUndoState(null)
+      setDeleting(true)
+      await fetch("/api/transactions", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids }),
+      })
+      setDeleting(false)
+    }, 5000)
+  }
+
+  function handleUndo() {
+    if (!undoState) return
+    clearTimeout(undoTimerRef.current!)
+    clearInterval(undoIntervalRef.current!)
+    setTransactions((prev) =>
+      [...undoState.txs, ...prev].sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      )
+    )
+    setTotal((prev) => prev + undoState.txs.length)
+    setUndoState(null)
   }
 
   const allSelected = transactions.length > 0 && selected.size === transactions.length
@@ -415,6 +444,12 @@ export function TransactionsTable({ initialData, categories, accounts, defaultCu
                           Possible duplicate
                         </span>
                       )}
+                      {tx.needsReview && (
+                        <span className="inline-flex items-center gap-1 mt-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-600 border border-amber-100">
+                          <AlertTriangle className="w-2.5 h-2.5" />
+                          {!tx.categoryId ? "Missing category" : "Verify details"}
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3.5 text-right tabular-nums whitespace-nowrap">
                       <span
@@ -507,6 +542,22 @@ export function TransactionsTable({ initialData, categories, accounts, defaultCu
           onSave={handleEditSave}
           onClose={() => setEditingTx(null)}
         />
+      )}
+
+      {undoState && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-xl text-sm font-medium">
+          <span>
+            Deleted {undoState.ids.length} transaction{undoState.ids.length !== 1 ? "s" : ""}
+          </span>
+          <button
+            onClick={handleUndo}
+            className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg transition-colors"
+          >
+            <Undo2 className="w-3.5 h-3.5" />
+            Undo
+          </button>
+          <span className="text-slate-400 text-xs tabular-nums">{undoState.countdown}s</span>
+        </div>
       )}
     </div>
   )

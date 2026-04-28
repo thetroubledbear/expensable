@@ -2,6 +2,7 @@
 import { db } from "@expensable/db"
 import { resolveHousehold } from "@/lib/auth/household"
 import { SubscriptionCard } from "@/components/subscription-card"
+import { AddSubscriptionButton } from "@/components/add-subscription-button"
 import { Repeat2 } from "lucide-react"
 
 function estimateAnnual(amount: number, frequency: string): number {
@@ -46,9 +47,12 @@ export default async function SubscriptionsPage() {
 
   return (
     <div className="p-4 sm:p-8 max-w-5xl mx-auto w-full">
-      <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-slate-900">Subscriptions</h1>
-        <p className="text-slate-500 mt-1 text-sm">Auto-detected recurring charges</p>
+      <div className="mb-8 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-slate-900">Subscriptions</h1>
+          <p className="text-slate-500 mt-1 text-sm">Auto-detected recurring charges</p>
+        </div>
+        {isOwner && <AddSubscriptionButton defaultCurrency={currency} />}
       </div>
 
       {subs.length === 0 ? (
