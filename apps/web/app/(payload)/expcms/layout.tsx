@@ -3,6 +3,7 @@ import { importMap } from "./[[...segments]]/importMap"
 import { serverFunction } from "./serverFunction"
 import config from "@payload-config"
 import React from "react"
+import "@payloadcms/next/css"
 
 type Args = {
   children: React.ReactNode
