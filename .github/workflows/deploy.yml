@@ -1,24 +1,22 @@
-name: Deploy Web + Mobile
+name: Deploy Landing + Web + Mobile
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, dev]
     paths:
+      - 'apps/landing/**'
       - 'apps/web/**'
       - 'apps/mobile/**'
+      - 'packages/**'
       - '.github/workflows/**'
   workflow_dispatch:
 
 # ─── Detect what changed ───────────────────────────────────────────────────────
-#  web          → deploy web
-#  mobile_build → native files changed (package.json, android/, ios/, App.json,
-#                 eas.json) — needs full eas build → APK
-#  mobile_update → JS-only files changed — eas update (OTA) is enough
-# ──────────────────────────────────────────────────────────────────────────────
 jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
+      landing: ${{ steps.diff.outputs.landing }}
       web: ${{ steps.diff.outputs.web }}
       mobile_build: ${{ steps.diff.outputs.mobile_build }}
       mobile_update: ${{ steps.diff.outputs.mobile_update }}
@@ -29,8 +27,9 @@ jobs:
       - id: diff
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "web=true"          >> $GITHUB_OUTPUT
-            echo "mobile_build=true" >> $GITHUB_OUTPUT
+            echo "landing=true"       >> $GITHUB_OUTPUT
+            echo "web=true"           >> $GITHUB_OUTPUT
+            echo "mobile_build=true"  >> $GITHUB_OUTPUT
             exit 0
           fi
 
@@ -41,8 +40,13 @@ jobs:
 
           CHANGED=$(git diff --name-only "$BASE" HEAD)
 
+          # Landing
+          if echo "$CHANGED" | grep -qE '^(apps/landing/|packages/)'; then
+            echo "landing=true" >> $GITHUB_OUTPUT
+          fi
+
           # Web
-          if echo "$CHANGED" | grep -q '^apps/web/'; then
+          if echo "$CHANGED" | grep -qE '^(apps/web/|packages/)'; then
             echo "web=true" >> $GITHUB_OUTPUT
           fi
 
@@ -54,9 +58,9 @@ jobs:
             echo "mobile_update=true" >> $GITHUB_OUTPUT
           fi
 
-# ─── Staging (develop only — auto) ────────────────────────────────────────────
+# ─── Staging (dev only — auto) ────────────────────────────────────────────────
   deploy-staging:
-    if: github.ref == 'refs/heads/develop'
+    if: github.ref == 'refs/heads/dev'
     needs: changes
     runs-on: ubuntu-latest
     environment: staging
@@ -66,13 +70,33 @@ jobs:
         with:
           fetch-depth: 2
 
+      # ── Landing ──
+      - uses: actions/setup-node@v4
+        if: needs.changes.outputs.landing == 'true'
+        with:
+          node-version: 22
+
+      - name: Install Vercel CLI (landing)
+        if: needs.changes.outputs.landing == 'true'
+        run: npm install -g vercel
+
+      - name: Deploy Landing (staging)
+        if: needs.changes.outputs.landing == 'true'
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_LANDING_PROJECT_ID }}
+        run: |
+          vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+          vercel build --token=${{ secrets.VERCEL_TOKEN }}
+          vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
+
       # ── Web ──
       - uses: actions/setup-node@v4
         if: needs.changes.outputs.web == 'true'
         with:
           node-version: 22
 
-      - name: Install Vercel CLI
+      - name: Install Vercel CLI (web)
         if: needs.changes.outputs.web == 'true'
         run: npm install -g vercel
 
@@ -115,12 +139,8 @@ jobs:
           CI: '1'
 
 # ─── Production (approval required) ───────────────────────────────────────────
-#  develop push: after staging succeeds → approval gate
-#  main push / workflow_dispatch: directly → approval gate
-#  Set up: Settings → Environments → production → Required reviewers
-# ──────────────────────────────────────────────────────────────────────────────
   deploy-production:
-    if: always() && needs.changes.result == 'success' && (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' || (github.ref == 'refs/heads/develop' && needs['deploy-staging'].result == 'success'))
+    if: always() && needs.changes.result == 'success' && (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' || (github.ref == 'refs/heads/dev' && needs['deploy-staging'].result == 'success'))
     needs: [changes, deploy-staging]
     runs-on: ubuntu-latest
     environment: production
@@ -130,13 +150,33 @@ jobs:
         with:
           fetch-depth: 2
 
+      # ── Landing ──
+      - uses: actions/setup-node@v4
+        if: needs.changes.outputs.landing == 'true'
+        with:
+          node-version: 22
+
+      - name: Install Vercel CLI (landing)
+        if: needs.changes.outputs.landing == 'true'
+        run: npm install -g vercel
+
+      - name: Deploy Landing (production)
+        if: needs.changes.outputs.landing == 'true'
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_LANDING_PROJECT_ID }}
+        run: |
+          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+
       # ── Web ──
       - uses: actions/setup-node@v4
         if: needs.changes.outputs.web == 'true'
         with:
           node-version: 22
 
-      - name: Install Vercel CLI
+      - name: Install Vercel CLI (web)
         if: needs.changes.outputs.web == 'true'
         run: npm install -g vercel
 

@@ -17,9 +17,10 @@ export async function NoticesBanner() {
   let notices: any[] = []
 
   try {
-    const res = await fetch(`${process.env.NEXTAUTH_URL ?? "http://localhost:3000"}/api/notices`, {
-      next: { revalidate: 60 },
-    })
+    const res = await fetch(
+      `${process.env.LANDING_URL ?? process.env.NEXTAUTH_URL ?? "http://localhost:3001"}/api/notices`,
+      { next: { revalidate: 60 } }
+    )
     if (res.ok) notices = await res.json()
   } catch {
     return null

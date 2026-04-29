@@ -1,0 +1,40 @@
+{
+  "name": "@expensable/landing",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "type-check": "tsc --noEmit",
+    "generate:importmap": "NODE_OPTIONS='--experimental-strip-types' node ../../node_modules/payload/bin.js generate:importmap --disable-transpile"
+  },
+  "dependencies": {
+    "@expensable/ui": "*",
+    "@expensable/types": "*",
+    "@google-cloud/storage": "^7.19.0",
+    "@payloadcms/db-postgres": "^3.84.1",
+    "@payloadcms/next": "^3.84.1",
+    "@payloadcms/richtext-lexical": "^3.84.1",
+    "@payloadcms/storage-gcs": "^3.84.1",
+    "lucide-react": "^1.8.0",
+    "next": "16.2.4",
+    "payload": "^3.84.1",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.4",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
