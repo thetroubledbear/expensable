@@ -5,6 +5,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 import { LogoMark } from "@/components/logo"
+import { convertLexicalToHTML, defaultHTMLConverters } from "@payloadcms/richtext-lexical/html"
 
 export const revalidate = 60
 
@@ -88,10 +89,17 @@ export default async function BlogPost({ params }: Props) {
             <p className="text-lg text-slate-600 leading-relaxed mb-8 font-medium">{p.excerpt}</p>
           )}
 
-          {/* Payload lexical content rendered as HTML — extend with @payloadcms/richtext-lexical/html */}
-          <div className="prose prose-slate max-w-none">
-            <p className="text-slate-500 text-sm">[Rich text rendering — install @payloadcms/richtext-lexical HTML converter to render content here]</p>
-          </div>
+          {p.content && (
+            <div
+              className="prose prose-slate max-w-none"
+              dangerouslySetInnerHTML={{
+                __html: convertLexicalToHTML({
+                  data: p.content as any,
+                  converters: defaultHTMLConverters,
+                }),
+              }}
+            />
+          )}
         </div>
       </main>
     </div>
