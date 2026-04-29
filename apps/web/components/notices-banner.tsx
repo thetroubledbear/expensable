@@ -1,5 +1,3 @@
-import { getPayload } from "payload"
-import config from "@payload-config"
 import Link from "next/link"
 
 const VARIANT_CLASSES: Record<string, string> = {
@@ -19,32 +17,10 @@ export async function NoticesBanner() {
   let notices: any[] = []
 
   try {
-    const payload = await getPayload({ config })
-    const now = new Date().toISOString()
-    const result = await payload.find({
-      collection: "notices",
-      where: {
-        and: [
-          { active: { equals: true } },
-          { type: { equals: "banner" } },
-          {
-            or: [
-              { target: { equals: "both" } },
-              { target: { equals: "web" } },
-            ],
-          },
-          {
-            or: [
-              { expiresAt: { exists: false } },
-              { expiresAt: { greater_than: now } },
-            ],
-          },
-        ],
-      },
-      limit: 5,
-      sort: "-createdAt",
+    const res = await fetch(`${process.env.NEXTAUTH_URL ?? "http://localhost:3000"}/api/notices`, {
+      next: { revalidate: 60 },
     })
-    notices = result.docs
+    if (res.ok) notices = await res.json()
   } catch {
     return null
   }
