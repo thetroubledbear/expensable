@@ -9,7 +9,7 @@ import { convertLexicalToHTML, defaultHTMLConverters } from "@payloadcms/richtex
 
 export const revalidate = 60
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+const APP_URL = process.env.APP_URL ?? "http://localhost:3000"
 
 type Props = { params: Promise<{ slug: string }> }
 
