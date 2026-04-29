@@ -1,7 +1,7 @@
 import { getCookieHeader, ingestSetCookie } from "./cookies"
 
-export const BASE_URL = "https://app.expensable.io"
-export const LANDING_URL = "https://expensable.io"
+export const BASE_URL = "https://expensable-web.vercel.app"
+export const LANDING_URL = "https://expensable-landing.vercel.app"
 
 async function request(path: string, options: RequestInit = {}): Promise<Response> {
   const headers: Record<string, string> = {
