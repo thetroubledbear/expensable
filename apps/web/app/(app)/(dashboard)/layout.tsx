@@ -3,6 +3,9 @@ import { db } from "@expensable/db"
 import { getPresignedUrl } from "@/lib/storage"
 import { Sidebar } from "@/components/sidebar"
 import { FilesPoller } from "@/components/files-poller"
+import { NoticesBanner } from "@/components/notices-banner"
+
+export const revalidate = 60
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const session = await requireAuth()
@@ -30,7 +33,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="flex min-h-screen bg-slate-50">
       <Sidebar user={user} />
-      <main className="flex-1 min-w-0 overflow-auto pt-14 md:pt-0">{children}</main>
+      <main className="flex-1 min-w-0 overflow-auto pt-14 md:pt-0">
+        <NoticesBanner />
+        {children}
+      </main>
       <FilesPoller />
     </div>
   )
