@@ -6,7 +6,7 @@ import { LogoMark } from "@expensable/ui"
 
 export const revalidate = 60
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+const APP_URL = process.env.APP_URL ?? "http://localhost:3000"
 
 export default async function BlogIndex() {
   let posts: Array<{ slug: string; title: string; excerpt?: string | null; publishedAt?: string | null; author?: string | null }> = []
