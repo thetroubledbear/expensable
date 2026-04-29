@@ -37,7 +37,7 @@ export default async function BlogPost({ params }: Props) {
   let post: {
     title: string
     excerpt?: string | null
-    content?: unknown
+    content?: Record<string, unknown> | null
     publishedAt?: string | null
     author?: string | null
   } | null = null
@@ -53,7 +53,7 @@ export default async function BlogPost({ params }: Props) {
   } catch {}
 
   if (!post) notFound()
-  const p = post as { title: string; excerpt?: string | null; content?: unknown; publishedAt?: string | null; author?: string | null }
+  const p = post as { title: string; excerpt?: string | null; content?: Record<string, unknown> | null; publishedAt?: string | null; author?: string | null }
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -89,7 +89,7 @@ export default async function BlogPost({ params }: Props) {
             <p className="text-lg text-slate-600 leading-relaxed mb-8 font-medium">{p.excerpt}</p>
           )}
 
-          {p.content && (
+          {p.content ? (
             <div
               className="prose prose-slate max-w-none"
               dangerouslySetInnerHTML={{
@@ -99,7 +99,7 @@ export default async function BlogPost({ params }: Props) {
                 }),
               }}
             />
-          )}
+          ) : null}
         </div>
       </main>
     </div>
