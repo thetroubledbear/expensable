@@ -3,7 +3,7 @@ import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
 const PUBLIC_EXACT = ["/"]
-const PUBLIC_PREFIXES = ["/login", "/register", "/api/auth", "/invite", "/api/invite", "/expcms", "/cms-api", "/blog", "/(pages)"]
+const PUBLIC_PREFIXES = ["/login", "/register", "/api/auth", "/invite", "/api/invite", "/expcms", "/cms-api", "/blog", "/api/notices", "/p/"]
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
