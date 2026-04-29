@@ -4,7 +4,6 @@ export const HomePage: GlobalConfig = {
   slug: "home-page",
   admin: { group: "Content" },
   fields: [
-    // ── Hero ──────────────────────────────────────────────────────────────────
     {
       name: "hero",
       type: "group",
@@ -18,8 +17,6 @@ export const HomePage: GlobalConfig = {
         { name: "trustLine", type: "text", defaultValue: "Free plan available · No credit card required" },
       ],
     },
-
-    // ── Features section ──────────────────────────────────────────────────────
     {
       name: "featuresSection",
       type: "group",
@@ -58,8 +55,6 @@ export const HomePage: GlobalConfig = {
         },
       ],
     },
-
-    // ── How it works ──────────────────────────────────────────────────────────
     {
       name: "stepsSection",
       type: "group",
@@ -75,8 +70,6 @@ export const HomePage: GlobalConfig = {
         },
       ],
     },
-
-    // ── CTA section ───────────────────────────────────────────────────────────
     {
       name: "ctaSection",
       type: "group",
@@ -92,8 +85,6 @@ export const HomePage: GlobalConfig = {
         },
       ],
     },
-
-    // ── SEO ───────────────────────────────────────────────────────────────────
     {
       name: "seo",
       type: "group",

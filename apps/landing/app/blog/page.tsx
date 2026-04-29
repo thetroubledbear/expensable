@@ -2,9 +2,11 @@ import { getPayload } from "payload"
 import config from "@payload-config"
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
-import { LogoMark } from "@/components/logo"
+import { LogoMark } from "@expensable/ui"
 
 export const revalidate = 60
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
 
 export default async function BlogIndex() {
   let posts: Array<{ slug: string; title: string; excerpt?: string | null; publishedAt?: string | null; author?: string | null }> = []
@@ -28,7 +30,7 @@ export default async function BlogIndex() {
             <LogoMark className="w-7 h-7 rounded-lg" />
             <span className="text-slate-900 font-semibold text-[15px] tracking-tight">Expensable</span>
           </Link>
-          <Link href="/login" className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+          <Link href={`${APP_URL}/login`} className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
             Sign in
           </Link>
         </div>

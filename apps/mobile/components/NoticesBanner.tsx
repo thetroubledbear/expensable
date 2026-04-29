@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { View, StyleSheet, TouchableOpacity, Linking } from "react-native"
 import { Text } from "./Text"
-import { BASE_URL } from "../lib/api"
+import { LANDING_URL } from "../lib/api"
 import { X } from "lucide-react-native"
 
 const XIcon = X as any
@@ -27,7 +27,7 @@ export function NoticesBanner() {
   const [dismissed, setDismissed] = useState<Set<string>>(new Set())
 
   useEffect(() => {
-    fetch(`${BASE_URL}/api/notices`)
+    fetch(`${LANDING_URL}/api/notices`)
       .then((r) => r.json())
       .then((data: Notice[]) => setNotices(data.filter((n) => n.type === "banner")))
       .catch(() => {})

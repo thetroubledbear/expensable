@@ -4,10 +4,12 @@ import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
-import { LogoMark } from "@/components/logo"
+import { LogoMark } from "@expensable/ui"
 import { convertLexicalToHTML, defaultHTMLConverters } from "@payloadcms/richtext-lexical/html"
 
 export const revalidate = 60
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
 
 type Props = { params: Promise<{ slug: string }> }
 
@@ -63,7 +65,7 @@ export default async function BlogPost({ params }: Props) {
             <LogoMark className="w-7 h-7 rounded-lg" />
             <span className="text-slate-900 font-semibold text-[15px] tracking-tight">Expensable</span>
           </Link>
-          <Link href="/login" className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+          <Link href={`${APP_URL}/login`} className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
             Sign in
           </Link>
         </div>
