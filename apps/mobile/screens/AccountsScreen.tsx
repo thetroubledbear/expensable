@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { FONTS } from "../lib/fonts"
 import {
   View,
@@ -15,7 +15,7 @@ import {
 import { Text } from "../components/Text"
 import { apiGet, apiPost, apiPatch, apiDeleteById } from "../lib/api"
 import { useAlert } from "../lib/alert"
-import { Pencil, Trash2 } from "lucide-react-native"
+import { Pencil, Trash2, Undo2 } from "lucide-react-native"
 
 const ACCOUNT_TYPES = ["checking", "savings", "credit", "cash", "investment"] as const
 type AccountType = typeof ACCOUNT_TYPES[number]
@@ -67,6 +67,11 @@ const INITIAL_MODAL: ModalState = {
   isDefault: false,
 }
 
+interface UndoState {
+  account: Account
+  countdown: number
+}
+
 export default function AccountsScreen() {
   const { alert } = useAlert()
   const [accounts, setAccounts] = useState<Account[]>([])
@@ -74,7 +79,9 @@ export default function AccountsScreen() {
   const [refreshing, setRefreshing] = useState(false)
   const [modal, setModal] = useState<ModalState>(INITIAL_MODAL)
   const [saving, setSaving] = useState(false)
-  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [undoState, setUndoState] = useState<UndoState | null>(null)
+  const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const undoIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
     load()
@@ -173,32 +180,35 @@ export default function AccountsScreen() {
   }
 
   function handleDelete(account: Account) {
-    alert(
-      "Delete account?",
-      `"${account.name}" and its data will be removed.`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            setDeletingId(account.id)
-            try {
-              await apiDeleteById(`/api/accounts/${account.id}`)
-              setAccounts((prev) => prev.filter((a) => a.id !== account.id))
-            } catch (e: unknown) {
-              const msg =
-                e instanceof Error && e.message.includes("last")
-                  ? "Cannot delete the last account"
-                  : "Failed to delete account"
-              alert("Error", msg)
-            } finally {
-              setDeletingId(null)
-            }
-          },
-        },
-      ]
-    )
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current)
+    if (undoIntervalRef.current) clearInterval(undoIntervalRef.current)
+    // Flush previous pending delete immediately
+    if (undoState) {
+      apiDeleteById(`/api/accounts/${undoState.account.id}`).catch(() => {})
+    }
+
+    setAccounts((prev) => prev.filter((a) => a.id !== account.id))
+    setUndoState({ account, countdown: 5 })
+
+    undoIntervalRef.current = setInterval(() => {
+      setUndoState((prev) => (prev ? { ...prev, countdown: Math.max(0, prev.countdown - 1) } : null))
+    }, 1000)
+
+    undoTimerRef.current = setTimeout(async () => {
+      clearInterval(undoIntervalRef.current!)
+      setUndoState(null)
+      try {
+        await apiDeleteById(`/api/accounts/${account.id}`)
+      } catch {}
+    }, 5000)
+  }
+
+  function handleUndo() {
+    if (!undoState) return
+    clearTimeout(undoTimerRef.current!)
+    clearInterval(undoIntervalRef.current!)
+    setAccounts((prev) => [...prev, undoState.account])
+    setUndoState(null)
   }
 
   if (loading) {
@@ -257,14 +267,9 @@ export default function AccountsScreen() {
                     <TouchableOpacity
                       style={styles.actionBtn}
                       onPress={() => handleDelete(account)}
-                      disabled={deletingId === account.id}
                       hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                     >
-                      {deletingId === account.id ? (
-                        <ActivityIndicator size="small" color="#ef4444" />
-                      ) : (
-                        <Trash2 color="#ef4444" size={16} />
-                      )}
+                      <Trash2 color="#ef4444" size={16} />
                     </TouchableOpacity>
                   )}
                 </View>
@@ -273,6 +278,19 @@ export default function AccountsScreen() {
           ))
         )}
       </ScrollView>
+
+      {undoState && (
+        <View style={styles.undoToast}>
+          <Text style={styles.undoText} numberOfLines={1}>
+            {undoState.account.name} deleted
+          </Text>
+          <TouchableOpacity onPress={handleUndo} style={styles.undoBtn}>
+            <Undo2 color="#fff" size={14} />
+            <Text style={styles.undoBtnText}>Undo</Text>
+          </TouchableOpacity>
+          <Text style={styles.undoCountdown}>{undoState.countdown}s</Text>
+        </View>
+      )}
 
       {/* FAB */}
       <TouchableOpacity style={styles.fab} onPress={openAdd}>
@@ -530,4 +548,34 @@ const styles = StyleSheet.create({
   },
   saveBtnDisabled: { opacity: 0.6 },
   saveBtnText: { fontSize: 15, fontWeight: "700", color: "#fff" },
+  undoToast: {
+    position: "absolute",
+    bottom: 88,
+    left: 16,
+    right: 16,
+    backgroundColor: "#0f172a",
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  undoText: { flex: 1, color: "#fff", fontSize: 13, fontWeight: "500" },
+  undoBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    backgroundColor: "#059669",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  undoBtnText: { color: "#fff", fontSize: 13, fontWeight: "700" },
+  undoCountdown: { color: "#64748b", fontSize: 12, minWidth: 20, textAlign: "right" },
 })

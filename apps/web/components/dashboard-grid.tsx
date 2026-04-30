@@ -73,7 +73,7 @@ export interface DashboardData {
   totalMonthlySubscriptions: number
   subscriptions: Array<{ id: string; merchantName: string; amount: number; frequency: string; currency: string }>
   trend: Array<{ month: string; spent: number; received: number }>
-  categories: Array<{ name: string; color: string; total: number }>
+  categories: Array<{ name: string; color: string; total: number; id?: string | null }>
   momPct: number | null
   lastMonthName: string
   accountBalances: AccountBalance[]

@@ -74,7 +74,7 @@ export default function ManagePlanScreen({ navigation }: Props) {
   }, [])
 
   function handleUpgrade(planId: string) {
-    const url = `${BASE_URL}/settings/billing?plan=${planId}`
+    const url = `${BASE_URL}`
     alert(
       "Upgrade Plan",
       `Manage your subscription on the Expensable web app.`,

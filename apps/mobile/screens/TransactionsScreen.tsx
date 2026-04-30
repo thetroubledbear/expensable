@@ -56,7 +56,7 @@ function fmt(amount: number, currency: string): string {
 }
 
 type TransactionsStackParams = {
-  TransactionsList: { initialSearch?: string } | undefined
+  TransactionsList: { initialSearch?: string; initialCategoryId?: string } | undefined
   AddTransaction: undefined
 }
 
@@ -113,7 +113,7 @@ export default function TransactionsScreen({ navigation, route }: Props) {
 
   const { alert } = useAlert()
 
-  // Apply initialSearch param from navigation
+  // Apply initialSearch / initialCategoryId params from navigation
   useEffect(() => {
     const q = route.params?.initialSearch
     if (q) {
@@ -121,6 +121,14 @@ export default function TransactionsScreen({ navigation, route }: Props) {
       navigation.setParams({ initialSearch: undefined })
     }
   }, [route.params?.initialSearch])
+
+  useEffect(() => {
+    const catId = route.params?.initialCategoryId
+    if (catId) {
+      setCategoryFilter(catId)
+      navigation.setParams({ initialCategoryId: undefined })
+    }
+  }, [route.params?.initialCategoryId])
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 400)
@@ -491,7 +499,7 @@ export default function TransactionsScreen({ navigation, route }: Props) {
                     </Text>
                     {tx.needsReview ? (
                       <Text style={styles.reviewBadge}>
-                        ⚠ {tx.category ? "Verify details" : "Missing category"}
+                        ⚠ {tx.category ? "Check date & currency" : "Missing category"}
                       </Text>
                     ) : null}
                   </View>

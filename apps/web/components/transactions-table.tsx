@@ -413,7 +413,7 @@ export function TransactionsTable({ initialData, categories, accounts, defaultCu
                 return (
                   <tr
                     key={tx.id}
-                    className={`hover:bg-slate-50/70 transition-colors group ${isSelected ? "bg-emerald-50/40" : ""}`}
+                    className={`hover:bg-slate-50/70 transition-colors group ${isSelected ? "bg-emerald-50/40" : tx.needsReview ? "bg-amber-50/20" : ""}`}
                   >
                     {isOwner && (
                       <td className="px-4 py-3.5">
@@ -425,7 +425,7 @@ export function TransactionsTable({ initialData, categories, accounts, defaultCu
                         />
                       </td>
                     )}
-                    <td className="px-4 py-3.5 text-xs text-slate-400 tabular-nums whitespace-nowrap">
+                    <td className={`px-4 py-3.5 text-xs tabular-nums whitespace-nowrap ${tx.needsReview && tx.categoryId ? "text-amber-500 font-medium" : "text-slate-400"}`}>
                       {new Date(tx.date).toLocaleDateString("en", {
                         month: "short",
                         day: "numeric",
@@ -447,7 +447,7 @@ export function TransactionsTable({ initialData, categories, accounts, defaultCu
                       {tx.needsReview && (
                         <span className="inline-flex items-center gap-1 mt-0.5 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-600 border border-amber-100">
                           <AlertTriangle className="w-2.5 h-2.5" />
-                          {!tx.categoryId ? "Missing category" : "Verify details"}
+                          {!tx.categoryId ? "Missing category" : "Check date & currency"}
                         </span>
                       )}
                     </td>

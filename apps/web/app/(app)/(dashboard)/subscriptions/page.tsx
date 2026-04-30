@@ -74,7 +74,7 @@ export default async function SubscriptionsPage() {
               <span className="text-sm font-normal text-slate-400 ml-1">/mo</span>
             </p>
             <p className="text-xs text-slate-400 mt-0.5">
-              {fmt(totalMonthly * 12, currency)}/yr Â· {subs.length} subscription
+              {fmt(totalMonthly * 12, currency)}/yr · {subs.length} subscription
               {subs.length !== 1 ? "s" : ""}
             </p>
           </div>
