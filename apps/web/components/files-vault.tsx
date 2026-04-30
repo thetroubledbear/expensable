@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect, useRef } from "react"
+import { useRouter } from "next/navigation"
 import {
   Search, LayoutGrid, List, FolderOpen, FileText, FileImage, File,
-  Clock, CheckCircle2, AlertCircle, Loader2, Eye, Receipt,
+  Clock, CheckCircle2, AlertCircle, Loader2, Eye, Receipt, Undo2,
 } from "lucide-react"
 import { FileDeleteButton } from "@/components/file-delete-button"
 import { FilePreviewModal } from "@/components/file-preview-modal"
@@ -65,14 +66,69 @@ const SORT_OPTIONS = [
 ]
 
 export function FilesVault({ files, isOwner }: Props) {
+  const router = useRouter()
+  const [localFiles, setLocalFiles] = useState<VaultFile[]>(files)
+  const [undoState, setUndoState] = useState<{ file: VaultFile; countdown: number } | null>(null)
+  const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const undoIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const pendingDeleteIdRef = useRef<string | null>(null)
+
   const [search, setSearch] = useState("")
   const [typeFilter, setTypeFilter] = useState<string>("all")
   const [sort, setSort] = useState("newest")
   const [view, setView] = useState<"grid" | "list">("grid")
   const [preview, setPreview] = useState<VaultFile | null>(null)
 
+  // Sync from server (FilesPoller refreshes) — keep pending-delete hidden
+  useEffect(() => {
+    setLocalFiles(
+      pendingDeleteIdRef.current
+        ? files.filter((f) => f.id !== pendingDeleteIdRef.current)
+        : files
+    )
+  }, [files])
+
+  function handleDelete(file: VaultFile) {
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current)
+    if (undoIntervalRef.current) clearInterval(undoIntervalRef.current)
+    // Flush previous pending delete immediately if a new one comes in
+    if (pendingDeleteIdRef.current) {
+      const prev = pendingDeleteIdRef.current
+      fetch(`/api/files/${prev}`, { method: "DELETE" }).catch(() => {})
+    }
+
+    pendingDeleteIdRef.current = file.id
+    setLocalFiles((prev) => prev.filter((f) => f.id !== file.id))
+    setUndoState({ file, countdown: 5 })
+
+    undoIntervalRef.current = setInterval(() => {
+      setUndoState((prev) => (prev ? { ...prev, countdown: Math.max(0, prev.countdown - 1) } : null))
+    }, 1000)
+
+    undoTimerRef.current = setTimeout(async () => {
+      clearInterval(undoIntervalRef.current!)
+      setUndoState(null)
+      await fetch(`/api/files/${file.id}`, { method: "DELETE" })
+      pendingDeleteIdRef.current = null
+      router.refresh()
+    }, 5000)
+  }
+
+  function handleUndo() {
+    if (!undoState) return
+    clearTimeout(undoTimerRef.current!)
+    clearInterval(undoIntervalRef.current!)
+    pendingDeleteIdRef.current = null
+    setLocalFiles((prev) =>
+      [...prev, undoState.file].sort(
+        (a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
+      )
+    )
+    setUndoState(null)
+  }
+
   const filtered = useMemo(() => {
-    let result = files
+    let result = localFiles
     if (search.trim()) {
       const q = search.toLowerCase()
       result = result.filter((f) => f.name.toLowerCase().includes(q))
@@ -86,15 +142,15 @@ export function FilesVault({ files, isOwner }: Props) {
       return a.name.localeCompare(b.name)
     })
     return result
-  }, [files, search, typeFilter, sort])
+  }, [localFiles, search, typeFilter, sort])
 
   const counts = useMemo(() => {
-    const c: Record<string, number> = { all: files.length }
-    for (const f of files) c[f.type] = (c[f.type] ?? 0) + 1
+    const c: Record<string, number> = { all: localFiles.length }
+    for (const f of localFiles) c[f.type] = (c[f.type] ?? 0) + 1
     return c
-  }, [files])
+  }, [localFiles])
 
-  if (files.length === 0) {
+  if (localFiles.length === 0 && !undoState) {
     return (
       <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-white p-16 text-center">
         <div className="mx-auto w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-5">
@@ -174,13 +230,27 @@ export function FilesVault({ files, isOwner }: Props) {
           No files match your search
         </div>
       ) : view === "grid" ? (
-        <GridView files={filtered} isOwner={isOwner} onPreview={setPreview} />
+        <GridView files={filtered} isOwner={isOwner} onPreview={setPreview} onDelete={handleDelete} />
       ) : (
-        <ListView files={filtered} isOwner={isOwner} onPreview={setPreview} />
+        <ListView files={filtered} isOwner={isOwner} onPreview={setPreview} onDelete={handleDelete} />
       )}
 
       {preview && (
         <FilePreviewModal file={preview} onClose={() => setPreview(null)} />
+      )}
+
+      {undoState && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-xl text-sm font-medium">
+          <span className="truncate max-w-[200px]">{undoState.file.name} deleted</span>
+          <button
+            onClick={handleUndo}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 transition-colors text-xs font-semibold"
+          >
+            <Undo2 className="w-3.5 h-3.5" />
+            Undo
+          </button>
+          <span className="text-slate-400 text-xs tabular-nums w-4 text-right">{undoState.countdown}s</span>
+        </div>
       )}
     </>
   )
@@ -192,15 +262,17 @@ function GridView({
   files,
   isOwner,
   onPreview,
+  onDelete,
 }: {
   files: VaultFile[]
   isOwner: boolean
   onPreview: (f: VaultFile) => void
+  onDelete: (f: VaultFile) => void
 }) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
       {files.map((f) => (
-        <GridCard key={f.id} file={f} isOwner={isOwner} onPreview={onPreview} />
+        <GridCard key={f.id} file={f} isOwner={isOwner} onPreview={onPreview} onDelete={onDelete} />
       ))}
     </div>
   )
@@ -210,10 +282,12 @@ function GridCard({
   file,
   isOwner,
   onPreview,
+  onDelete,
 }: {
   file: VaultFile
   isOwner: boolean
   onPreview: (f: VaultFile) => void
+  onDelete: (f: VaultFile) => void
 }) {
   const typeCfg = TYPE_CONFIG[file.type as keyof typeof TYPE_CONFIG] ?? TYPE_CONFIG.pdf
 
@@ -260,7 +334,7 @@ function GridCard({
         )}
         {isOwner && (
           <div className="mt-2.5 pt-2.5 border-t border-slate-50 flex justify-end">
-            <FileDeleteButton fileId={file.id} isOwner={isOwner} />
+            <FileDeleteButton fileId={file.id} isOwner={isOwner} onDelete={() => onDelete(file)} />
           </div>
         )}
       </div>
@@ -274,10 +348,12 @@ function ListView({
   files,
   isOwner,
   onPreview,
+  onDelete,
 }: {
   files: VaultFile[]
   isOwner: boolean
   onPreview: (f: VaultFile) => void
+  onDelete: (f: VaultFile) => void
 }) {
   return (
     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
@@ -333,7 +409,7 @@ function ListView({
                     >
                       <Eye className="w-4 h-4" />
                     </button>
-                    <FileDeleteButton fileId={file.id} isOwner={isOwner} />
+                    <FileDeleteButton fileId={file.id} isOwner={isOwner} onDelete={() => onDelete(file)} />
                   </div>
                 </td>
               </tr>

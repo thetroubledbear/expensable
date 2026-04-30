@@ -117,6 +117,7 @@ export async function GET() {
   const catById = new Map(cats.map((c) => [c.id, c]))
   const categories = catTotals
     .map((c) => ({
+      id: c.categoryId ?? null,
       name: c.categoryId ? (catById.get(c.categoryId)?.name ?? "Other") : "Uncategorized",
       color: c.categoryId ? (catById.get(c.categoryId)?.color ?? "#94a3b8") : "#94a3b8",
       total: Math.round((c._sum.amount ?? 0) * 100) / 100,

@@ -1,7 +1,10 @@
+import Link from "next/link"
+
 interface CategoryData {
   name: string
   color: string
   total: number
+  id?: string | null
 }
 
 interface Props {
@@ -38,15 +41,20 @@ export function CategoryBreakdownWidget({ categories, currency, monthName }: Pro
           const rawPct = total > 0 ? (cat.total / total) * 100 : 0
           const displayPct = rawPct < 1 ? rawPct.toFixed(1) : Math.round(rawPct).toString()
           const barWidth = Math.max(2, rawPct)
+          const href = cat.id
+            ? `/transactions?categoryId=${cat.id}&type=debit`
+            : cat.name === "Uncategorized"
+            ? `/transactions?categoryId=uncategorized&type=debit`
+            : `/transactions?type=debit`
           return (
-            <div key={cat.name}>
+            <Link key={cat.name} href={href} className="block group/cat">
               <div className="flex items-center justify-between mb-1">
                 <div className="flex items-center gap-2 min-w-0">
                   <div
                     className="w-2.5 h-2.5 rounded-full shrink-0"
                     style={{ backgroundColor: cat.color }}
                   />
-                  <span className="text-xs text-slate-600 truncate">{cat.name}</span>
+                  <span className="text-xs text-slate-600 truncate group-hover/cat:text-emerald-600 transition-colors">{cat.name}</span>
                 </div>
                 <div className="flex items-center gap-2 shrink-0 ml-2">
                   <span className="text-xs text-slate-400">{displayPct}%</span>
@@ -61,7 +69,7 @@ export function CategoryBreakdownWidget({ categories, currency, monthName }: Pro
                   style={{ width: `${barWidth}%`, backgroundColor: cat.color }}
                 />
               </div>
-            </div>
+            </Link>
           )
         })}
       </div>

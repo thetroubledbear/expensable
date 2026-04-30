@@ -1,8 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Calendar, X } from "lucide-react"
+import { useState, useRef } from "react"
+import { Calendar, X, Undo2 } from "lucide-react"
 
 const FREQ_LABEL = { monthly: "/mo", weekly: "/wk", annual: "/yr" } as const
 const FREQ_BADGE = { monthly: "Monthly", weekly: "Weekly", annual: "Annual" } as const
@@ -38,21 +37,54 @@ export function SubscriptionCard({
   isOwner,
 }: Props) {
   const [dismissed, setDismissed] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const router = useRouter()
+  const [undoPending, setUndoPending] = useState(false)
+  const [countdown, setCountdown] = useState(5)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  async function dismiss() {
-    setLoading(true)
-    try {
-      await fetch(`/api/subscriptions/${id}`, { method: "DELETE" })
+  function dismiss() {
+    setUndoPending(true)
+    setCountdown(5)
+
+    intervalRef.current = setInterval(() => {
+      setCountdown((prev) => Math.max(0, prev - 1))
+    }, 1000)
+
+    timerRef.current = setTimeout(async () => {
+      clearInterval(intervalRef.current!)
+      setUndoPending(false)
       setDismissed(true)
-      router.refresh()
-    } finally {
-      setLoading(false)
-    }
+      await fetch(`/api/subscriptions/${id}`, { method: "DELETE" })
+    }, 5000)
+  }
+
+  function handleUndo() {
+    clearTimeout(timerRef.current!)
+    clearInterval(intervalRef.current!)
+    setUndoPending(false)
   }
 
   if (dismissed) return null
+
+  if (undoPending) {
+    return (
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex items-center justify-between gap-3">
+        <span className="text-sm text-slate-500 min-w-0 truncate">
+          <span className="font-medium text-slate-700">{merchantName}</span> dismissed
+        </span>
+        <div className="flex items-center gap-3 shrink-0">
+          <button
+            onClick={handleUndo}
+            className="flex items-center gap-1.5 text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
+          >
+            <Undo2 className="w-3.5 h-3.5" />
+            Undo
+          </button>
+          <span className="text-xs text-slate-400 tabular-nums w-5 text-right">{countdown}s</span>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
@@ -66,8 +98,7 @@ export function SubscriptionCard({
         {isOwner && (
           <button
             onClick={dismiss}
-            disabled={loading}
-            className="w-6 h-6 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors disabled:opacity-50 shrink-0"
+            className="w-6 h-6 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors shrink-0"
             title="Dismiss"
           >
             <X className="w-3.5 h-3.5" />

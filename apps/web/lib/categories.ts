@@ -28,6 +28,7 @@ export const HINT_TO_CATEGORY: Record<string, string> = {
   travel: "Travel",
   subscription: "Bills & Utilities",
   income: "Income",
+  savings: "Savings",
   transfer: "Other",
   other: "Other",
 }
@@ -42,6 +43,7 @@ export const SYSTEM_CATEGORIES = [
   { name: "Housing", icon: "🏡", color: "orange" },
   { name: "Income", icon: "💰", color: "green" },
   { name: "Other", icon: "📦", color: "zinc" },
+  { name: "Savings", icon: "🐷", color: "teal" },
   { name: "Shopping", icon: "🛍️", color: "violet" },
   { name: "Transport", icon: "🚗", color: "blue" },
   { name: "Travel", icon: "✈️", color: "sky" },

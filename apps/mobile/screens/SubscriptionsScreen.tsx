@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useFocusEffect } from "@react-navigation/native"
 import { FONTS } from "../lib/fonts"
 import {
@@ -15,8 +15,7 @@ import {
 } from "react-native"
 import { Text } from "../components/Text"
 import { apiGet, apiDeleteById, apiPost } from "../lib/api"
-import { useAlert } from "../lib/alert"
-import { RefreshCw, Trash2, Plus, X } from "lucide-react-native"
+import { RefreshCw, Trash2, Plus, X, Undo2 } from "lucide-react-native"
 
 interface Subscription {
   id: string
@@ -59,12 +58,18 @@ function freqBadgeColor(freq: string): string {
 const CURRENCIES = ["USD", "EUR", "GBP", "PLN", "CHF", "CAD", "AUD", "JPY", "NOK", "SEK"]
 const FREQUENCIES = ["monthly", "annual", "weekly"] as const
 
+interface UndoState {
+  sub: Subscription
+  countdown: number
+}
+
 export default function SubscriptionsScreen() {
-  const { alert } = useAlert()
   const [subs, setSubs] = useState<Subscription[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
-  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [undoState, setUndoState] = useState<UndoState | null>(null)
+  const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const undoIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const [householdCurrency, setHouseholdCurrency] = useState("USD")
 
   // Add modal
@@ -98,25 +103,35 @@ export default function SubscriptionsScreen() {
   }
 
   function handleDelete(sub: Subscription) {
-    alert(
-      "Delete subscription?",
-      "This will remove it from tracking.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            setDeletingId(sub.id)
-            try {
-              await apiDeleteById("/api/subscriptions/" + sub.id)
-              setSubs((prev) => prev.filter((s) => s.id !== sub.id))
-            } catch {}
-            finally { setDeletingId(null) }
-          },
-        },
-      ]
-    )
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current)
+    if (undoIntervalRef.current) clearInterval(undoIntervalRef.current)
+    // Flush previous pending delete immediately
+    if (undoState) {
+      apiDeleteById("/api/subscriptions/" + undoState.sub.id).catch(() => {})
+    }
+
+    setSubs((prev) => prev.filter((s) => s.id !== sub.id))
+    setUndoState({ sub, countdown: 5 })
+
+    undoIntervalRef.current = setInterval(() => {
+      setUndoState((prev) => (prev ? { ...prev, countdown: Math.max(0, prev.countdown - 1) } : null))
+    }, 1000)
+
+    undoTimerRef.current = setTimeout(async () => {
+      clearInterval(undoIntervalRef.current!)
+      setUndoState(null)
+      try {
+        await apiDeleteById("/api/subscriptions/" + sub.id)
+      } catch {}
+    }, 5000)
+  }
+
+  function handleUndo() {
+    if (!undoState) return
+    clearTimeout(undoTimerRef.current!)
+    clearInterval(undoIntervalRef.current!)
+    setSubs((prev) => [undoState.sub, ...prev])
+    setUndoState(null)
   }
 
   function openAdd() {
@@ -228,13 +243,8 @@ export default function SubscriptionsScreen() {
                   <TouchableOpacity
                     style={styles.trashBtn}
                     onPress={() => handleDelete(sub)}
-                    disabled={deletingId === sub.id}
                   >
-                    {deletingId === sub.id ? (
-                      <ActivityIndicator size="small" color="#ef4444" />
-                    ) : (
-                      <Trash2 color="#ef4444" size={16} />
-                    )}
+                    <Trash2 color="#ef4444" size={16} />
                   </TouchableOpacity>
                 </View>
               </View>
@@ -242,6 +252,19 @@ export default function SubscriptionsScreen() {
           </>
         )}
       </ScrollView>
+
+      {undoState && (
+        <View style={styles.undoToast}>
+          <Text style={styles.undoText} numberOfLines={1}>
+            {undoState.sub.merchantName} deleted
+          </Text>
+          <TouchableOpacity onPress={handleUndo} style={styles.undoBtn}>
+            <Undo2 color="#fff" size={14} />
+            <Text style={styles.undoBtnText}>Undo</Text>
+          </TouchableOpacity>
+          <Text style={styles.undoCountdown}>{undoState.countdown}s</Text>
+        </View>
+      )}
 
       {/* Add subscription modal */}
       <Modal visible={addOpen} transparent animationType="slide" onRequestClose={() => setAddOpen(false)}>
@@ -385,4 +408,34 @@ const styles = StyleSheet.create({
   modalCancelBtnText: { fontSize: 14, fontWeight: "600", color: "#64748b" },
   modalSaveBtn: { flex: 1, paddingVertical: 12, borderRadius: 12, backgroundColor: "#059669", alignItems: "center" },
   modalSaveBtnText: { fontSize: 14, fontWeight: "700", color: "#fff" },
+  undoToast: {
+    position: "absolute",
+    bottom: 20,
+    left: 16,
+    right: 16,
+    backgroundColor: "#0f172a",
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  undoText: { flex: 1, color: "#fff", fontSize: 13, fontWeight: "500" },
+  undoBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    backgroundColor: "#059669",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  undoBtnText: { color: "#fff", fontSize: 13, fontWeight: "700" },
+  undoCountdown: { color: "#64748b", fontSize: 12, minWidth: 20, textAlign: "right" },
 })

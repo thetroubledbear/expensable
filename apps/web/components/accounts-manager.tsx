@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import {
   Landmark,
   Plus,
@@ -11,6 +11,7 @@ import {
   Check,
   X,
   ArrowLeftRight,
+  Undo2,
 } from "lucide-react"
 
 export type AccountType = "checking" | "savings" | "credit" | "cash" | "investment"
@@ -72,8 +73,9 @@ export function AccountsManager({ initialAccounts, defaultCurrency, isOwner }: P
   const [saving, setSaving] = useState(false)
   const [editError, setEditError] = useState("")
 
-  const [deletingId, setDeletingId] = useState<string | null>(null)
-  const [deleteError, setDeleteError] = useState<Record<string, string>>({})
+  const [undoState, setUndoState] = useState<{ account: FinancialAccount; countdown: number } | null>(null)
+  const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const undoIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   async function createAccount() {
     if (!createForm.name.trim()) return
@@ -125,17 +127,37 @@ export function AccountsManager({ initialAccounts, defaultCurrency, isOwner }: P
     setEditingId(null)
   }
 
-  async function deleteAccount(id: string) {
-    setDeletingId(id)
-    setDeleteError((prev) => ({ ...prev, [id]: "" }))
-    const res = await fetch(`/api/accounts/${id}`, { method: "DELETE" })
-    setDeletingId(null)
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}))
-      setDeleteError((prev) => ({ ...prev, [id]: data.error ?? "Failed to delete" }))
-      return
+  function deleteAccount(id: string) {
+    const account = accounts.find((a) => a.id === id)
+    if (!account) return
+
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current)
+    if (undoIntervalRef.current) clearInterval(undoIntervalRef.current)
+    // Flush previous pending delete immediately
+    if (undoState) {
+      fetch(`/api/accounts/${undoState.account.id}`, { method: "DELETE" }).catch(() => {})
     }
+
     setAccounts((prev) => prev.filter((a) => a.id !== id))
+    setUndoState({ account, countdown: 5 })
+
+    undoIntervalRef.current = setInterval(() => {
+      setUndoState((prev) => (prev ? { ...prev, countdown: Math.max(0, prev.countdown - 1) } : null))
+    }, 1000)
+
+    undoTimerRef.current = setTimeout(async () => {
+      clearInterval(undoIntervalRef.current!)
+      setUndoState(null)
+      await fetch(`/api/accounts/${id}`, { method: "DELETE" })
+    }, 5000)
+  }
+
+  function handleUndoDelete() {
+    if (!undoState) return
+    clearTimeout(undoTimerRef.current!)
+    clearInterval(undoIntervalRef.current!)
+    setAccounts((prev) => [...prev, undoState.account])
+    setUndoState(null)
   }
 
   async function setDefault(id: string) {
@@ -246,9 +268,6 @@ export function AccountsManager({ initialAccounts, defaultCurrency, isOwner }: P
                   <p className="text-xs text-slate-400 mt-0.5">
                     {account._count.transactions} transaction{account._count.transactions !== 1 ? "s" : ""}
                   </p>
-                  {deleteError[account.id] && (
-                    <p className="text-xs text-red-500 mt-1">{deleteError[account.id]}</p>
-                  )}
                 </div>
                 {isOwner && (
                   <div className="flex items-center gap-1 shrink-0">
@@ -269,15 +288,11 @@ export function AccountsManager({ initialAccounts, defaultCurrency, isOwner }: P
                     </button>
                     <button
                       onClick={() => deleteAccount(account.id)}
-                      disabled={deletingId === account.id || accounts.length <= 1}
+                      disabled={accounts.length <= 1}
                       title={accounts.length <= 1 ? "Cannot delete the last account" : "Delete account"}
                       className="p-2 rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                     >
-                      {deletingId === account.id ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Trash2 className="w-4 h-4" />
-                      )}
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 )}
@@ -379,6 +394,20 @@ export function AccountsManager({ initialAccounts, defaultCurrency, isOwner }: P
               Add account
             </button>
           )}
+        </div>
+      )}
+
+      {undoState && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-xl text-sm font-medium">
+          <span>{undoState.account.name} deleted</span>
+          <button
+            onClick={handleUndoDelete}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 transition-colors text-xs font-semibold"
+          >
+            <Undo2 className="w-3.5 h-3.5" />
+            Undo
+          </button>
+          <span className="text-slate-400 text-xs tabular-nums w-4 text-right">{undoState.countdown}s</span>
         </div>
       )}
     </div>

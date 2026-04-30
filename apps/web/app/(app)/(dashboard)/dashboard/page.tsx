@@ -193,6 +193,7 @@ export default async function DashboardPage() {
   const catById = new Map(cats.map((c) => [c.id, c]))
   const categories = catTotals
     .map((c) => ({
+      id: c.categoryId ?? null,
       name: c.categoryId ? (catById.get(c.categoryId)?.name ?? "Other") : "Uncategorized",
       color: (() => {
         const raw = c.categoryId ? (catById.get(c.categoryId)?.color ?? "") : ""

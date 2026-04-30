@@ -35,7 +35,7 @@ interface DashboardData {
   totalMonthlySubscriptions: number
   accountBalances: Array<{ id: string; name: string; type: string; currency: string; balance: number }>
   trend: Array<{ month: string; spent: number; received: number }>
-  categories: Array<{ name: string; color: string; total: number }>
+  categories: Array<{ id: string | null; name: string; color: string; total: number }>
 }
 
 interface HealthScoreBreakdown {
@@ -127,7 +127,7 @@ function Badge({ text, up }: { text: string; up: boolean }) {
 
 type TabParamList = {
   Dashboard: undefined
-  Transactions: { screen: string; params: { initialSearch?: string } }
+  Transactions: { screen: string; params: { initialSearch?: string; initialCategoryId?: string } }
   Upload: undefined
   Files: undefined
   Settings: undefined
@@ -594,13 +594,24 @@ export default function DashboardScreen({ navigation }: { navigation: BottomTabN
                 {(() => {
                   const maxCat = Math.max(...data!.categories.map((c) => c.total), 1)
                   return data!.categories.map((c, i) => (
-                    <View key={i} style={styles.merchantRow}>
+                    <TouchableOpacity
+                      key={i}
+                      style={styles.merchantRow}
+                      onPress={() => {
+                        if (c.id) {
+                          navigation.navigate("Transactions", { screen: "TransactionsList", params: { initialCategoryId: c.id } })
+                        } else {
+                          navigation.navigate("Transactions", { screen: "TransactionsList", params: {} })
+                        }
+                      }}
+                      activeOpacity={0.6}
+                    >
                       <View style={styles.merchantTop}>
                         <Text style={styles.rowTitle} numberOfLines={1}>{c.name}</Text>
                         <Text style={styles.rowAmount}>{fmt(c.total, data!.currency)}</Text>
                       </View>
                       <Bar pct={Math.round((c.total / maxCat) * 100)} color={c.color} />
-                    </View>
+                    </TouchableOpacity>
                   ))
                 })()}
               </Card>
@@ -610,10 +621,14 @@ export default function DashboardScreen({ navigation }: { navigation: BottomTabN
             {data!.subscriptionsCount > 0 && (
               <Card>
                 <SectionTitle>Subscriptions</SectionTitle>
-                <View style={styles.row}>
+                <TouchableOpacity
+                  style={styles.row}
+                  onPress={() => navigation.navigate("Settings" as any, { screen: "Subscriptions" } as any)}
+                  activeOpacity={0.6}
+                >
                   <Text style={styles.rowTitle}>{data!.subscriptionsCount} detected</Text>
-                  <Text style={styles.rowAmount}>~{fmt(data!.totalMonthlySubscriptions, data!.currency)}/mo</Text>
-                </View>
+                  <Text style={styles.rowAmount}>~{fmt(data!.totalMonthlySubscriptions, data!.currency)}/mo →</Text>
+                </TouchableOpacity>
               </Card>
             )}
 
