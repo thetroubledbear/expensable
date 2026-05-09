@@ -178,7 +178,8 @@ Rules:
     const remaining = queryLimit === null ? null : queryLimit - usedQueries - 1
     return NextResponse.json({ answer, remaining, limit: queryLimit })
   } catch (err) {
-    console.error("AI query error:", err)
-    return NextResponse.json({ error: "Failed to process query" }, { status: 500 })
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error("AI query error:", msg)
+    return NextResponse.json({ error: "Failed to process query", detail: msg }, { status: 500 })
   }
 }

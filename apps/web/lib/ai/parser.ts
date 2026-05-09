@@ -24,7 +24,7 @@ type ParseInput =
   | { type: "pdf"; data: string }
 
 const BASE_URL = "https://ollama.com/api"
-const MODEL = process.env.OLLAMA_MODEL ?? "gemma4"
+const MODEL = process.env.OLLAMA_MODEL ?? "gemma4:31b-cloud"
 
 const SYSTEM_PROMPT = `You are a financial data extraction expert. Extract all transactions from the provided document.
 Return a JSON object with this exact structure:
