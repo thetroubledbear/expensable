@@ -1,5 +1,5 @@
 const BASE_URL = "https://ollama.com/api"
-export const OLLAMA_MODEL = process.env.OLLAMA_MODEL ?? "gemma4"
+export const OLLAMA_MODEL = process.env.OLLAMA_MODEL ?? "gemma4:31b-cloud"
 
 export async function ollamaChat(
   systemPrompt: string,
