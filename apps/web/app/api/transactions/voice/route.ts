@@ -4,20 +4,16 @@ import { auth } from "@/lib/auth/config"
 import { db } from "@expensable/db"
 import { resolveHousehold } from "@/lib/auth/household"
 import { ensureCategories, HINT_TO_CATEGORY } from "@/lib/categories"
-import { GoogleGenerativeAI } from "@google/generative-ai"
+import { ollamaChat } from "@/lib/ai/ollama-client"
 
 const bodySchema = z.object({
   transcript: z.string().min(1).max(500),
 })
 
-const MODEL = process.env.GEMINI_MODEL ?? "gemini-2.0-flash"
 const SUPPORTED_CURRENCIES = ["USD","EUR","GBP","CHF","CAD","AUD","JPY","NOK","SEK","DKK","NZD","SGD","HKD","PLN"]
 
 async function parseTranscript(transcript: string, defaultCurrency: string, today: string) {
-  if (!process.env.GEMINI_API_KEY) throw new Error("GEMINI_API_KEY not configured")
-
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
-  const model = genAI.getGenerativeModel({ model: MODEL })
+  if (!process.env.OLLAMA_API_KEY) throw new Error("OLLAMA_API_KEY not configured")
 
   const prompt = `Parse this spoken expense statement into a single transaction.
 
@@ -44,8 +40,7 @@ Rules:
 - categoryHint: food|transport|utilities|entertainment|health|shopping|travel|subscription|income|other
 - Return only valid JSON, no markdown`
 
-  const result = await model.generateContent(prompt)
-  const text = result.response.text()
+  const text = await ollamaChat("You are a financial data parser. Return only valid JSON.", prompt)
   const match = text.match(/\{[\s\S]*\}/)
   if (!match) throw new Error("No JSON in AI response")
   return JSON.parse(match[0]) as {
@@ -89,9 +84,9 @@ export async function POST(req: NextRequest) {
       parsed_tx = await parseTranscript(parsed.data.transcript, defaultCurrency, today)
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Parse failed"
-      const isConfig = msg.includes("GEMINI_API_KEY")
+      const isConfig = msg.includes("OLLAMA_API_KEY")
       return NextResponse.json(
-        { error: isConfig ? "AI not configured — check GEMINI_API_KEY" : "Could not understand the transaction" },
+        { error: isConfig ? "AI not configured — check OLLAMA_API_KEY" : "Could not understand the transaction" },
         { status: 422 }
       )
     }

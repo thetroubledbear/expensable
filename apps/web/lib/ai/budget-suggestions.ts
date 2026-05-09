@@ -1,6 +1,6 @@
-import { GoogleGenerativeAI } from "@google/generative-ai"
 import { db } from "@expensable/db"
 import { CATEGORY_COLOR_MAP } from "@/lib/categories"
+import { ollamaChat } from "./ollama-client"
 
 export interface BudgetSuggestion {
   categoryId: string
@@ -10,8 +10,6 @@ export interface BudgetSuggestion {
   suggestedBudget: number
   reasoning: string
 }
-
-const MODEL = process.env.GEMINI_MODEL ?? "gemini-2.0-flash"
 
 function fallback(avgMonthly: number): number {
   return Math.round(avgMonthly * 0.9)
@@ -54,7 +52,7 @@ export async function generateBudgetSuggestions(
 
   if (spending.length === 0) return []
 
-  if (!process.env.GEMINI_API_KEY) {
+  if (!process.env.OLLAMA_API_KEY) {
     return spending.map((s) => ({
       categoryId: s.categoryId,
       categoryName: s.name,
@@ -65,8 +63,6 @@ export async function generateBudgetSuggestions(
     }))
   }
 
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
-  const model = genAI.getGenerativeModel({ model: MODEL })
   const spendingText = spending
     .map((s) => `${s.name}: ${currency} ${s.avgMonthly}/mo (3-month avg)`)
     .join("\n")
@@ -74,20 +70,10 @@ export async function generateBudgetSuggestions(
   let aiByName = new Map<string, { suggestedBudget: number; reasoning: string }>()
 
   try {
-    const result = await model.generateContent(
-      `Based on this household's spending data (currency: ${currency}), suggest realistic monthly budgets. Return JSON array only, no other text:
-
-${spendingText}
-
-Return: [{"categoryName": "...", "suggestedBudget": 123, "reasoning": "one sentence, practical advice"}]
-
-Rules:
-- Aim for 5-15% reduction where there is obvious room; match current spending if already lean
-- Never suggest 0 or negative
-- Keep reasoning under 15 words`
+    const text = await ollamaChat(
+      "You are a personal finance advisor. Return only valid JSON arrays, no other text.",
+      `Based on this household's spending data (currency: ${currency}), suggest realistic monthly budgets. Return JSON array only, no other text:\n\n${spendingText}\n\nReturn: [{"categoryName": "...", "suggestedBudget": 123, "reasoning": "one sentence, practical advice"}]\n\nRules:\n- Aim for 5-15% reduction where there is obvious room; match current spending if already lean\n- Never suggest 0 or negative\n- Keep reasoning under 15 words`
     )
-
-    const text = result.response.text()
     const match = text.match(/\[[\s\S]*\]/)
     if (match) {
       type AIRow = { categoryName: string; suggestedBudget: number; reasoning: string }
