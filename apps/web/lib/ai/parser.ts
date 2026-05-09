@@ -1,4 +1,3 @@
-import { GoogleGenerativeAI } from "@google/generative-ai"
 import type { FileType } from "@expensable/types"
 import { sanitizeForAI } from "./sanitize"
 
@@ -24,7 +23,8 @@ type ParseInput =
   | { type: "image"; mediaType: string; data: string }
   | { type: "pdf"; data: string }
 
-const MODEL = process.env.GEMINI_MODEL ?? "gemini-2.0-flash"
+const BASE_URL = "https://ollama.com/api"
+const MODEL = process.env.OLLAMA_MODEL ?? "gemma4"
 
 const SYSTEM_PROMPT = `You are a financial data extraction expert. Extract all transactions from the provided document.
 Return a JSON object with this exact structure:
@@ -53,7 +53,6 @@ Rules:
 function extractJson(text: string): ParseResult {
   const match = text.match(/\{[\s\S]*\}/)
   if (!match) throw new Error("No parseable JSON in response")
-  // Strip control chars invalid in JSON (keep tab/LF/CR which are structural whitespace)
   const cleaned = match[0].replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "")
   return JSON.parse(cleaned) as ParseResult
 }
@@ -62,34 +61,48 @@ export async function parseFileContent(
   content: ParseInput,
   fileType: FileType
 ): Promise<ParseResult> {
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
-  const model = genAI.getGenerativeModel({
-    model: MODEL,
-    systemInstruction: SYSTEM_PROMPT,
-  })
+  if (typeof content === "object" && content.type === "pdf") {
+    throw new Error("PDF parsing is not supported with Ollama cloud. Use a provider that accepts PDF input.")
+  }
 
-  let parts: Parameters<typeof model.generateContent>[0]
+  const messages: Array<{ role: string; content: string; images?: string[] }> = [
+    { role: "system", content: SYSTEM_PROMPT },
+  ]
 
   if (typeof content === "string") {
     const safe = sanitizeForAI(content)
-    parts = `Parse all transactions from this ${fileType.toUpperCase()} content:\n\n${safe}`
-  } else if (content.type === "pdf") {
-    parts = [
-      { inlineData: { mimeType: "application/pdf", data: content.data } },
-      { text: "Parse all transactions from this PDF document." },
-    ]
+    messages.push({
+      role: "user",
+      content: `Parse all transactions from this ${fileType.toUpperCase()} content:\n\n${safe}`,
+    })
   } else {
-    parts = [
-      {
-        inlineData: {
-          mimeType: content.mediaType as string,
-          data: content.data,
-        },
-      },
-      { text: "Parse all transactions from this receipt/document image." },
-    ]
+    messages.push({
+      role: "user",
+      content: "Parse all transactions from this receipt/document image.",
+      images: [content.data],
+    })
   }
 
-  const result = await model.generateContent(parts)
-  return extractJson(result.response.text())
+  const res = await fetch(`${BASE_URL}/chat`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.OLLAMA_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: MODEL,
+      messages,
+      stream: false,
+      format: "json",
+    }),
+  })
+
+  if (!res.ok) {
+    const body = await res.text()
+    throw new Error(`Ollama cloud error ${res.status}: ${body}`)
+  }
+
+  const data = await res.json() as { message?: { content?: string } }
+  const text = data.message?.content ?? ""
+  return extractJson(text)
 }

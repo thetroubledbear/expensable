@@ -70,17 +70,19 @@ cd apps/web && npm run lint
 7. On error: `status: "failed"`, error stored in `errorMsg`
 8. Files page polls every 3 s while any file is pending/processing
 
-### AI Parsing — dual provider
-`apps/web/lib/ai/parser.ts` dispatches based on `ANTHROPIC_API_KEY`:
+### AI Parsing — Ollama cloud
+`apps/web/lib/ai/parser.ts` uses Ollama cloud API (`https://ollama.com/api`):
 
-| Env | Provider | CSV | PDF | Images |
-|-----|----------|-----|-----|--------|
-| `ANTHROPIC_API_KEY` set | Claude (`claude-sonnet-4-6`) | ✅ | ✅ | ✅ |
-| `ANTHROPIC_API_KEY` empty | Ollama (`OLLAMA_MODEL`) | ✅ | ❌ | ✅ (if model supports vision) |
+| File type | Support |
+|-----------|---------|
+| CSV | ✅ |
+| Images (JPEG/PNG/WebP/HEIC) | ✅ (Gemma 4 is multimodal) |
+| PDF | ❌ (not supported by Ollama cloud) |
 
-- Ollama client: `apps/web/lib/ai/ollama.ts` — calls `/api/chat` with `format: "json"`
-- Default Ollama model: `gemma4:e4b` (set via `OLLAMA_MODEL` env var)
-- PDF parsing with Ollama throws a clear error — requires Claude key
+- Auth: `OLLAMA_API_KEY` env var (Bearer token)
+- Model: `OLLAMA_MODEL` env var, default `gemma4`
+- Response format: `format: "json"` enforced on all requests
+- PDF throws clear error message
 - AI prompt injection sanitization: `lib/ai/sanitize.ts` — strips 17 injection patterns, caps cells at 500 chars
 
 ### Null-safety in transaction mapping

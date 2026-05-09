@@ -15,6 +15,7 @@ import {
 } from "react-native"
 import { Text } from "../components/Text"
 import { apiGet, apiDeleteById, apiPost } from "../lib/api"
+import { notifyError } from "../lib/notifications"
 import { RefreshCw, Trash2, Plus, X, Undo2 } from "lucide-react-native"
 
 interface Subscription {
@@ -83,14 +84,16 @@ export default function SubscriptionsScreen() {
   useEffect(() => {
     apiGet<{ defaultCurrency?: string }>("/api/household")
       .then((d) => { if (d.defaultCurrency) { setHouseholdCurrency(d.defaultCurrency); setAddForm((f) => ({ ...f, currency: d.defaultCurrency! })) } })
-      .catch(() => {})
+      .catch((err) => notifyError(err, "Failed to fetch household currency"))
   }, [])
 
   async function load() {
     try {
       const data = await apiGet<Subscription[]>("/api/subscriptions")
       if (Array.isArray(data)) setSubs(data)
-    } catch {}
+    } catch (err) {
+      notifyError(err, "Failed to load subscriptions");
+    }
     finally {
       setLoading(false)
       setRefreshing(false)
@@ -122,7 +125,9 @@ export default function SubscriptionsScreen() {
       setUndoState(null)
       try {
         await apiDeleteById("/api/subscriptions/" + sub.id)
-      } catch {}
+      } catch (err) {
+        notifyError(err, "Failed to delete subscription");
+      }
     }, 5000)
   }
 
@@ -217,7 +222,12 @@ export default function SubscriptionsScreen() {
             </View>
 
             {subs.map((sub) => (
-              <View key={sub.id} style={styles.card}>
+              <TouchableOpacity
+                key={sub.id}
+                style={styles.card}
+                onPress={() => navigation.navigate("SubscriptionDetail", { subId: sub.id })}
+                activeOpacity={0.7}
+              >
                 <View style={styles.cardHeader}>
                   <View style={styles.initials}>
                     <Text style={styles.initialsText}>
@@ -247,7 +257,7 @@ export default function SubscriptionsScreen() {
                     <Trash2 color="#ef4444" size={16} />
                   </TouchableOpacity>
                 </View>
-              </View>
+              </TouchableOpacity>
             ))}
           </>
         )}
