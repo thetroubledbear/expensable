@@ -20,9 +20,9 @@ export default function FilePreviewModal({ visible, onClose, fileUrl, fileType, 
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
-        <View style={styles.closeBtn} onPress={onClose}>
+        <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
           <X color="#fff" size={24} />
-        </View>
+        </TouchableOpacity>
 
         <View style={styles.content}>
           <Text style={styles.title}>{fileName}</Text>

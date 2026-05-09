@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useRef, useState } from "react"
 import { useFocusEffect } from "@react-navigation/native"
 import { FONTS } from "../lib/fonts"
 import {
@@ -8,7 +8,6 @@ import {
   ActivityIndicator,
   RefreshControl,
   TouchableOpacity,
-  Modal,
 } from "react-native"
 import { Text } from "../components/Text"
 import { apiGet, apiDeleteById } from "../lib/api"
@@ -99,6 +98,11 @@ export default function FilesScreen() {
 
   useFocusEffect(useCallback(() => { load() }, [load]))
 
+  function onRefresh() {
+    setRefreshing(true)
+    load()
+  }
+
   function toggleBulkMode() {
     if (bulkMode) {
       setSelectedIds(new Set())
@@ -120,7 +124,7 @@ export default function FilesScreen() {
     if (ids.length === 0) return
 
     try {
-      await apiPost("/api/transactions/bulk-delete", { ids }) // Reusing bulk delete logic if applicable or use dedicated file bulk delete
+      await Promise.all(ids.map((id) => apiDeleteById(`/api/files/${id}`)))
       setFiles((prev) => prev.filter((f) => !ids.includes(f.id)))
       setSelectedIds(new Set())
       setBulkMode(false)
@@ -180,11 +184,19 @@ export default function FilesScreen() {
         contentContainerStyle={styles.content}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#059669" />}
       >
-        <Text style={styles.title}>File Vault</Text>
+        <View style={styles.headerRow}>
+          <Text style={styles.title}>File Vault</Text>
+          {files.length > 0 && (
+            <TouchableOpacity onPress={toggleBulkMode} style={styles.bulkBtn}>
+              <Text style={[styles.bulkBtnText, bulkMode && styles.bulkBtnActive]}>
+                {bulkMode ? "Cancel" : "Select"}
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
         <Text style={styles.subtitle}>
           {files.length > 0 ? `${files.length} file${files.length !== 1 ? "s" : ""}` : "No files yet"}
-        </Text same:
- la
+        </Text>
         {files.length === 0 ? (
           <View style={styles.empty}>
             <FileText color="#cbd5e1" size={40} />
@@ -195,10 +207,10 @@ export default function FilesScreen() {
           </View>
         ) : (
           files.map((file) => (
-            <View key={file.id} style={styles.card}>
+            <View key={file.id} style={[styles.card, bulkMode && selectedIds.has(file.id) && styles.cardSelected]}>
               <TouchableOpacity
                 style={styles.fileRow}
-                onPress={() => setPreviewFile(file)}
+                onPress={() => bulkMode ? toggleSelect(file.id) : setPreviewFile(file)}
                 activeOpacity={0.7}
               >
                 <View style={styles.iconBox}>
@@ -226,8 +238,7 @@ export default function FilesScreen() {
                 >
                   <Trash2 color="#94a3b8" size={16} />
                 </TouchableOpacity>
-              </TouchableOpacity same:
- la
+              </TouchableOpacity>
               <View style={styles.statusRow}>
                 <StatusIcon status={file.status} />
                 <Text style={[styles.statusText, { color: STATUS_COLOR[file.status] }]}>

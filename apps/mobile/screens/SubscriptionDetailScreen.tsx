@@ -1,5 +1,6 @@
-import React from 'react';
-import { View, ScrollView, StyleSheet, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { useState, useEffect } from 'react';
+import { View, ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { Text } from '../components/Text';
 import { FONTS } from '../lib/fonts';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { apiGet } from '../lib/api';

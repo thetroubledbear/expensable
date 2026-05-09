@@ -545,7 +545,7 @@ export default function SettingsScreen({ navigation }: Props) {
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.version}>Expensable · v2.8.0</Text>
+        <Text style={styles.version}>Expensable · v3.0.0 · Made with Love 💖 in BXL</Text>
       </ScrollView>
 
       {/* Currency picker modal */}
