@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
-import { GoogleGenerativeAI } from "@google/generative-ai"
 import { auth } from "@/lib/auth/config"
 import { db } from "@expensable/db"
 import { resolveHousehold } from "@/lib/auth/household"
-
-const MODEL = process.env.GEMINI_MODEL ?? "gemini-2.0-flash"
+import { ollamaChat } from "@/lib/ai/ollama-client"
 
 export async function GET(req: NextRequest) {
   const session = await auth()
@@ -125,22 +123,10 @@ Top merchants:
 ${merchantLines || "  - No data"}`
 
   try {
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
-    const model = genAI.getGenerativeModel({
-      model: MODEL,
-      systemInstruction:
-        "You are a concise personal finance assistant. Output plain sentences only that are written beautifully and give extraordinary insights to your users — no JSON, no labels, no markdown, no keys.",
-    })
-
-    const result = await model.generateContent(
-      `Analyze this spending data and give exactly 6 financial insights.
-
-${summary}
-
-Each line is one insight. No numbers, no labels, no intro, no extra text.`
+    const raw = await ollamaChat(
+      "You are a concise personal finance assistant. Output plain sentences only that are written beautifully and give extraordinary insights to your users — no JSON, no labels, no markdown, no keys.",
+      `Analyze this spending data and give exactly 6 financial insights.\n\n${summary}\n\nEach line is one insight. No numbers, no labels, no intro, no extra text.`
     )
-
-    const raw = result.response.text()
     const insights = raw
       .split("\n")
       .map((l) => l

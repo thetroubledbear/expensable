@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
-import { GoogleGenerativeAI } from "@google/generative-ai"
 import { z } from "zod"
 import { auth } from "@/lib/auth/config"
 import { db } from "@expensable/db"
 import { resolveHousehold } from "@/lib/auth/household"
 import { PLANS } from "@expensable/types"
-
-const MODEL = process.env.GEMINI_MODEL ?? "gemini-2.0-flash"
+import { ollamaChat } from "@/lib/ai/ollama-client"
 
 const bodySchema = z.object({
   question: z.string().min(1).max(500),
@@ -168,10 +166,7 @@ Rules:
 - If data is missing or insufficient, say so in one sentence and give your best estimate`
 
   try {
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
-    const model = genAI.getGenerativeModel({ model: MODEL, systemInstruction: systemPrompt })
-    const result = await model.generateContent(`${context}\n\nQuestion: ${parsed.data.question}`)
-    const answer = result.response.text()
+    const answer = await ollamaChat(systemPrompt, `${context}\n\nQuestion: ${parsed.data.question}`)
 
     if (billing) {
       db.householdBilling.update({
