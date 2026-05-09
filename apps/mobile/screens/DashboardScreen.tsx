@@ -1103,10 +1103,10 @@ const styles = StyleSheet.create({
   socialRowHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 },
   socialBars: { gap: 5 },
   socialBarRow: { flexDirection: "row", alignItems: "center", gap: 6 },
-  socialBarLabel: { fontSize: 10, color: "#94a3b8", width: 24, fontFamily: FONTS.regular },
+  socialBarLabel: { fontSize: 10, color: "#94a3b8", width: 30, fontFamily: FONTS.regular },
   socialBarTrack: { flex: 1, height: 6, backgroundColor: "#f1f5f9", borderRadius: 3, overflow: "hidden" },
   socialBarFill: { height: 6, borderRadius: 3 },
-  socialBarAmt: { fontSize: 10, color: "#64748b", width: 48, textAlign: "right", fontFamily: FONTS.regular },
+  socialBarAmt: { fontSize: 10, color: "#64748b", minWidth: 60, textAlign: "right", fontFamily: FONTS.regular },
 
   // AI
   insightRow: { flexDirection: "row", alignItems: "flex-start", gap: 10, paddingVertical: 6 },
