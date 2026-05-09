@@ -13,7 +13,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { useAlert } from "../lib/alert"
 import { ChevronLeft, Check, Zap, Users, Star } from "lucide-react-native"
 import { apiGet } from "../lib/api"
-import { BASE_URL } from "../lib/api"
+import { Config } from "../lib/config"
 
 interface Billing {
   tier: string
@@ -74,7 +74,7 @@ export default function ManagePlanScreen({ navigation }: Props) {
   }, [])
 
   function handleUpgrade(planId: string) {
-    const url = `${BASE_URL}`
+    const url = `${Config.API_URL}/billing/portal?plan=${planId}`
     alert(
       "Upgrade Plan",
       `Manage your subscription on the Expensable web app.`,

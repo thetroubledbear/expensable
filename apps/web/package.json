@@ -20,7 +20,6 @@
     "@expensable/types": "*",
     "@expensable/ui": "*",
     "@google-cloud/storage": "^7.19.0",
-    "@google/generative-ai": "^0.24.0",
     "@types/bcryptjs": "^2.4.6",
     "bcryptjs": "^3.0.3",
     "lucide-react": "^1.8.0",

@@ -19,6 +19,7 @@ import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from "expo-spe
 import { useAuth } from "../lib/auth"
 import { apiGet, apiPost, apiPatch } from "../lib/api"
 import { FONTS } from "../lib/fonts"
+import { notifyError } from "../lib/notifications"
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -267,7 +268,8 @@ export default function DashboardScreen({ navigation }: { navigation: BottomTabN
       const res = await apiGet<{ error?: string } & Partial<DashboardData>>("/api/mobile/dashboard")
       if ("error" in res && res.error) setNoHousehold(true)
       else setData(res as DashboardData)
-    } catch {
+    } catch (err) {
+      notifyError(err, "Failed to load dashboard data");
       setNoHousehold(true)
     } finally {
       setLoading(false)
@@ -280,7 +282,9 @@ export default function DashboardScreen({ navigation }: { navigation: BottomTabN
     try {
       const res = await apiGet<{ insights?: string[]; available?: boolean }>("/api/insights/ai")
       if (res.available && res.insights?.length) setAiInsights(res.insights)
-    } catch {}
+    } catch (err) {
+      notifyError(err, "Failed to load AI insights");
+    }
     setAiInsightsLoading(false)
   }
 
@@ -310,7 +314,9 @@ export default function DashboardScreen({ navigation }: { navigation: BottomTabN
     try {
       const res = await apiPost<{ answer?: string }>("/api/ai/query", { question: q })
       if (res.answer) setAiAnswer(res.answer)
-    } catch {}
+    } catch (err) {
+      notifyError(err, "AI query failed");
+    }
     setAiQuerying(false)
   }
 
@@ -320,7 +326,9 @@ export default function DashboardScreen({ navigation }: { navigation: BottomTabN
       await apiPatch("/api/household", { socialComparison: true })
       const r = await apiGet<{ optIn: boolean; comparisons?: SocialItem[] }>("/api/insights/social-comparison")
       setSocialData(r)
-    } catch {}
+    } catch (err) {
+      notifyError(err, "Failed to enable social comparison");
+    }
     setSocialOptInLoading(false)
   }
 

@@ -1,7 +1,12 @@
 import { getCookieHeader, ingestSetCookie } from "./cookies"
+import { Config } from "./config"
 
-export const BASE_URL = "https://expensable-web.vercel.app"
-export const LANDING_URL = "https://expensable-landing.vercel.app"
+export class ApiError extends Error {
+  constructor(public status: number, message: string) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
 
 async function request(path: string, options: RequestInit = {}): Promise<Response> {
   const headers: Record<string, string> = {
@@ -10,8 +15,14 @@ async function request(path: string, options: RequestInit = {}): Promise<Respons
   const cookie = getCookieHeader()
   if (cookie) headers["Cookie"] = cookie
 
-  const res = await fetch(`${BASE_URL}${path}`, { ...options, headers })
+  const res = await fetch(`${Config.API_URL}${path}`, { ...options, headers })
   ingestSetCookie(res.headers.get("set-cookie"))
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` })) as { error?: string }
+    throw new ApiError(res.status, err.error ?? `Request failed with status ${res.status}`)
+  }
+
   return res
 }
 
@@ -35,10 +46,6 @@ export async function apiDelete<T = unknown>(path: string, body?: unknown): Prom
     headers: body ? { "Content-Type": "application/json" } : undefined,
     body: body ? JSON.stringify(body) : undefined,
   })
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: `HTTP ${res.status}` })) as { error?: string }
-    throw new Error(err.error ?? `HTTP ${res.status}`)
-  }
   const text = await res.text()
   if (!text.trim()) return {} as T
   try { return JSON.parse(text) as T } catch { return {} as T }
@@ -46,7 +53,6 @@ export async function apiDelete<T = unknown>(path: string, body?: unknown): Prom
 
 export async function getCsrfToken(): Promise<string> {
   const res = await request("/api/auth/csrf")
-  ingestSetCookie(res.headers.get("set-cookie"))
   const data = await res.json() as { csrfToken: string }
   return data.csrfToken
 }
@@ -58,8 +64,6 @@ export async function authSignIn(email: string, password: string): Promise<boole
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({ csrfToken, email, password }).toString(),
   })
-  ingestSetCookie(res.headers.get("set-cookie"))
-  if (!res.ok) return false
   try {
     const data = await res.json() as { url?: string; error?: string }
     return !data.error
@@ -71,7 +75,6 @@ export async function authSignIn(email: string, password: string): Promise<boole
 export async function authGetSession(): Promise<{ user?: { id: string; name?: string | null; email?: string | null } } | null> {
   try {
     const res = await request("/api/auth/session")
-    if (!res.ok) return null
     const data = await res.json() as { user?: { id: string; name?: string | null; email?: string | null } }
     return data.user ? data : null
   } catch {
@@ -101,7 +104,7 @@ export async function apiUploadFile(formData: FormData): Promise<{ id?: string; 
   const timeoutId = setTimeout(() => controller.abort(), 60_000)
 
   try {
-    const res = await fetch(`${BASE_URL}/api/files`, {
+    const res = await fetch(`${Config.API_URL}/api/files`, {
       method: "POST",
       headers,
       body: formData,

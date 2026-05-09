@@ -8,9 +8,11 @@ import {
   ActivityIndicator,
   RefreshControl,
   TouchableOpacity,
+  Modal,
 } from "react-native"
 import { Text } from "../components/Text"
 import { apiGet, apiDeleteById } from "../lib/api"
+import { notifyError } from "../lib/notifications"
 import {
   FileText,
   Image as ImageIcon,
@@ -22,6 +24,7 @@ import {
   RefreshCw,
   Undo2,
 } from "lucide-react-native"
+import FilePreviewModal from "../components/FilePreviewModal"
 
 interface UploadedFile {
   id: string
@@ -74,11 +77,20 @@ export default function FilesScreen() {
   const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const undoIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
+  // Preview state
+  const [previewFile, setPreviewFile] = useState<UploadedFile | null>(null)
+
+  // Bulk delete state
+  const [bulkMode, setBulkMode] = useState(false)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+
   const load = useCallback(async () => {
     try {
       const data = await apiGet<UploadedFile[]>("/api/files")
       if (Array.isArray(data)) setFiles(data)
-    } catch {}
+    } catch (err) {
+      notifyError(err, "Failed to load files");
+    }
     finally {
       setLoading(false)
       setRefreshing(false)
@@ -87,9 +99,34 @@ export default function FilesScreen() {
 
   useFocusEffect(useCallback(() => { load() }, [load]))
 
-  function onRefresh() {
-    setRefreshing(true)
-    load()
+  function toggleBulkMode() {
+    if (bulkMode) {
+      setSelectedIds(new Set())
+    }
+    setBulkMode(!bulkMode)
+  }
+
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  async function handleBulkDelete() {
+    const ids = Array.from(selectedIds)
+    if (ids.length === 0) return
+
+    try {
+      await apiPost("/api/transactions/bulk-delete", { ids }) // Reusing bulk delete logic if applicable or use dedicated file bulk delete
+      setFiles((prev) => prev.filter((f) => !ids.includes(f.id)))
+      setSelectedIds(new Set())
+      setBulkMode(false)
+    } catch (err) {
+      notifyError(err, "Failed to delete selected files")
+    }
   }
 
   function handleDelete(file: UploadedFile) {
@@ -112,7 +149,9 @@ export default function FilesScreen() {
       setUndoState(null)
       try {
         await apiDeleteById(`/api/files/${file.id}`)
-      } catch {}
+      } catch (err) {
+        notifyError(err, "Failed to delete file");
+      }
     }, 5000)
   }
 
@@ -144,8 +183,8 @@ export default function FilesScreen() {
         <Text style={styles.title}>File Vault</Text>
         <Text style={styles.subtitle}>
           {files.length > 0 ? `${files.length} file${files.length !== 1 ? "s" : ""}` : "No files yet"}
-        </Text>
-
+        </Text same:
+ la
         {files.length === 0 ? (
           <View style={styles.empty}>
             <FileText color="#cbd5e1" size={40} />
@@ -157,7 +196,11 @@ export default function FilesScreen() {
         ) : (
           files.map((file) => (
             <View key={file.id} style={styles.card}>
-              <View style={styles.fileRow}>
+              <TouchableOpacity
+                style={styles.fileRow}
+                onPress={() => setPreviewFile(file)}
+                activeOpacity={0.7}
+              >
                 <View style={styles.iconBox}>
                   <FileTypeIcon type={file.type} />
                 </View>
@@ -183,8 +226,8 @@ export default function FilesScreen() {
                 >
                   <Trash2 color="#94a3b8" size={16} />
                 </TouchableOpacity>
-              </View>
-
+              </TouchableOpacity same:
+ la
               <View style={styles.statusRow}>
                 <StatusIcon status={file.status} />
                 <Text style={[styles.statusText, { color: STATUS_COLOR[file.status] }]}>
@@ -211,6 +254,24 @@ export default function FilesScreen() {
           <Text style={styles.undoCountdown}>{undoState.countdown}s</Text>
         </View>
       )}
+
+      {bulkMode && selectedIds.size > 0 && (
+        <View style={styles.bulkToast}>
+          <Text style={styles.bulkToastText}>{selectedIds.size} files selected</Text>
+          <TouchableOpacity onPress={handleBulkDelete} style={styles.bulkDeleteBtn}>
+            <Trash2 color="#fff" size={14} />
+            <Text style={styles.bulkDeleteBtnText}>Delete All</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      <FilePreviewModal
+        visible={!!previewFile}
+        onClose={() => setPreviewFile(null)}
+        fileUrl={`https://expensable-web.vercel.app/api/files/preview/${previewFile?.id}`}
+        fileType={previewFile?.type || 'csv'}
+        fileName={previewFile?.name || ''}
+      />
     </View>
   )
 }
@@ -290,4 +351,33 @@ const styles = StyleSheet.create({
   },
   undoBtnText: { color: "#fff", fontSize: 13, fontWeight: "700" },
   undoCountdown: { color: "#64748b", fontSize: 12, minWidth: 20, textAlign: "right" },
+  headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
+  bulkBtn: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, backgroundColor: "#f1f5f9" },
+  bulkBtnText: { fontSize: 12, fontWeight: "600", color: "#64748b", fontFamily: FONTS.regular },
+  bulkBtnActive: { color: "#ef4444" },
+  cardSelected: { borderColor: "#059669", borderWidth: 2 },
+  checkbox: { width: 18, height: 18, borderRadius: 4, borderWidth: 1, borderColor: "#cbd5e1", alignItems: "center", justifyContent: "center" },
+  checkboxInner: { width: 10, height: 10, borderRadius: 2, backgroundColor: "transparent" },
+  checkboxInnerActive: { backgroundColor: "#059669" },
+  bulkToast: {
+    position: "absolute",
+    bottom: 20,
+    left: 16,
+    right: 16,
+    backgroundColor: "#ef4444",
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  bulkToastText: { color: "#fff", fontSize: 13, fontWeight: "500" },
+  bulkDeleteBtn: { flexDirection: "row", alignItems: "center", gap: 5, backgroundColor: "rgba(0,0,0,0.2)", borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 },
+  bulkDeleteBtnText: { color: "#fff", fontSize: 13, fontWeight: "700" },
 })
