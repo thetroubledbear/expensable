@@ -9,7 +9,8 @@ import {
 } from "react-native"
 import { Text } from "../components/Text"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
-import { apiPost, BASE_URL } from "../lib/api"
+import { apiPost } from "../lib/api"
+import { Config } from "../lib/config"
 import { useAlert } from "../lib/alert"
 import { Link2, Users } from "lucide-react-native"
 
@@ -34,7 +35,7 @@ export default function InviteScreen({ navigation }: Props) {
         {}
       )
       if (res.token) {
-        setInviteLink(`${BASE_URL}/invite/${res.token}`)
+        setInviteLink(`${Config.API_URL}/invite/${res.token}`)
         setExpiresAt(res.expiresAt ?? null)
       } else {
         alert("Error", res.error ?? "Failed to generate invite")
