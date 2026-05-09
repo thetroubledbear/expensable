@@ -152,6 +152,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function signOut(): Promise<void> {
     setUser(null)
     setOnboardingCompleted(true)
+    try {
+      const csrfRes = await fetch(`${Config.API_URL}/api/auth/csrf`, {
+        headers: { Cookie: getCookieHeader() },
+      })
+      const { csrfToken } = await csrfRes.json() as { csrfToken: string }
+      await fetch(`${Config.API_URL}/api/auth/signout`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Cookie: getCookieHeader(),
+        },
+        body: new URLSearchParams({ csrfToken }).toString(),
+      })
+    } catch {}
     await clearCookies()
     await SecureStore.deleteItemAsync(CREDS_KEY).catch(() => {})
   }

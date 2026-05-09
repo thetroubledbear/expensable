@@ -16,7 +16,6 @@ import {
   X,
 } from "lucide-react"
 import { signOut } from "next-auth/react"
-import { NotificationsBell } from "@/components/notifications-bell"
 import { LogoMark } from "@/components/logo"
 
 const NAV = [
@@ -77,9 +76,6 @@ export function Sidebar({ user }: SidebarProps) {
 
       {/* User */}
       <div className="px-3 py-4 border-t border-slate-800">
-        <div className="hidden md:flex justify-end px-3 pb-1 [&_button]:text-slate-400 [&_button:hover]:text-slate-200 [&_button:hover]:bg-white/10">
-          <NotificationsBell />
-        </div>
         <div className="flex items-center gap-3 px-3 py-2 mb-1">
           <div className="w-7 h-7 rounded-full bg-slate-700 overflow-hidden flex items-center justify-center shrink-0">
             {user.avatarUrl ? (
@@ -119,9 +115,6 @@ export function Sidebar({ user }: SidebarProps) {
         <div className="flex items-center gap-2">
           <LogoMark className="w-6 h-6 rounded-md" />
           <span className="text-white font-semibold text-sm">Expensable</span>
-        </div>
-        <div className="ml-auto [&_button]:text-slate-400 [&_button:hover]:text-slate-200 [&_button:hover]:bg-white/10">
-          <NotificationsBell />
         </div>
       </div>
 
