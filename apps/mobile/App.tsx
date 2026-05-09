@@ -133,7 +133,7 @@ function RootNavigator() {
   if (!user) return <AuthNavigator />
   if (!onboardingCompleted) return <OnboardingScreen />
   return (
-    <View style={{ flex: 1 }}>
+    <View key={user.id} style={{ flex: 1 }}>
       <NoticesBanner />
       <TabNavigator />
     </View>

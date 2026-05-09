@@ -2,8 +2,9 @@ import React, { createContext, useContext, useEffect, useState } from "react"
 import * as SecureStore from "expo-secure-store"
 import * as WebBrowser from "expo-web-browser"
 import * as Google from "expo-auth-session/providers/google"
-import { authSignIn, authGetSession, BASE_URL } from "./api"
-import { clearCookies, loadCookies, ingestSetCookie } from "./cookies"
+import { authSignIn, authGetSession } from "./api"
+import { Config } from "./config"
+import { clearCookies, loadCookies, ingestSetCookie, getCookieHeader } from "./cookies"
 
 // Register the web browser redirect handler
 WebBrowser.maybeCompleteAuthSession()
@@ -48,10 +49,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   })
 
   useEffect(() => {
-    if (googleResponse?.type === "success") {
+    if (!googleResponse) return
+    if (googleResponse.type === "success") {
       const idToken = googleResponse.params.id_token ?? googleResponse.authentication?.idToken
-      if (idToken) handleGoogleToken(idToken)
-    } else if (googleResponse?.type === "error") {
+      if (idToken) {
+        handleGoogleToken(idToken)
+      } else {
+        setGoogleLoading(false)
+      }
+    } else {
+      // error, cancel, dismiss — all reset loading
       setGoogleLoading(false)
     }
   }, [googleResponse])
@@ -90,7 +97,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function handleGoogleToken(idToken: string) {
     setGoogleLoading(true)
     try {
-      const res = await fetch(`${BASE_URL}/api/auth/mobile/google`, {
+      await clearCookies()
+      const res = await fetch(`${Config.API_URL}/api/auth/mobile/google`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idToken }),
@@ -100,6 +108,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const data = await res.json() as { ok?: boolean; user?: User; error?: string }
       if (data.ok && data.user) {
         setUser(data.user)
+        const done = await SecureStore.getItemAsync(`onboarding_${data.user.id}`).catch(() => null)
+        setOnboardingCompleted(done === "true")
       }
     } catch {}
     finally {
@@ -117,13 +127,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (currentUser) {
       await SecureStore.setItemAsync(`onboarding_${currentUser.id}`, "true").catch(() => {})
       try {
-        await fetch(`${BASE_URL}/api/user/complete-onboarding`, { method: "POST" })
+        await fetch(`${Config.API_URL}/api/user/complete-onboarding`, {
+          method: "POST",
+          headers: { Cookie: getCookieHeader() },
+        })
       } catch {}
     }
     setOnboardingCompleted(true)
   }
 
   async function signIn(email: string, password: string): Promise<string | null> {
+    await clearCookies()
     const ok = await authSignIn(email, password)
     if (!ok) return "Invalid email or password"
     const session = await authGetSession()
@@ -136,14 +150,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function signOut(): Promise<void> {
-    clearCookies()
-    await SecureStore.deleteItemAsync(CREDS_KEY).catch(() => {})
     setUser(null)
+    setOnboardingCompleted(true)
+    await clearCookies()
+    await SecureStore.deleteItemAsync(CREDS_KEY).catch(() => {})
   }
 
   async function register(name: string, email: string, password: string): Promise<string | null> {
     try {
-      const res = await fetch(`${BASE_URL}/api/auth/register`, {
+      const res = await fetch(`${Config.API_URL}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),

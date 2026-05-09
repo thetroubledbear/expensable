@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-import { Mic, MicOff } from "lucide-react-native"
+import { Mic, MicOff, RefreshCw } from "lucide-react-native"
 import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs"
 import {
   View,
@@ -277,10 +277,11 @@ export default function DashboardScreen({ navigation }: { navigation: BottomTabN
     }
   }
 
-  async function loadInsights() {
+  async function loadInsights(force = false) {
     setAiInsightsLoading(true)
     try {
-      const res = await apiGet<{ insights?: string[]; available?: boolean }>("/api/insights/ai")
+      const url = force ? "/api/insights/ai?force=true" : "/api/insights/ai"
+      const res = await apiGet<{ insights?: string[]; available?: boolean }>(url)
       if (res.available && res.insights?.length) setAiInsights(res.insights)
     } catch (err) {
       notifyError(err, "Failed to load AI insights");
@@ -794,7 +795,17 @@ export default function DashboardScreen({ navigation }: { navigation: BottomTabN
 
             {/* ── AI insights ── */}
             <Card>
-              <SectionTitle>AI Insights</SectionTitle>
+              <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                <SectionTitle>AI Insights</SectionTitle>
+                <TouchableOpacity
+                  onPress={() => loadInsights(true)}
+                  disabled={aiInsightsLoading}
+                  style={{ flexDirection: "row", alignItems: "center", gap: 4, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8, backgroundColor: "#f0fdf4", opacity: aiInsightsLoading ? 0.5 : 1 }}
+                >
+                  <RefreshCw size={12} color="#059669" />
+                  <Text style={{ fontSize: 11, color: "#059669", fontFamily: FONTS.regular }}>Regenerate</Text>
+                </TouchableOpacity>
+              </View>
               {aiInsightsLoading ? (
                 <ActivityIndicator color="#059669" style={{ marginVertical: 8 }} />
               ) : aiInsights ? (

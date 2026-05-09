@@ -32,9 +32,9 @@ export function getCookieHeader(): string {
   return [...jar.entries()].map(([k, v]) => `${k}=${v}`).join("; ")
 }
 
-export function clearCookies(): void {
+export async function clearCookies(): Promise<void> {
   jar.clear()
-  SecureStore.deleteItemAsync(STORE_KEY).catch(() => {})
+  await SecureStore.deleteItemAsync(STORE_KEY).catch(() => {})
 }
 
 export function hasCookies(): boolean {
