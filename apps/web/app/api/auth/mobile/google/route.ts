@@ -30,8 +30,11 @@ export async function POST(req: NextRequest) {
 
     const tokenInfo = await tokenInfoRes.json() as GoogleTokenInfo
 
-    const expectedClientId = process.env.GOOGLE_CLIENT_ID
-    if (!expectedClientId || tokenInfo.aud !== expectedClientId) {
+    const allowedAudiences = [
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_ANDROID_CLIENT_ID,
+    ].filter(Boolean) as string[]
+    if (allowedAudiences.length === 0 || !allowedAudiences.includes(tokenInfo.aud)) {
       return NextResponse.json({ error: "Token audience mismatch" }, { status: 401 })
     }
 

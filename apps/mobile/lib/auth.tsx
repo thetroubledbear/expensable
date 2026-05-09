@@ -2,7 +2,6 @@ import React, { createContext, useContext, useEffect, useState } from "react"
 import * as SecureStore from "expo-secure-store"
 import * as WebBrowser from "expo-web-browser"
 import * as Google from "expo-auth-session/providers/google"
-import { makeRedirectUri } from "expo-auth-session"
 import { authSignIn, authGetSession, BASE_URL } from "./api"
 import { clearCookies, loadCookies, ingestSetCookie } from "./cookies"
 
@@ -43,12 +42,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [googleLoading, setGoogleLoading] = useState(false)
   const [onboardingCompleted, setOnboardingCompleted] = useState(true)
 
-  const redirectUri = makeRedirectUri({ native: "expensable://oauthredirect" })
-
   const [, googleResponse, promptAsync] = Google.useAuthRequest({
     webClientId: GOOGLE_WEB_CLIENT_ID,
     androidClientId: GOOGLE_ANDROID_CLIENT_ID || undefined,
-    redirectUri,
   })
 
   useEffect(() => {
