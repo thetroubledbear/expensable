@@ -142,7 +142,7 @@ export default async function SettingsPage({
           isOwner={membership?.role === "owner"}
         />
       </div>
-      <p className="text-center text-xs text-slate-300 mt-10">Expensable · v3.0.0 · Made with Love 💖 in BXL</p>
+      <p className="text-center text-xs text-slate-300 mt-10">Expensable · v3.1.0 · Made with Love 💖 in BXL</p>
     </div>
   )
 }
