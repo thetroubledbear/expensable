@@ -83,7 +83,7 @@ export function SubscriptionsSummaryWidget({ count, totalMonthly, currency, subs
               <p className="text-xs font-medium text-slate-700 truncate">{s.merchantName}</p>
             </div>
             <p className="text-xs font-semibold text-slate-600 tabular-nums shrink-0 ml-2">
-              {fmtMonthly(s.amount, s.frequency, s.currency ?? currency)}/mo
+              {fmtMonthly(s.amount, s.frequency, currency)}/mo
             </p>
           </div>
         ))}
