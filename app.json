@@ -6,7 +6,7 @@
       }
     },
     "android": {
-      "package": "com.thetroubledbear.expensable"
+      "package": "com.expensable.app"
     },
     "runtimeVersion": {
       "policy": "appVersion"

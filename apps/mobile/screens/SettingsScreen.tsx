@@ -18,6 +18,7 @@ import {
   LogOut, Home, CreditCard, User, RefreshCw, ChevronRight,
   UserPlus, BarChart2, Wallet, Pencil, Check, X, Zap, Plus, Tag,
 } from "lucide-react-native"
+import { version } from "../package.json"
 
 const CURRENCIES = ["USD","EUR","PLN","GBP","CHF","CAD","AUD","JPY","NOK","SEK","DKK","NZD","SGD","HKD"]
 const PLAN_LIMITS: Record<string, number> = { free: 25, pro: 60, family: 1000 }
@@ -545,7 +546,7 @@ export default function SettingsScreen({ navigation }: Props) {
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.version}>Expensable · v3.3.0 · Made with Love 💖 in BXL</Text>
+        <Text style={styles.version}>Expensable · v{version} · Made with Love 💖 in BXL</Text>
       </ScrollView>
 
       {/* Currency picker modal */}
@@ -578,84 +579,77 @@ export default function SettingsScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f8fafc" },
+  container: { flex: 1, backgroundColor: "#06111b" },
   content: { padding: 16, paddingBottom: 48 },
-  title: { fontSize: 22, fontWeight: "700", color: "#0f172a", marginTop: 48, marginBottom: 24, fontFamily: FONTS.bold },
+  title: { fontSize: 22, fontWeight: "700", color: "#edf2f7", marginTop: 48, marginBottom: 24, fontFamily: FONTS.bold },
   section: { marginBottom: 20 },
-  sectionLabel: { fontSize: 11, fontWeight: "600", color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8, paddingHorizontal: 4 },
+  sectionLabel: { fontSize: 11, fontWeight: "600", color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8, paddingHorizontal: 4 },
   sectionHeaderRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 8, paddingHorizontal: 4 },
-  card: { backgroundColor: "#fff", borderRadius: 16, overflow: "hidden", shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 2 },
+  card: { backgroundColor: "rgba(255,255,255,0.055)", borderRadius: 16, overflow: "hidden", borderWidth: 1, borderColor: "rgba(255,255,255,0.09)" },
   row: { flexDirection: "row", alignItems: "center", gap: 14, padding: 14 },
-  rowBorder: { borderTopWidth: 1, borderTopColor: "#f1f5f9" },
-  iconBox: { width: 36, height: 36, borderRadius: 10, backgroundColor: "#f0fdf4", alignItems: "center", justifyContent: "center" },
+  rowBorder: { borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.07)" },
+  iconBox: { width: 36, height: 36, borderRadius: 10, backgroundColor: "rgba(5,150,105,0.15)", alignItems: "center", justifyContent: "center" },
   rowInfo: { flex: 1 },
-  rowTitle: { fontSize: 14, fontWeight: "500", color: "#0f172a" },
-  rowSub: { fontSize: 12, color: "#94a3b8", marginTop: 2 },
+  rowTitle: { fontSize: 14, fontWeight: "500", color: "#edf2f7" },
+  rowSub: { fontSize: 12, color: "rgba(255,255,255,0.28)", marginTop: 2 },
 
-  // Edit household
   editBtn: { flexDirection: "row", alignItems: "center", gap: 4 },
-  editBtnText: { fontSize: 12, color: "#059669", fontWeight: "500" },
+  editBtnText: { fontSize: 12, color: "#34d399", fontWeight: "500" },
   editArea: { padding: 14 },
-  editLabel: { fontSize: 11, fontWeight: "600", color: "#94a3b8", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 },
-  editInput: { borderWidth: 1, borderColor: "#e2e8f0", borderRadius: 10, paddingHorizontal: 12, paddingVertical: 9, fontSize: 14, color: "#0f172a", backgroundColor: "#f8fafc" },
-  currencyPicker: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderWidth: 1, borderColor: "#e2e8f0", borderRadius: 10, paddingHorizontal: 12, paddingVertical: 9, backgroundColor: "#f8fafc" },
-  currencyPickerText: { fontSize: 14, color: "#0f172a", fontWeight: "500" },
+  editLabel: { fontSize: 11, fontWeight: "600", color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 },
+  editInput: { borderWidth: 1, borderColor: "rgba(255,255,255,0.09)", borderRadius: 10, paddingHorizontal: 12, paddingVertical: 9, fontSize: 14, color: "#edf2f7", backgroundColor: "rgba(255,255,255,0.05)" },
+  currencyPicker: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", borderWidth: 1, borderColor: "rgba(255,255,255,0.09)", borderRadius: 10, paddingHorizontal: 12, paddingVertical: 9, backgroundColor: "rgba(255,255,255,0.05)" },
+  currencyPickerText: { fontSize: 14, color: "#edf2f7", fontWeight: "500" },
   editActions: { flexDirection: "row", gap: 8, marginTop: 16 },
-  cancelBtn: { flex: 1, borderWidth: 1, borderColor: "#e2e8f0", borderRadius: 10, paddingVertical: 9, alignItems: "center" },
-  cancelBtnText: { fontSize: 13, color: "#64748b" },
+  cancelBtn: { flex: 1, borderWidth: 1, borderColor: "rgba(255,255,255,0.09)", borderRadius: 10, paddingVertical: 9, alignItems: "center" },
+  cancelBtnText: { fontSize: 13, color: "rgba(255,255,255,0.5)" },
   saveBtn: { flex: 1, backgroundColor: "#059669", borderRadius: 10, paddingVertical: 9, alignItems: "center" },
   saveBtnText: { fontSize: 13, fontWeight: "600", color: "#fff" },
 
-  // Billing
   tierBadge: { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 },
   tierBadgeText: { fontSize: 10, fontWeight: "700", letterSpacing: 0.5 },
   usageSection: { paddingHorizontal: 14, paddingBottom: 14 },
   usageRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 },
-  usageLabel: { fontSize: 12, color: "#64748b" },
-  usageCount: { fontSize: 12, fontWeight: "600", color: "#0f172a" },
-  progressTrack: { height: 4, backgroundColor: "#f1f5f9", borderRadius: 2, overflow: "hidden" },
+  usageLabel: { fontSize: 12, color: "rgba(255,255,255,0.5)" },
+  usageCount: { fontSize: 12, fontWeight: "600", color: "#edf2f7" },
+  progressTrack: { height: 4, backgroundColor: "rgba(255,255,255,0.1)", borderRadius: 2, overflow: "hidden" },
   progressFill: { height: 4, borderRadius: 2 },
   limitText: { fontSize: 11, color: "#ef4444", marginTop: 6 },
-  manageSubBtn: { flexDirection: "row", alignItems: "center", gap: 6, borderTopWidth: 1, borderTopColor: "#f1f5f9", paddingHorizontal: 14, paddingVertical: 12 },
-  manageSubText: { flex: 1, fontSize: 13, fontWeight: "600", color: "#059669" },
+  manageSubBtn: { flexDirection: "row", alignItems: "center", gap: 6, borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.07)", paddingHorizontal: 14, paddingVertical: 12 },
+  manageSubText: { flex: 1, fontSize: 13, fontWeight: "600", color: "#34d399" },
 
-  // Members
   memberRow: { flexDirection: "row", alignItems: "center", gap: 12, padding: 14 },
-  memberAvatar: { width: 36, height: 36, borderRadius: 18, backgroundColor: "#f0fdf4", alignItems: "center", justifyContent: "center" },
-  memberInitials: { fontSize: 14, fontWeight: "700", color: "#059669" },
+  memberAvatar: { width: 36, height: 36, borderRadius: 18, backgroundColor: "rgba(5,150,105,0.15)", alignItems: "center", justifyContent: "center" },
+  memberInitials: { fontSize: 14, fontWeight: "700", color: "#34d399" },
   roleBadge: { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3 },
-  roleBadgeOwner: { backgroundColor: "#f0fdf4" },
-  roleBadgeMember: { backgroundColor: "#f8fafc" },
+  roleBadgeOwner: { backgroundColor: "rgba(52,211,153,0.12)" },
+  roleBadgeMember: { backgroundColor: "rgba(255,255,255,0.07)" },
   roleBadgeText: { fontSize: 10, fontWeight: "700", textTransform: "uppercase", letterSpacing: 0.5 },
-  roleBadgeOwnerText: { color: "#059669" },
-  roleBadgeMemberText: { color: "#94a3b8" },
+  roleBadgeOwnerText: { color: "#34d399" },
+  roleBadgeMemberText: { color: "rgba(255,255,255,0.4)" },
 
-  // Sign out
-  signOutBtn: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: "#fff", borderRadius: 16, padding: 16, shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 2 },
+  signOutBtn: { flexDirection: "row", alignItems: "center", gap: 12, backgroundColor: "rgba(239,68,68,0.08)", borderRadius: 16, padding: 16, borderWidth: 1, borderColor: "rgba(239,68,68,0.2)" },
   signOutText: { fontSize: 15, fontWeight: "500", color: "#ef4444" },
-  version: { textAlign: "center", fontSize: 12, color: "#cbd5e1", marginTop: 8 },
+  version: { textAlign: "center", fontSize: 12, color: "rgba(255,255,255,0.2)", marginTop: 8 },
 
-  // Toggle
   toggle: { width: 40, height: 22, borderRadius: 11, padding: 2, justifyContent: "center" },
   toggleOn: { backgroundColor: "#3b82f6" },
-  toggleOff: { backgroundColor: "#cbd5e1" },
+  toggleOff: { backgroundColor: "rgba(255,255,255,0.15)" },
   toggleThumb: { width: 18, height: 18, borderRadius: 9, backgroundColor: "#fff" },
 
-  // Custom categories
-  catFormArea: { padding: 14, borderTopWidth: 1, borderTopColor: "#f1f5f9" },
+  catFormArea: { padding: 14, borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.07)" },
   catFormRow: { flexDirection: "row", gap: 10 },
   colorRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 12 },
   colorDot: { width: 24, height: 24, borderRadius: 12 },
-  colorDotSelected: { borderWidth: 2.5, borderColor: "#0f172a" },
+  colorDotSelected: { borderWidth: 2.5, borderColor: "#edf2f7" },
   catErrorText: { fontSize: 12, color: "#ef4444", marginBottom: 6 },
 
-  // Currency modal
-  modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.4)", justifyContent: "flex-end" },
-  modalCard: { backgroundColor: "#fff", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, maxHeight: 420 },
+  modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.6)", justifyContent: "flex-end" },
+  modalCard: { backgroundColor: "#0b1a26", borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, maxHeight: 420, borderTopWidth: 1, borderColor: "rgba(255,255,255,0.09)" },
   modalHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 },
-  modalTitle: { fontSize: 16, fontWeight: "600", color: "#0f172a" },
-  currencyItem: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 13, borderBottomWidth: 1, borderBottomColor: "#f1f5f9" },
+  modalTitle: { fontSize: 16, fontWeight: "600", color: "#edf2f7" },
+  currencyItem: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 13, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.07)" },
   currencyItemActive: { },
-  currencyItemText: { fontSize: 15, color: "#334155" },
-  currencyItemTextActive: { fontWeight: "700", color: "#059669" },
+  currencyItemText: { fontSize: 15, color: "rgba(255,255,255,0.7)" },
+  currencyItemTextActive: { fontWeight: "700", color: "#34d399" },
 })

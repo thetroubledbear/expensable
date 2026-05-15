@@ -17,6 +17,7 @@ import {
 } from "lucide-react"
 import { signOut } from "next-auth/react"
 import { LogoMark } from "@/components/logo"
+import { NotificationsBell } from "@/components/notifications-bell"
 
 const NAV = [
   { icon: LayoutDashboard, label: "Dashboard",     href: "/dashboard" },
@@ -115,6 +116,9 @@ export function Sidebar({ user }: SidebarProps) {
         <div className="flex items-center gap-2">
           <LogoMark className="w-6 h-6 rounded-md" />
           <span className="text-white font-semibold text-sm">Expensable</span>
+        </div>
+        <div className="ml-auto">
+          <NotificationsBell dark />
         </div>
       </div>
 
