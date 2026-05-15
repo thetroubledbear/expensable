@@ -22,7 +22,7 @@
     "@payloadcms/richtext-lexical": "^3.84.1",
     "@payloadcms/storage-gcs": "^3.84.1",
     "lucide-react": "^1.8.0",
-    "next": "16.2.4",
+    "next": "16.2.6",
     "payload": "^3.84.1",
     "react": "19.2.4",
     "react-dom": "19.2.4"
