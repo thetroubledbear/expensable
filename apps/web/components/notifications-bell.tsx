@@ -18,7 +18,7 @@ const TYPE_ICONS: Record<string, React.ReactNode> = {
   odd_timing:   <Clock className="w-3.5 h-3.5 text-violet-500" />,
 }
 
-export function NotificationsBell() {
+export function NotificationsBell({ dark = false }: { dark?: boolean }) {
   const [open, setOpen] = useState(false)
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
@@ -67,7 +67,7 @@ export function NotificationsBell() {
     <div className="relative" ref={ref}>
       <button
         onClick={() => { setOpen((o) => !o); if (!open) load() }}
-        className="relative p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+        className={`relative p-2 rounded-xl transition-colors ${dark ? "text-slate-400 hover:text-white hover:bg-white/10" : "text-slate-400 hover:text-slate-700 hover:bg-slate-100"}`}
         aria-label="Notifications"
       >
         <Bell className="w-5 h-5" />

@@ -12,12 +12,12 @@ import { Text } from "../components/Text"
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { useAlert } from "../lib/alert"
 import { ChevronLeft, Check, Zap, Users, Star } from "lucide-react-native"
-import { apiGet } from "../lib/api"
-import { Config } from "../lib/config"
+import { apiGet, apiPost } from "../lib/api"
 
 interface Billing {
   tier: string
   filesUploadedThisMonth: number
+  stripeSubscriptionId?: string | null
 }
 
 const PLANS = [
@@ -65,6 +65,7 @@ export default function ManagePlanScreen({ navigation }: Props) {
   const { alert } = useAlert()
   const [billing, setBilling] = useState<Billing | null>(null)
   const [loading, setLoading] = useState(true)
+  const [upgrading, setUpgrading] = useState(false)
 
   useEffect(() => {
     apiGet<{ billing?: Billing; error?: string }>("/api/household")
@@ -73,16 +74,64 @@ export default function ManagePlanScreen({ navigation }: Props) {
       .finally(() => setLoading(false))
   }, [])
 
-  function handleUpgrade(planId: string) {
-    const url = `${Config.API_URL}/billing/portal?plan=${planId}`
-    alert(
-      "Upgrade Plan",
-      `Manage your subscription on the Expensable web app.`,
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Open Web", onPress: () => Linking.openURL(url) },
-      ]
-    )
+  async function handleUpgrade(planId: string) {
+    const hasActiveSub = !!billing?.stripeSubscriptionId
+
+    // Downgrade to free → open Stripe billing portal to cancel
+    if (planId === "free") {
+      if (!hasActiveSub) return
+      setUpgrading(true)
+      try {
+        const res = await apiPost<{ url?: string; error?: string }>("/api/stripe/portal", {})
+        if (res.url) {
+          Linking.openURL(res.url)
+        } else {
+          alert("Error", res.error ?? "Could not open billing portal")
+        }
+      } catch {
+        alert("Error", "Could not reach billing service")
+      } finally {
+        setUpgrading(false)
+      }
+      return
+    }
+
+    // Pro ↔ Family switch (existing subscription) → change plan directly
+    if (hasActiveSub) {
+      setUpgrading(true)
+      try {
+        const res = await apiPost<{ success?: boolean; tier?: string; error?: string }>(
+          "/api/stripe/change-plan",
+          { tier: planId }
+        )
+        if (res.success) {
+          setBilling((b) => b ? { ...b, tier: res.tier ?? planId } : b)
+          alert("Plan updated", `You are now on the ${planId} plan.`)
+        } else {
+          alert("Error", res.error ?? "Failed to change plan")
+        }
+      } catch {
+        alert("Error", "Could not reach billing service")
+      } finally {
+        setUpgrading(false)
+      }
+      return
+    }
+
+    // Free → Pro/Family → Stripe checkout
+    setUpgrading(true)
+    try {
+      const res = await apiPost<{ url?: string; error?: string }>("/api/stripe/checkout", { tier: planId })
+      if (res.url) {
+        Linking.openURL(res.url)
+      } else {
+        alert("Error", res.error ?? "Could not create checkout session")
+      }
+    } catch {
+      alert("Error", "Could not reach billing service")
+    } finally {
+      setUpgrading(false)
+    }
   }
 
   const currentTier = billing?.tier ?? "free"
@@ -149,14 +198,18 @@ export default function ManagePlanScreen({ navigation }: Props) {
 
                 {!isCurrent && (
                   <TouchableOpacity
-                    style={[styles.upgradeBtn, { backgroundColor: plan.color }]}
+                    style={[styles.upgradeBtn, { backgroundColor: plan.color }, upgrading && { opacity: 0.6 }]}
                     onPress={() => handleUpgrade(plan.id)}
+                    disabled={upgrading}
                   >
-                    <Text style={styles.upgradeBtnText}>
-                      {PLANS.findIndex(p => p.id === plan.id) < PLANS.findIndex(p => p.id === currentTier)
-                        ? `Downgrade to ${plan.label}`
-                        : `Upgrade to ${plan.label}`}
-                    </Text>
+                    {upgrading
+                      ? <ActivityIndicator color="#fff" size="small" />
+                      : <Text style={styles.upgradeBtnText}>
+                          {PLANS.findIndex(p => p.id === plan.id) < PLANS.findIndex(p => p.id === currentTier)
+                            ? `Downgrade to ${plan.label}`
+                            : `Upgrade to ${plan.label}`}
+                        </Text>
+                    }
                   </TouchableOpacity>
                 )}
               </View>
@@ -171,31 +224,26 @@ export default function ManagePlanScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f8fafc" },
+  container: { flex: 1, backgroundColor: "#06111b" },
   content: { padding: 16, paddingBottom: 48 },
 
   header: { marginTop: 48, marginBottom: 28 },
   back: { flexDirection: "row", alignItems: "center", gap: 4, marginBottom: 16 },
-  backText: { fontSize: 15, color: "#059669", fontWeight: "500" },
-  title: { fontSize: 26, fontWeight: "700", color: "#0f172a", fontFamily: FONTS.bold, marginBottom: 6 },
-  subtitle: { fontSize: 14, color: "#64748b" },
+  backText: { fontSize: 15, color: "#34d399", fontWeight: "500" },
+  title: { fontSize: 26, fontWeight: "700", color: "#edf2f7", fontFamily: FONTS.bold, marginBottom: 6 },
+  subtitle: { fontSize: 14, color: "rgba(255,255,255,0.5)" },
 
   plans: { gap: 16 },
   planCard: {
-    backgroundColor: "#fff",
+    backgroundColor: "rgba(255,255,255,0.055)",
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
+    borderColor: "rgba(255,255,255,0.09)",
     padding: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
   },
   popularBadge: {
     alignSelf: "flex-start",
-    backgroundColor: "#0ea5e922",
+    backgroundColor: "rgba(14,165,233,0.15)",
     borderRadius: 6,
     paddingHorizontal: 8,
     paddingVertical: 3,
@@ -215,15 +263,15 @@ const styles = StyleSheet.create({
   planIcon: { width: 44, height: 44, borderRadius: 12, alignItems: "center", justifyContent: "center" },
   planLabel: { fontSize: 16, fontWeight: "700", marginBottom: 2 },
   priceRow: { flexDirection: "row", alignItems: "baseline", gap: 2 },
-  planPrice: { fontSize: 24, fontWeight: "700", color: "#0f172a" },
-  planPeriod: { fontSize: 13, color: "#94a3b8" },
+  planPrice: { fontSize: 24, fontWeight: "700", color: "#edf2f7" },
+  planPeriod: { fontSize: 13, color: "rgba(255,255,255,0.28)" },
 
   featureList: { gap: 9, marginBottom: 20 },
   featureRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  featureText: { fontSize: 13, color: "#334155" },
+  featureText: { fontSize: 13, color: "rgba(255,255,255,0.7)" },
 
   upgradeBtn: { borderRadius: 12, paddingVertical: 12, alignItems: "center" },
   upgradeBtnText: { fontSize: 14, fontWeight: "700", color: "#fff" },
 
-  note: { textAlign: "center", fontSize: 12, color: "#94a3b8", marginTop: 24 },
+  note: { textAlign: "center", fontSize: 12, color: "rgba(255,255,255,0.28)", marginTop: 24 },
 })
