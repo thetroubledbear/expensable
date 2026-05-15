@@ -3,13 +3,14 @@
     "name": "Expensable",
     "slug": "expensable",
     "scheme": ["expensable", "com.expensable.app", "com.googleusercontent.apps.480679432186-t24h3sn5ggioakuc2m2cp610o3c6r1kt"],
-    "version": "3.2.0",
+    "version": "3.3.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "newArchEnabled": false,
     "android": {
       "package": "com.expensable.app",
       "icon": "./assets/icon.png",
+      "googleServicesFile": "./android/app/google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#059669"
@@ -20,7 +21,7 @@
       "supportsTablet": true,
       "icon": "./assets/icon.png"
     },
-    "runtimeVersion": "3.2.0",
+    "runtimeVersion": "3.3.0",
     "updates": {
       "url": "https://u.expo.dev/7ec4980c-e686-4da6-b9f5-d01425cd0f1f"
     },
