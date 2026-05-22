@@ -30,6 +30,9 @@ npm-debug.log*
 .vscode/
 .idea/
 
+# Claude Code local settings (may contain credentials)
+.claude/settings.local.json
+
 # Android (Capacitor build outputs handled by apps/web/android/.gitignore)
 apps/web/android/.gradle/
 apps/web/android/build/
