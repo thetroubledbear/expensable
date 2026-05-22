@@ -1,21 +1,21 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
-const S = 4 // px per pixel
+const S = 4
 
 const C: Record<number, string> = {
   0: "transparent",
-  1: "#E8864A", // orange fur
-  2: "#2C1406", // dark outline
-  3: "#F5C27A", // light cheeks
-  4: "#FF9EB5", // pink (ears + nose)
-  5: "#FFFFFF", // white eye highlight
-  6: "#C96B3A", // tabby stripe
-  7: "#4A6FE8", // blue eyes
+  1: "#E8864A",
+  2: "#2C1406",
+  3: "#F5C27A",
+  4: "#FF9EB5",
+  5: "#FFFFFF",
+  6: "#C96B3A",
+  7: "#4A6FE8",
 }
 
-const IDLE: number[][] = [
+const HEAD: number[][] = [
   [0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0],
   [0, 1, 2, 0, 0, 0, 0, 0, 0, 2, 1, 0],
   [2, 1, 4, 2, 0, 0, 0, 0, 2, 4, 1, 2],
@@ -33,16 +33,32 @@ const IDLE: number[][] = [
   [0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0],
   [0, 1, 1, 6, 1, 1, 1, 6, 1, 1, 1, 0],
   [0, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 0],
+]
+
+const HEAD_BLINK: number[][] = [
+  ...HEAD.slice(0, 6),
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  [1, 1, 2, 2, 2, 1, 1, 2, 2, 2, 1, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  ...HEAD.slice(9),
+]
+
+// Sitting legs
+const LEGS_IDLE: number[][] = [
   [0, 0, 2, 1, 1, 0, 0, 1, 1, 2, 0, 0],
   [0, 0, 0, 2, 0, 0, 0, 0, 2, 0, 0, 0],
 ]
 
-const BLINK: number[][] = [
-  ...IDLE.slice(0, 6),
-  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-  [1, 1, 2, 2, 2, 1, 1, 2, 2, 2, 1, 1],
-  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-  ...IDLE.slice(9),
+// Walk frame A — legs spread
+const LEGS_WALK_A: number[][] = [
+  [0, 2, 1, 1, 0, 0, 0, 0, 1, 1, 2, 0],
+  [0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0],
+]
+
+// Walk frame B — legs tucked
+const LEGS_WALK_B: number[][] = [
+  [0, 0, 0, 2, 1, 0, 0, 1, 2, 0, 0, 0],
+  [0, 0, 0, 0, 2, 0, 0, 2, 0, 0, 0, 0],
 ]
 
 const TIPS = [
@@ -54,11 +70,24 @@ const TIPS = [
   "Subscriptions add up!",
 ]
 
+const CAT_W = 12 * S  // 48px
+const CAT_H = 19 * S  // 76px
+const AREA_W = 192
+const MAX_X = AREA_W - CAT_W  // 144px
+
 export function PixelPet() {
   const [blink, setBlink] = useState(false)
+  const [walking, setWalking] = useState(false)
+  const [walkFrame, setWalkFrame] = useState(0)
+  const [posX, setPosX] = useState(Math.floor(MAX_X / 2))
+  const [dir, setDir] = useState(1)
   const [showTip, setShowTip] = useState(false)
   const [tipIdx, setTipIdx] = useState(0)
 
+  const dirRef = useRef(1)
+  dirRef.current = dir
+
+  // Blink
   useEffect(() => {
     let id: ReturnType<typeof setTimeout>
     const loop = () => {
@@ -72,14 +101,49 @@ export function PixelPet() {
     return () => clearTimeout(id)
   }, [])
 
-  const pixels = blink ? BLINK : IDLE
-  const W = pixels[0].length * S
-  const H = pixels.length * S
+  // Toggle walk / idle
+  useEffect(() => {
+    let id: ReturnType<typeof setTimeout>
+    const toggle = (isWalking: boolean) => {
+      const delay = isWalking
+        ? 2500 + Math.random() * 2000
+        : 3000 + Math.random() * 4000
+      id = setTimeout(() => {
+        setWalking(!isWalking)
+        if (isWalking) setWalkFrame(0)
+        toggle(!isWalking)
+      }, delay)
+    }
+    toggle(false)
+    return () => clearTimeout(id)
+  }, [])
+
+  // Walk movement interval
+  useEffect(() => {
+    if (!walking) return
+    const id = setInterval(() => {
+      setWalkFrame(f => (f + 1) % 2)
+      setPosX(prev => {
+        const next = prev + dirRef.current * 2
+        if (next >= MAX_X) { setDir(-1); return MAX_X }
+        if (next <= 0)      { setDir(1);  return 0 }
+        return next
+      })
+    }, 150)
+    return () => clearInterval(id)
+  }, [walking])
+
+  const headRows = blink ? HEAD_BLINK : HEAD
+  const legRows  = walking
+    ? (walkFrame === 0 ? LEGS_WALK_A : LEGS_WALK_B)
+    : LEGS_IDLE
+  const pixels = [...headRows, ...legRows]
 
   return (
-    <div className="flex flex-col items-center py-3 border-t border-slate-800/50">
+    <div className="py-3 border-t border-slate-800/50 flex flex-col items-center gap-1">
       <div
         className="relative cursor-pointer"
+        style={{ width: AREA_W, height: CAT_H + 8 }}
         onMouseEnter={() => {
           setTipIdx(i => (i + 1) % TIPS.length)
           setShowTip(true)
@@ -87,16 +151,25 @@ export function PixelPet() {
         onMouseLeave={() => setShowTip(false)}
       >
         {showTip && (
-          <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-emerald-950 border border-emerald-800 text-emerald-300 text-[10px] rounded-lg px-2 py-1 whitespace-nowrap z-10 pointer-events-none">
+          <div
+            className="absolute bottom-full mb-1 bg-emerald-950 border border-emerald-800 text-emerald-300 text-[10px] rounded-lg px-2 py-1 whitespace-nowrap z-10 pointer-events-none"
+            style={{ left: posX + CAT_W / 2, transform: "translateX(-50%)" }}
+          >
             {TIPS[tipIdx]}
             <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-emerald-800" />
           </div>
         )}
         <svg
-          width={W}
-          height={H}
-          style={{ imageRendering: "pixelated" }}
-          className="transition-transform hover:scale-110 hover:-translate-y-0.5 duration-200"
+          width={CAT_W}
+          height={CAT_H}
+          style={{
+            imageRendering: "pixelated",
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            transform: `translateX(${posX}px) scaleX(${dir === -1 ? -1 : 1})`,
+            transformOrigin: `${CAT_W / 2}px center`,
+          }}
         >
           {pixels.flatMap((row, y) =>
             row.map((c, x) =>
@@ -114,7 +187,7 @@ export function PixelPet() {
           )}
         </svg>
       </div>
-      <span className="mt-1 text-[9px] text-slate-600 font-medium tracking-widest uppercase">
+      <span className="text-[9px] text-slate-600 font-medium tracking-widest uppercase">
         Penny
       </span>
     </div>
