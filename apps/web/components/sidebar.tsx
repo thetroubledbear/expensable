@@ -18,6 +18,7 @@ import {
 import { signOut } from "next-auth/react"
 import { LogoMark } from "@/components/logo"
 import { NotificationsBell } from "@/components/notifications-bell"
+import { PixelPet } from "@/components/pixel-pet"
 
 const NAV = [
   { icon: LayoutDashboard, label: "Dashboard",     href: "/dashboard" },
@@ -74,6 +75,9 @@ export function Sidebar({ user }: SidebarProps) {
           )
         })}
       </nav>
+
+      {/* Pixel pet mascot */}
+      <PixelPet />
 
       {/* User */}
       <div className="px-3 py-4 border-t border-slate-800">
