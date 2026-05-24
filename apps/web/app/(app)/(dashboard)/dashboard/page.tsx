@@ -7,7 +7,6 @@ import { UploadCloud } from "lucide-react"
 import { DashboardGrid, type DashboardData } from "@/components/dashboard-grid"
 import { CATEGORY_COLOR_MAP } from "@/lib/categories"
 import { NotificationsBell } from "@/components/notifications-bell"
-import { SpendingAlerts } from "@/components/spending-alerts"
 
 function greeting() {
   const h = new Date().getHours()
@@ -263,7 +262,6 @@ export default async function DashboardPage() {
           {membership?.household.name ?? "Your workspace"} · {monthName} overview
         </p>
       </div>
-      <SpendingAlerts currency={currency} />
       <DashboardGrid data={data} />
     </div>
   )

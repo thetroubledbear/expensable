@@ -13,9 +13,10 @@ interface Notification {
 }
 
 const TYPE_ICONS: Record<string, React.ReactNode> = {
-  duplicate:    <Copy className="w-3.5 h-3.5 text-amber-500" />,
-  amount_spike: <AlertTriangle className="w-3.5 h-3.5 text-rose-500" />,
-  odd_timing:   <Clock className="w-3.5 h-3.5 text-violet-500" />,
+  duplicate:     <Copy className="w-3.5 h-3.5 text-amber-500" />,
+  amount_spike:  <AlertTriangle className="w-3.5 h-3.5 text-rose-500" />,
+  odd_timing:    <Clock className="w-3.5 h-3.5 text-violet-500" />,
+  spending_pace: <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />,
 }
 
 export function NotificationsBell({ dark = false }: { dark?: boolean }) {
@@ -26,6 +27,8 @@ export function NotificationsBell({ dark = false }: { dark?: boolean }) {
 
   async function load() {
     try {
+      // Ensure spending pace notifications are written before fetching the list
+      await fetch("/api/insights/predictions").catch(() => {})
       const res = await fetch("/api/notifications")
       if (!res.ok) return
       const data = await res.json()

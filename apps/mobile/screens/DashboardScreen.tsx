@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-import { Mic, MicOff, RefreshCw } from "lucide-react-native"
+import { Bell, Mic, MicOff, RefreshCw } from "lucide-react-native"
 import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs"
 import {
   View,
@@ -17,7 +17,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { useFocusEffect } from "@react-navigation/native"
 import { ExpoSpeechRecognitionModule, useSpeechRecognitionEvent } from "expo-speech-recognition"
 import { useAuth } from "../lib/auth"
-import { apiGet, apiPost, apiPatch } from "../lib/api"
+import { apiGet, apiPost, apiPatch, apiDelete } from "../lib/api"
 import { FONTS } from "../lib/fonts"
 import { notifyError } from "../lib/notifications"
 
@@ -48,9 +48,8 @@ interface HealthScore {
   breakdown: { savings: HealthScoreBreakdown; stability: HealthScoreBreakdown; subscriptions: HealthScoreBreakdown; hygiene: HealthScoreBreakdown }
 }
 
-interface Alert {
-  category: string; color: string; currentSpend: number; projected: number
-  lastMonth: number; overagePct: number; daysLeft: number
+interface MobileNotification {
+  id: string; type: string; title: string; body: string; read: boolean; createdAt: string
 }
 
 interface CategoryComparison {
@@ -244,9 +243,12 @@ export default function DashboardScreen({ navigation }: { navigation: BottomTabN
     setVoiceOpen(false)
   }
 
+  // Notifications
+  const [notifications, setNotifications] = useState<MobileNotification[]>([])
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [notificationsOpen, setNotificationsOpen] = useState(false)
+
   // Insights
-  const [alerts, setAlerts] = useState<Alert[]>([])
-  const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set())
   const [healthScore, setHealthScore] = useState<HealthScore | null>(null)
   const [comparison, setComparison] = useState<CategoryComparison[]>([])
   const [patterns, setPatterns] = useState<PatternData | null>(null)
@@ -259,9 +261,45 @@ export default function DashboardScreen({ navigation }: { navigation: BottomTabN
 
   // Load insights + extras once on mount — they're heavy and don't need per-focus refresh
   useEffect(() => {
+    loadNotifications()
     loadInsights()
     loadExtras()
   }, [])
+
+  async function loadNotifications() {
+    try {
+      // Ensure spending pace notifications are written before fetching the list
+      await apiGet("/api/insights/predictions").catch(() => {})
+      const res = await apiGet<{ notifications?: MobileNotification[]; unreadCount?: number }>("/api/notifications")
+      setNotifications(res.notifications ?? [])
+      setUnreadCount(res.unreadCount ?? 0)
+    } catch {}
+  }
+
+  async function markOneRead(id: string) {
+    try {
+      await apiPatch(`/api/notifications/${id}`, {})
+      setNotifications((ns) => ns.map((n) => (n.id === id ? { ...n, read: true } : n)))
+      setUnreadCount((c) => Math.max(0, c - 1))
+    } catch {}
+  }
+
+  async function markAllRead() {
+    try {
+      await apiPatch("/api/notifications", {})
+      setNotifications((ns) => ns.map((n) => ({ ...n, read: true })))
+      setUnreadCount(0)
+    } catch {}
+  }
+
+  async function clearAllNotifications() {
+    try {
+      await apiDelete("/api/notifications")
+      setNotifications([])
+      setUnreadCount(0)
+      setNotificationsOpen(false)
+    } catch {}
+  }
 
   async function load() {
     try {
@@ -291,7 +329,6 @@ export default function DashboardScreen({ navigation }: { navigation: BottomTabN
 
   async function loadExtras() {
     await Promise.allSettled([
-      apiGet<Alert[]>("/api/insights/predictions").then((r) => { if (Array.isArray(r)) setAlerts(r) }),
       apiGet<HealthScore>("/api/dashboard/health-score").then((r) => { if (r.score !== undefined) setHealthScore(r) }),
       apiGet<CategoryComparison[]>("/api/insights/spending-comparison").then((r) => { if (Array.isArray(r)) setComparison(r) }),
       apiGet<PatternData>("/api/insights/patterns").then((r) => { if (r.monthsAnalyzed !== undefined) setPatterns(r) }),
@@ -345,7 +382,6 @@ export default function DashboardScreen({ navigation }: { navigation: BottomTabN
     )
   }
 
-  const visibleAlerts = alerts.filter((a) => !dismissedAlerts.has(a.category))
   const hasData = !noHousehold && data !== null
 
   return (
@@ -356,6 +392,17 @@ export default function DashboardScreen({ navigation }: { navigation: BottomTabN
     >
       {/* ── Dark hero header ── */}
       <View style={[styles.heroWrap, { paddingTop: Math.max(insets.top, 20) + 12 }]}>
+        <TouchableOpacity
+          style={styles.bellBtn}
+          onPress={() => { setNotificationsOpen(true); loadNotifications() }}
+        >
+          <Bell size={20} color="#94a3b8" />
+          {unreadCount > 0 && (
+            <View style={styles.bellBadge}>
+              <Text style={styles.bellBadgeText}>{unreadCount > 9 ? "9+" : String(unreadCount)}</Text>
+            </View>
+          )}
+        </TouchableOpacity>
         <Text style={styles.greeting}>
           {greeting},{" "}
           <Text style={styles.greetingAccent}>{firstName}</Text>
@@ -392,23 +439,6 @@ export default function DashboardScreen({ navigation }: { navigation: BottomTabN
       {/* ── Light content area ── */}
       <View style={styles.lightContent}>
 
-        {/* ── Predictive alerts ── */}
-        {visibleAlerts.map((alert) => (
-          <View key={alert.category} style={styles.alertCard}>
-            <View style={styles.alertContent}>
-              <Text style={styles.alertEmoji}>⚠️</Text>
-              <Text style={styles.alertText}>
-                <Text style={styles.alertBold}>{alert.category}: </Text>
-                at this pace you'll spend {fmt(alert.projected, alert.currency)} this month — {alert.overagePct}% more than last month.
-                {alert.daysLeft > 0 ? ` ${alert.daysLeft} day${alert.daysLeft !== 1 ? "s" : ""} left.` : ""}
-              </Text>
-            </View>
-            <TouchableOpacity onPress={() => setDismissedAlerts((prev) => new Set(prev).add(alert.category))}>
-              <Text style={styles.alertDismiss}>✕</Text>
-            </TouchableOpacity>
-          </View>
-        ))}
-
         {/* ── Voice Log button ── */}
         <TouchableOpacity style={styles.voiceLogBtn} onPress={() => setVoiceOpen(true)}>
           <View style={styles.voiceLogBtnIconWrap}>
@@ -419,6 +449,53 @@ export default function DashboardScreen({ navigation }: { navigation: BottomTabN
             <Text style={styles.voiceLogBtnHint}>Tap to log by voice</Text>
           </View>
         </TouchableOpacity>
+
+        {/* ── Notifications modal ── */}
+        <Modal visible={notificationsOpen} transparent animationType="slide" onRequestClose={() => setNotificationsOpen(false)}>
+          <Pressable style={styles.modalOverlay} onPress={() => setNotificationsOpen(false)}>
+            <Pressable style={styles.notifSheet} onPress={() => {}}>
+              <View style={styles.notifSheetHandle} />
+              <View style={styles.notifSheetHeader}>
+                <Text style={styles.notifSheetTitle}>Alerts</Text>
+                <View style={{ flexDirection: "row", gap: 16, alignItems: "center" }}>
+                  {unreadCount > 0 && (
+                    <TouchableOpacity onPress={markAllRead}>
+                      <Text style={{ color: "#34d399", fontSize: 12, fontFamily: FONTS.bold }}>Mark all read</Text>
+                    </TouchableOpacity>
+                  )}
+                  {notifications.length > 0 && (
+                    <TouchableOpacity onPress={clearAllNotifications}>
+                      <Text style={{ color: "#ef4444", fontSize: 12, fontFamily: FONTS.bold }}>Clear</Text>
+                    </TouchableOpacity>
+                  )}
+                  <TouchableOpacity onPress={() => setNotificationsOpen(false)}>
+                    <Text style={{ color: "#64748b", fontSize: 18, lineHeight: 20 }}>✕</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <ScrollView style={{ maxHeight: 420 }}>
+                {notifications.length === 0 ? (
+                  <Text style={{ textAlign: "center", color: "#64748b", padding: 32, fontFamily: FONTS.regular, fontSize: 13 }}>No alerts</Text>
+                ) : notifications.map((n) => (
+                  <TouchableOpacity
+                    key={n.id}
+                    style={[styles.notifItem, n.read && styles.notifItemRead]}
+                    onPress={() => { if (!n.read) markOneRead(n.id) }}
+                  >
+                    <View style={{ flex: 1 }}>
+                      <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                        <Text style={styles.notifItemTitle}>{n.title}</Text>
+                        {!n.read && <View style={styles.unreadDot} />}
+                      </View>
+                      <Text style={styles.notifItemBody}>{n.body}</Text>
+                      <Text style={styles.notifItemDate}>{new Date(n.createdAt).toLocaleDateString()}</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </Pressable>
+          </Pressable>
+        </Modal>
 
         {/* ── Voice Log modal ── */}
         <Modal visible={voiceOpen} transparent animationType="fade" onRequestClose={closeVoice}>
@@ -970,12 +1047,20 @@ const styles = StyleSheet.create({
   red: { color: "#ef4444" },
   emptyText: { color: "rgba(255,255,255,0.5)", textAlign: "center", fontSize: 14, lineHeight: 22, fontFamily: FONTS.regular },
 
-  alertCard: { flexDirection: "row", alignItems: "flex-start", backgroundColor: "rgba(245,158,11,0.1)", borderColor: "rgba(245,158,11,0.25)", borderWidth: 1, borderRadius: 14, padding: 12, marginBottom: 10, gap: 8 },
-  alertContent: { flex: 1, flexDirection: "row", gap: 8, alignItems: "flex-start" },
-  alertEmoji: { fontSize: 16, marginTop: 1 },
-  alertText: { flex: 1, fontSize: 12, color: "#fcd34d", lineHeight: 18, fontFamily: FONTS.regular },
-  alertBold: { fontWeight: "700", fontFamily: FONTS.bold },
-  alertDismiss: { fontSize: 14, color: "#f59e0b", padding: 2, fontFamily: FONTS.regular },
+  bellBtn: { position: "absolute", top: 8, right: 16, zIndex: 10, padding: 6 },
+  bellBadge: { position: "absolute", top: 2, right: 2, minWidth: 16, height: 16, backgroundColor: "#ef4444", borderRadius: 8, justifyContent: "center", alignItems: "center", paddingHorizontal: 2 },
+  bellBadgeText: { color: "#fff", fontSize: 9, fontFamily: FONTS.bold, textAlign: "center" },
+
+  notifSheet: { backgroundColor: "#1e293b", borderTopLeftRadius: 24, borderTopRightRadius: 24, marginTop: "auto", paddingBottom: 32 },
+  notifSheetHandle: { width: 36, height: 4, backgroundColor: "rgba(255,255,255,0.15)", borderRadius: 2, alignSelf: "center", marginTop: 12, marginBottom: 4 },
+  notifSheetHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 20, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.07)" },
+  notifSheetTitle: { fontSize: 15, fontFamily: FONTS.bold, color: "#f1f5f9" },
+  notifItem: { paddingHorizontal: 20, paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.05)" },
+  notifItemRead: { opacity: 0.5 },
+  notifItemTitle: { fontSize: 12, fontFamily: FONTS.bold, color: "#f1f5f9" },
+  notifItemBody: { fontSize: 12, fontFamily: FONTS.regular, color: "#94a3b8", marginTop: 3, lineHeight: 18 },
+  notifItemDate: { fontSize: 10, fontFamily: FONTS.regular, color: "#475569", marginTop: 4 },
+  unreadDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: "#34d399" },
 
   voiceLogBtn: {
     flexDirection: "row",

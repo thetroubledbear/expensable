@@ -4,6 +4,10 @@ import { db } from "@expensable/db"
 import { resolveHousehold } from "@/lib/auth/household"
 import { CATEGORY_COLOR_MAP } from "@/lib/categories"
 
+function fmtCurrency(n: number, currency: string) {
+  return new Intl.NumberFormat(undefined, { style: "currency", currency, maximumFractionDigits: 0 }).format(n)
+}
+
 export interface SpendingPrediction {
   category: string
   color: string
@@ -21,6 +25,7 @@ export async function GET() {
   const membership = await resolveHousehold(session.user.id)
   if (!membership) return NextResponse.json({ error: "No household" }, { status: 404 })
   const hid = membership.householdId
+  const currency = membership.household.defaultCurrency
 
   const now = new Date()
   const dayOfMonth = now.getDate()
@@ -31,6 +36,7 @@ export async function GET() {
   // Need at least 5 days of data before predictions make sense
   if (dayOfMonth < 5) return NextResponse.json([])
 
+  const monthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
   const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
   const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59)
@@ -87,5 +93,35 @@ export async function GET() {
   }
 
   predictions.sort((a, b) => b.overagePct - a.overagePct)
-  return NextResponse.json(predictions.slice(0, 4))
+  const top = predictions.slice(0, 4)
+
+  // Create DB notifications for new pace alerts (one per category per month)
+  if (top.length > 0) {
+    const existing = await db.notification.findMany({
+      where: { householdId: hid, type: "spending_pace" },
+      select: { metadata: true },
+    })
+    const notified = new Set(
+      existing.flatMap((n) => {
+        try {
+          const m = JSON.parse(n.metadata ?? "{}") as { month?: string; category?: string }
+          return m.month === monthKey && m.category ? [m.category] : []
+        } catch { return [] }
+      })
+    )
+    const toCreate = top.filter((p) => !notified.has(p.category))
+    if (toCreate.length > 0) {
+      await db.notification.createMany({
+        data: toCreate.map((p) => ({
+          householdId: hid,
+          type: "spending_pace",
+          title: `${p.category}: spending pace alert`,
+          body: `At this pace you'll spend ${fmtCurrency(p.projected, currency)} this month — ${p.overagePct}% more than last month (${fmtCurrency(p.lastMonth, currency)}). ${p.daysLeft} day${p.daysLeft !== 1 ? "s" : ""} left.`,
+          metadata: JSON.stringify({ month: monthKey, category: p.category }),
+        })),
+      })
+    }
+  }
+
+  return NextResponse.json(top)
 }
