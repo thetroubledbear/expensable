@@ -1,0 +1,1582 @@
+{
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\app.json": {
+    "mtime": 1778859744.24212,
+    "ast_hash": "beb488aae921d4c0a6f06bf7636ded9a",
+    "semantic_hash": "beb488aae921d4c0a6f06bf7636ded9a"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\eas.json": {
+    "mtime": 1778859697.2317798,
+    "ast_hash": "4677460276170222f3aba12b7f5d9c70",
+    "semantic_hash": "4677460276170222f3aba12b7f5d9c70"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\package.json": {
+    "mtime": 1778859185.0593662,
+    "ast_hash": "acf9614b4df93750a0de02db73cb98fd",
+    "semantic_hash": "acf9614b4df93750a0de02db73cb98fd"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\tsconfig.json": {
+    "mtime": 1776447280.168033,
+    "ast_hash": "d48baf475ccc9d51a3df37de17118161",
+    "semantic_hash": "d48baf475ccc9d51a3df37de17118161"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\turbo.json": {
+    "mtime": 1777479482.5521398,
+    "ast_hash": "6ad4a5ec19f80bd65911a916e4763950",
+    "semantic_hash": "6ad4a5ec19f80bd65911a916e4763950"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\vercel.json": {
+    "mtime": 1777404422.140557,
+    "ast_hash": "1b8216a1646e4e903141ba85f85a2e53",
+    "semantic_hash": "1b8216a1646e4e903141ba85f85a2e53"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\version.json": {
+    "mtime": 1778859236.7677093,
+    "ast_hash": "31243400dd7bf3498d032a611e51a078",
+    "semantic_hash": "31243400dd7bf3498d032a611e51a078"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\.claude\\settings.json": {
+    "mtime": 1779475140.4175391,
+    "ast_hash": "101c05b77f825dad5f4c5b775c140d8a",
+    "semantic_hash": "101c05b77f825dad5f4c5b775c140d8a"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\landing\\generate-importmap.mjs": {
+    "mtime": 1777479006.9034815,
+    "ast_hash": "72ba8cfcce367cf3a94ba97f47698c9a",
+    "semantic_hash": "72ba8cfcce367cf3a94ba97f47698c9a"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\landing\\instrumentation.ts": {
+    "mtime": 1777479000.255192,
+    "ast_hash": "cd0187aa14c14ff7b4d14532885ae4d8",
+    "semantic_hash": "cd0187aa14c14ff7b4d14532885ae4d8"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\landing\\next.config.ts": {
+    "mtime": 1777478983.430868,
+    "ast_hash": "6a49a6f4e7c1e9dd2599f50d22c7dcdd",
+    "semantic_hash": "6a49a6f4e7c1e9dd2599f50d22c7dcdd"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\landing\\package.json": {
+    "mtime": 1777479670.0748525,
+    "ast_hash": "f50c0864559e19d397cab0045079e2bc",
+    "semantic_hash": "f50c0864559e19d397cab0045079e2bc"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\landing\\payload.config.ts": {
+    "mtime": 1777478995.1846247,
+    "ast_hash": "c465fa8efee6d05b8cf8b39c9ed3672b",
+    "semantic_hash": "c465fa8efee6d05b8cf8b39c9ed3672b"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\landing\\postcss.config.mjs": {
+    "mtime": 1777482491.0133464,
+    "ast_hash": "239f3ebf717465dc636818a1a619398d",
+    "semantic_hash": "239f3ebf717465dc636818a1a619398d"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\landing\\tsconfig.json": {
+    "mtime": 1777478979.175309,
+    "ast_hash": "d7d1e06d396239274c8dbd2ea5608d74",
+    "semantic_hash": "d7d1e06d396239274c8dbd2ea5608d74"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\landing\\vercel.json": {
+    "mtime": 1777481797.989217,
+    "ast_hash": "cd04257614bfbe5cca713e0e1c04b2f1",
+    "semantic_hash": "cd04257614bfbe5cca713e0e1c04b2f1"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\landing\\app\\layout.tsx": {
+    "mtime": 1777479016.7979684,
+    "ast_hash": "e8d55008e528c125972d3adc2ae6adf3",
+    "semantic_hash": "e8d55008e528c125972d3adc2ae6adf3"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\landing\\app\\page.tsx": {
+    "mtime": 1777482842.717681,
+    "ast_hash": "994192bbd09c31faba7bc5caafc11eb4",
+    "semantic_hash": "994192bbd09c31faba7bc5caafc11eb4"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\landing\\app\\(payload)\\cms-api\\[...slug]\\route.ts": {
+    "mtime": 1777479201.3699267,
+    "ast_hash": "002d2ed8f1c9b33c1b5cea9669b45eb8",
+    "semantic_hash": "002d2ed8f1c9b33c1b5cea9669b45eb8"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\landing\\app\\(payload)\\expcms\\layout.tsx": {
+    "mtime": 1777479323.807505,
+    "ast_hash": "42ec5fc7bee716e37621b170e5061ff4",
+    "semantic_hash": "42ec5fc7bee716e37621b170e5061ff4"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\landing\\app\\(payload)\\expcms\\serverFunction.ts": {
+    "mtime": 1777479159.4098752,
+    "ast_hash": "67c2eab31276e47f8938087d218f7407",
+    "semantic_hash": "67c2eab31276e47f8938087d218f7407"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\landing\\app\\(payload)\\expcms\\[[...segments]]\\importMap.ts": {
+    "mtime": 1777479193.5700307,
+    "ast_hash": "76933bc6d0e8a59ef3e545a41254a96d",
+    "semantic_hash": "76933bc6d0e8a59ef3e545a41254a96d"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\landing\\app\\(payload)\\expcms\\[[...segments]]\\not-found.tsx": {
+    "mtime": 1777479197.8805554,
+    "ast_hash": "79f66a8bd9355d8297dc4be907ac1ccf",
+    "semantic_hash": "79f66a8bd9355d8297dc4be907ac1ccf"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\landing\\app\\(payload)\\expcms\\[[...segments]]\\page.tsx": {
+    "mtime": 1777479163.7234375,
+    "ast_hash": "06110ceac94db2199493d9c2b3d25d6a",
+    "semantic_hash": "06110ceac94db2199493d9c2b3d25d6a"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\landing\\app\\api\\notices\\route.ts": {
+    "mtime": 1777479206.6645572,
+    "ast_hash": "8951ed42d0ccd9e768e68cb88214a370",
+    "semantic_hash": "8951ed42d0ccd9e768e68cb88214a370"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\landing\\app\\blog\\page.tsx": {
+    "mtime": 1777482845.6140523,
+    "ast_hash": "6089f7acccfd12a534a5996b78b8fee2",
+    "semantic_hash": "6089f7acccfd12a534a5996b78b8fee2"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\landing\\app\\blog\\[slug]\\page.tsx": {
+    "mtime": 1777482849.1624932,
+    "ast_hash": "11df891dbb107cc8b7ded4028d05eb2a",
+    "semantic_hash": "11df891dbb107cc8b7ded4028d05eb2a"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\landing\\app\\p\\[slug]\\page.tsx": {
+    "mtime": 1777482852.2131195,
+    "ast_hash": "8509a67aa72ef5cb507ba56e10f78552",
+    "semantic_hash": "8509a67aa72ef5cb507ba56e10f78552"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\landing\\cms\\payload-types.ts": {
+    "mtime": 1777479301.3547885,
+    "ast_hash": "26151843e9375d0668c1f8a00d4194f7",
+    "semantic_hash": "26151843e9375d0668c1f8a00d4194f7"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\landing\\cms\\collections\\CMSUsers.ts": {
+    "mtime": 1777479291.1754458,
+    "ast_hash": "812622da1def6d930debf77217bccc88",
+    "semantic_hash": "812622da1def6d930debf77217bccc88"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\landing\\cms\\collections\\Media.ts": {
+    "mtime": 1777479241.9728432,
+    "ast_hash": "1c77c7577d93d725bf59ac0a6c4ce702",
+    "semantic_hash": "1c77c7577d93d725bf59ac0a6c4ce702"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\landing\\cms\\collections\\Notices.ts": {
+    "mtime": 1777479261.8068492,
+    "ast_hash": "54bf4492a8e760abc09c8ef86265edf9",
+    "semantic_hash": "54bf4492a8e760abc09c8ef86265edf9"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\landing\\cms\\collections\\Pages.ts": {
+    "mtime": 1777479250.4776974,
+    "ast_hash": "02a8696fa6402d2e6604f133ac625531",
+    "semantic_hash": "02a8696fa6402d2e6604f133ac625531"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\landing\\cms\\collections\\Posts.ts": {
+    "mtime": 1777479254.3046384,
+    "ast_hash": "7024b1af13f5a72f20798258b74525a9",
+    "semantic_hash": "7024b1af13f5a72f20798258b74525a9"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\landing\\cms\\globals\\HomePage.ts": {
+    "mtime": 1777479275.147297,
+    "ast_hash": "10baf32106e967ef494dba79cce62817",
+    "semantic_hash": "10baf32106e967ef494dba79cce62817"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\landing\\components\\notices-banner.tsx": {
+    "mtime": 1777479217.0262089,
+    "ast_hash": "4f5dfd045c2d5cbbb0d8b913ebfec34d",
+    "semantic_hash": "4f5dfd045c2d5cbbb0d8b913ebfec34d"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\App.js": {
+    "mtime": 499162500.0,
+    "ast_hash": "cef8f6fd308b2e28e056d76821a55b95",
+    "semantic_hash": "cef8f6fd308b2e28e056d76821a55b95"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\app.json": {
+    "mtime": 1778859185.0613663,
+    "ast_hash": "6e40f9d3a4454a39b870a26beb71de59",
+    "semantic_hash": "6e40f9d3a4454a39b870a26beb71de59"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\App.tsx": {
+    "mtime": 1778860143.620945,
+    "ast_hash": "c2a5155b692ed731073c60bb578d9b52",
+    "semantic_hash": "c2a5155b692ed731073c60bb578d9b52"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\babel.config.js": {
+    "mtime": 1776860197.383001,
+    "ast_hash": "8fc7a520543679a79421ba4e2dbcfe90",
+    "semantic_hash": "8fc7a520543679a79421ba4e2dbcfe90"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\eas.json": {
+    "mtime": 1777061856.1257553,
+    "ast_hash": "9c559759663e12c56334447a4f47d17c",
+    "semantic_hash": "9c559759663e12c56334447a4f47d17c"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\index.js": {
+    "mtime": 499162500.0,
+    "ast_hash": "33caa6d28d87fc7e637c033d0d7124b1",
+    "semantic_hash": "33caa6d28d87fc7e637c033d0d7124b1"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\metro.config.js": {
+    "mtime": 1776860194.7733161,
+    "ast_hash": "ff258171ebef74b4be45bc9ca973ca9f",
+    "semantic_hash": "ff258171ebef74b4be45bc9ca973ca9f"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\package.json": {
+    "mtime": 1778859185.0613663,
+    "ast_hash": "20fd38009683452fa1928aecc4edc318",
+    "semantic_hash": "20fd38009683452fa1928aecc4edc318"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\tsconfig.json": {
+    "mtime": 1776860199.8112404,
+    "ast_hash": "5e0f9428b6036ac603f36f8786325ea9",
+    "semantic_hash": "5e0f9428b6036ac603f36f8786325ea9"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\.expo\\devices.json": {
+    "mtime": 1777059205.7552557,
+    "ast_hash": "c0a7652986fd7b1204956ff6bb816066",
+    "semantic_hash": "c0a7652986fd7b1204956ff6bb816066"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\android\\build.gradle": {
+    "mtime": 1776860426.7667308,
+    "ast_hash": "55cec08c744fbe7b1f1294009fe3f65d",
+    "semantic_hash": "55cec08c744fbe7b1f1294009fe3f65d"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\android\\gradlew": {
+    "mtime": 499162500.0,
+    "ast_hash": "ff1ddbebbc9b4d04f2e9f8cab50d6595",
+    "semantic_hash": "ff1ddbebbc9b4d04f2e9f8cab50d6595"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\android\\settings.gradle": {
+    "mtime": 1776860426.7652197,
+    "ast_hash": "aa639b184cfea2879c41c34c9fbadcd3",
+    "semantic_hash": "aa639b184cfea2879c41c34c9fbadcd3"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\android\\app\\build.gradle": {
+    "mtime": 1777158212.9575818,
+    "ast_hash": "4556898a1425ca0151f9af56553a64f4",
+    "semantic_hash": "4556898a1425ca0151f9af56553a64f4"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\android\\app\\src\\main\\java\\com\\expensable\\app\\MainActivity.kt": {
+    "mtime": 1776860426.7318978,
+    "ast_hash": "e2adefa618f421afe765a8f2f53c3829",
+    "semantic_hash": "e2adefa618f421afe765a8f2f53c3829"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\android\\app\\src\\main\\java\\com\\expensable\\app\\MainApplication.kt": {
+    "mtime": 1776860426.7318978,
+    "ast_hash": "5b9eceef0e7c7dfa661aec23308beb82",
+    "semantic_hash": "5b9eceef0e7c7dfa661aec23308beb82"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\components\\FilePreviewModal.tsx": {
+    "mtime": 1778350816.1514788,
+    "ast_hash": "89d460edb01adccc37f04bf014f872e7",
+    "semantic_hash": "89d460edb01adccc37f04bf014f872e7"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\components\\LogoMark.tsx": {
+    "mtime": 1777148676.3989172,
+    "ast_hash": "278b4342628c34c1a02981a0b2b654b1",
+    "semantic_hash": "278b4342628c34c1a02981a0b2b654b1"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\components\\NoticesBanner.tsx": {
+    "mtime": 1777479505.702243,
+    "ast_hash": "86f6ecb36c5e3472e08d92425de4338a",
+    "semantic_hash": "86f6ecb36c5e3472e08d92425de4338a"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\components\\Text.tsx": {
+    "mtime": 1777227972.4948776,
+    "ast_hash": "b59063185f6f7326b0ef3bcf22090c34",
+    "semantic_hash": "b59063185f6f7326b0ef3bcf22090c34"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\ios\\Podfile.properties.json": {
+    "mtime": 499162500.0,
+    "ast_hash": "4a357809d422c79bc009c666175e72ad",
+    "semantic_hash": "4a357809d422c79bc009c666175e72ad"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\ios\\mobile\\AppDelegate.swift": {
+    "mtime": 499162500.0,
+    "ast_hash": "68e35dd98ceb7c38f6f1d18e55a1a39e",
+    "semantic_hash": "68e35dd98ceb7c38f6f1d18e55a1a39e"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\ios\\mobile\\mobile-Bridging-Header.h": {
+    "mtime": 499162500.0,
+    "ast_hash": "15ff0b9e396e448453a3401293a1ee14",
+    "semantic_hash": "15ff0b9e396e448453a3401293a1ee14"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\ios\\mobile\\Images.xcassets\\Contents.json": {
+    "mtime": 499162500.0,
+    "ast_hash": "96cbaeb138eab0aceebfdf0022c7d835",
+    "semantic_hash": "96cbaeb138eab0aceebfdf0022c7d835"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\ios\\mobile\\Images.xcassets\\AppIcon.appiconset\\Contents.json": {
+    "mtime": 499162500.0,
+    "ast_hash": "a588282d6ad9a445f9389ae222624ca7",
+    "semantic_hash": "a588282d6ad9a445f9389ae222624ca7"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\ios\\mobile\\Images.xcassets\\SplashScreenLegacy.imageset\\Contents.json": {
+    "mtime": 499162500.0,
+    "ast_hash": "ce4b981e671103ccc722e236d656825f",
+    "semantic_hash": "ce4b981e671103ccc722e236d656825f"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\lib\\alert.tsx": {
+    "mtime": 1777228676.4699943,
+    "ast_hash": "6923c29e4ae4787373f6d6ead92323de",
+    "semantic_hash": "6923c29e4ae4787373f6d6ead92323de"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\lib\\api.ts": {
+    "mtime": 1778345079.141843,
+    "ast_hash": "d5e204ef4e1ff9647357cd6f9c6ea8fe",
+    "semantic_hash": "d5e204ef4e1ff9647357cd6f9c6ea8fe"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\lib\\auth.tsx": {
+    "mtime": 1778364152.3399975,
+    "ast_hash": "f0f781a80264391ad663213426480551",
+    "semantic_hash": "f0f781a80264391ad663213426480551"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\lib\\config.ts": {
+    "mtime": 1778345021.7847157,
+    "ast_hash": "057f733b7df5fdfeae967ef782450db3",
+    "semantic_hash": "057f733b7df5fdfeae967ef782450db3"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\lib\\cookies.ts": {
+    "mtime": 1778354635.8427782,
+    "ast_hash": "9dcc8770ce8d9da4601e0eeef8d2497a",
+    "semantic_hash": "9dcc8770ce8d9da4601e0eeef8d2497a"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\lib\\fonts.ts": {
+    "mtime": 1777148676.3989172,
+    "ast_hash": "6680d8bc0512f5e29e4f89b846cd9521",
+    "semantic_hash": "6680d8bc0512f5e29e4f89b846cd9521"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\lib\\notifications.ts": {
+    "mtime": 1778345120.4919808,
+    "ast_hash": "2f3ae70a9b79ce29edeeafcdbeb90a10",
+    "semantic_hash": "2f3ae70a9b79ce29edeeafcdbeb90a10"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\screens\\AccountsScreen.tsx": {
+    "mtime": 1778860656.2439759,
+    "ast_hash": "fdf67c183afda98b82b06e7eb5946c72",
+    "semantic_hash": "fdf67c183afda98b82b06e7eb5946c72"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\screens\\AddTransactionScreen.tsx": {
+    "mtime": 1778860512.6052403,
+    "ast_hash": "8a3a72f04cc135330cb17218c0ef3ce4",
+    "semantic_hash": "8a3a72f04cc135330cb17218c0ef3ce4"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\screens\\DashboardScreen.tsx": {
+    "mtime": 1779617520.655349,
+    "ast_hash": "aae04ed664ef6ce6c59adca30d758149",
+    "semantic_hash": "aae04ed664ef6ce6c59adca30d758149"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\screens\\FilesScreen.tsx": {
+    "mtime": 1778860493.680731,
+    "ast_hash": "935f70334358da4ca5e9be640f43bddd",
+    "semantic_hash": "935f70334358da4ca5e9be640f43bddd"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\screens\\InviteScreen.tsx": {
+    "mtime": 1778860614.3416278,
+    "ast_hash": "1ac3dcdcfbbc1dccf62d535efe5d518e",
+    "semantic_hash": "1ac3dcdcfbbc1dccf62d535efe5d518e"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\screens\\LoginScreen.tsx": {
+    "mtime": 1778859879.585127,
+    "ast_hash": "c49c8f536a6c062aea22b0186e1e440c",
+    "semantic_hash": "c49c8f536a6c062aea22b0186e1e440c"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\screens\\ManagePlanScreen.tsx": {
+    "mtime": 1778860675.9265864,
+    "ast_hash": "c458d6033c8d0023a40ae3dddddf474f",
+    "semantic_hash": "c458d6033c8d0023a40ae3dddddf474f"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\screens\\OnboardingScreen.tsx": {
+    "mtime": 1778871727.6272643,
+    "ast_hash": "d8b5d47a7fbe4cea352abffc17a7f55e",
+    "semantic_hash": "d8b5d47a7fbe4cea352abffc17a7f55e"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\screens\\RegisterScreen.tsx": {
+    "mtime": 1778859914.2417564,
+    "ast_hash": "f0909dc89a3de2c3be6ab46820fdee51",
+    "semantic_hash": "f0909dc89a3de2c3be6ab46820fdee51"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\screens\\SettingsScreen.tsx": {
+    "mtime": 1778860557.4624867,
+    "ast_hash": "2c79e2be061a82a1257d5d9bf59936c5",
+    "semantic_hash": "2c79e2be061a82a1257d5d9bf59936c5"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\screens\\SubscriptionDetailScreen.tsx": {
+    "mtime": 1778860923.9232407,
+    "ast_hash": "34b822ad45f572669767ed17eee96a39",
+    "semantic_hash": "34b822ad45f572669767ed17eee96a39"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\screens\\SubscriptionsScreen.tsx": {
+    "mtime": 1778860596.2410195,
+    "ast_hash": "d6e0a3e2832621d85bd3ef729dbb213b",
+    "semantic_hash": "d6e0a3e2832621d85bd3ef729dbb213b"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\screens\\TransactionsScreen.tsx": {
+    "mtime": 1778860434.469805,
+    "ast_hash": "e821b9918e6bb3f36bf0fbf361cc6c6b",
+    "semantic_hash": "e821b9918e6bb3f36bf0fbf361cc6c6b"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\screens\\UploadScreen.tsx": {
+    "mtime": 1778860461.092603,
+    "ast_hash": "5979bc5902be8feaf35392d0ac171af5",
+    "semantic_hash": "5979bc5902be8feaf35392d0ac171af5"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\eslint.config.mjs": {
+    "mtime": 1776447352.0134516,
+    "ast_hash": "dfa1f5f6a7037bf39dc510f30b180002",
+    "semantic_hash": "dfa1f5f6a7037bf39dc510f30b180002"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\next-env.d.ts": {
+    "mtime": 1776448663.0116043,
+    "ast_hash": "d0f8375ae1199dc7acd3977fc33b78b8",
+    "semantic_hash": "d0f8375ae1199dc7acd3977fc33b78b8"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\next.config.ts": {
+    "mtime": 1777479447.091618,
+    "ast_hash": "da88f5ed3ba62e06765ec27023b8fe3d",
+    "semantic_hash": "da88f5ed3ba62e06765ec27023b8fe3d"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\package.json": {
+    "mtime": 1778859185.060366,
+    "ast_hash": "5114db486a3d79e2f036f89801975542",
+    "semantic_hash": "5114db486a3d79e2f036f89801975542"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\postcss.config.mjs": {
+    "mtime": 1776711008.335891,
+    "ast_hash": "481fac0fdecd70e1821cc30b86030c1a",
+    "semantic_hash": "481fac0fdecd70e1821cc30b86030c1a"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\proxy.ts": {
+    "mtime": 1777479451.1352372,
+    "ast_hash": "eb2fc40f6bd061e5a225cd5f26bdba9c",
+    "semantic_hash": "eb2fc40f6bd061e5a225cd5f26bdba9c"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\tsconfig.json": {
+    "mtime": 1777403870.2432973,
+    "ast_hash": "d7d1e06d396239274c8dbd2ea5608d74",
+    "semantic_hash": "d7d1e06d396239274c8dbd2ea5608d74"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\build.gradle": {
+    "mtime": 1776857933.1716945,
+    "ast_hash": "682315a426653617c6a74fc12bef55b6",
+    "semantic_hash": "682315a426653617c6a74fc12bef55b6"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\capacitor.settings.gradle": {
+    "mtime": 1776858460.6123753,
+    "ast_hash": "ce10d1b918ef22db6c4b5cdf83077c4e",
+    "semantic_hash": "ce10d1b918ef22db6c4b5cdf83077c4e"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\gradlew": {
+    "mtime": 1776857933.173202,
+    "ast_hash": "794669d78aef1dd5c7d889ef618b311a",
+    "semantic_hash": "794669d78aef1dd5c7d889ef618b311a"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\settings.gradle": {
+    "mtime": 1776857933.173202,
+    "ast_hash": "f6cd925b3f859e23c3d819fe2459e0e4",
+    "semantic_hash": "f6cd925b3f859e23c3d819fe2459e0e4"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\variables.gradle": {
+    "mtime": 1776857933.1747148,
+    "ast_hash": "4b3fce8ea2a515a9d2e47e74757172ec",
+    "semantic_hash": "4b3fce8ea2a515a9d2e47e74757172ec"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\build.gradle": {
+    "mtime": 1776857933.1527424,
+    "ast_hash": "3c3508e4ed34fa73e2aaa9ff442c1f6f",
+    "semantic_hash": "3c3508e4ed34fa73e2aaa9ff442c1f6f"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\capacitor.build.gradle": {
+    "mtime": 1776858460.6128836,
+    "ast_hash": "b863e425fbde80251bd3c68ac8ccba02",
+    "semantic_hash": "b863e425fbde80251bd3c68ac8ccba02"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\release\\output-metadata.json": {
+    "mtime": 1776859483.0999134,
+    "ast_hash": "6bbfeaa9a623d0b924d2a57d38617fc8",
+    "semantic_hash": "6bbfeaa9a623d0b924d2a57d38617fc8"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\release\\baselineProfiles\\0\\app-release.dm": {
+    "mtime": 1776859479.2460723,
+    "ast_hash": "f173485541d23d1b787ab1ff2d8d1b8d",
+    "semantic_hash": "f173485541d23d1b787ab1ff2d8d1b8d"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\release\\baselineProfiles\\1\\app-release.dm": {
+    "mtime": 1776859479.25064,
+    "ast_hash": "2985d7c71b4bfccc5a4f02c507c835d6",
+    "semantic_hash": "2985d7c71b4bfccc5a4f02c507c835d6"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\androidTest\\java\\com\\getcapacitor\\myapp\\ExampleInstrumentedTest.java": {
+    "mtime": 1776857933.1542506,
+    "ast_hash": "fbaf7cc870c663eb52dcf218531c439d",
+    "semantic_hash": "fbaf7cc870c663eb52dcf218531c439d"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\main\\assets\\capacitor.config.json": {
+    "mtime": 1776859040.9969835,
+    "ast_hash": "270c1c93bddb71156e93adc77098a767",
+    "semantic_hash": "270c1c93bddb71156e93adc77098a767"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\main\\assets\\capacitor.plugins.json": {
+    "mtime": 1776858460.5899136,
+    "ast_hash": "58e0494c51d30eb3494f7c9198986bb9",
+    "semantic_hash": "58e0494c51d30eb3494f7c9198986bb9"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\main\\assets\\public\\cordova.js": {
+    "mtime": 1776858460.6108487,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\main\\assets\\public\\cordova_plugins.js": {
+    "mtime": 1776858460.6108487,
+    "ast_hash": "d41d8cd98f00b204e9800998ecf8427e",
+    "semantic_hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\main\\java\\com\\expensable\\app\\MainActivity.java": {
+    "mtime": 1776857933.155272,
+    "ast_hash": "9111ba6e45b73a1a70c2abf09cbef98e",
+    "semantic_hash": "9111ba6e45b73a1a70c2abf09cbef98e"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\test\\java\\com\\getcapacitor\\myapp\\ExampleUnitTest.java": {
+    "mtime": 1776857933.1716945,
+    "ast_hash": "e91b4501c14da821682fa5c26a16d616",
+    "semantic_hash": "e91b4501c14da821682fa5c26a16d616"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\capacitor-cordova-android-plugins\\build.gradle": {
+    "mtime": 1776858460.6133902,
+    "ast_hash": "2af61653d70c95d20802c8b5c433ba90",
+    "semantic_hash": "2af61653d70c95d20802c8b5c433ba90"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\capacitor-cordova-android-plugins\\cordova.variables.gradle": {
+    "mtime": 1776858460.613899,
+    "ast_hash": "d2372a0ae9aa60abb8d03e7f06bf9194",
+    "semantic_hash": "d2372a0ae9aa60abb8d03e7f06bf9194"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\(app)\\layout.tsx": {
+    "mtime": 1777148676.4054189,
+    "ast_hash": "7b6fa0683989a8b39edd183800cf3272",
+    "semantic_hash": "7b6fa0683989a8b39edd183800cf3272"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\(app)\\page.tsx": {
+    "mtime": 1777479469.8981235,
+    "ast_hash": "2fcf065b5f5b84d96247e45ab637ccc7",
+    "semantic_hash": "2fcf065b5f5b84d96247e45ab637ccc7"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\(app)\\(auth)\\login\\page.tsx": {
+    "mtime": 1777148676.4031627,
+    "ast_hash": "7717b5928e726fec5eee0123429ebe01",
+    "semantic_hash": "7717b5928e726fec5eee0123429ebe01"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\(app)\\(auth)\\register\\page.tsx": {
+    "mtime": 1777148676.4039044,
+    "ast_hash": "fb236aaab15344cdad4fdb86c59182bf",
+    "semantic_hash": "fb236aaab15344cdad4fdb86c59182bf"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\(app)\\(dashboard)\\layout.tsx": {
+    "mtime": 1778859057.3077729,
+    "ast_hash": "fc025381baec1114600f1d698877d310",
+    "semantic_hash": "fc025381baec1114600f1d698877d310"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\(app)\\(dashboard)\\accounts\\page.tsx": {
+    "mtime": 1776675640.577337,
+    "ast_hash": "f188a429e0d670d7eee1f304dedc4ced",
+    "semantic_hash": "f188a429e0d670d7eee1f304dedc4ced"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\(app)\\(dashboard)\\dashboard\\page.tsx": {
+    "mtime": 1779623670.3290505,
+    "ast_hash": "b248c3a70448254ab0af7580f7f9601c",
+    "semantic_hash": "b248c3a70448254ab0af7580f7f9601c"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\(app)\\(dashboard)\\files\\page.tsx": {
+    "mtime": 1776805372.899929,
+    "ast_hash": "125eb80c2ab99b91609ddd850bea5f7c",
+    "semantic_hash": "125eb80c2ab99b91609ddd850bea5f7c"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\(app)\\(dashboard)\\settings\\page.tsx": {
+    "mtime": 1778353142.8073907,
+    "ast_hash": "bb910461a102f26bc65805c2e4f9b9f2",
+    "semantic_hash": "bb910461a102f26bc65805c2e4f9b9f2"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\(app)\\(dashboard)\\subscriptions\\page.tsx": {
+    "mtime": 1777582068.7464929,
+    "ast_hash": "af578aeafb95ddff9c2ff86a880464e0",
+    "semantic_hash": "af578aeafb95ddff9c2ff86a880464e0"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\(app)\\(dashboard)\\transactions\\page.tsx": {
+    "mtime": 1777063837.094725,
+    "ast_hash": "208b6cbf4b71f370da82c729beca5cf1",
+    "semantic_hash": "208b6cbf4b71f370da82c729beca5cf1"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\(app)\\(dashboard)\\upload\\page.tsx": {
+    "mtime": 1776805372.8953779,
+    "ast_hash": "2df80a4c00d256b10bbfc348db0dff3f",
+    "semantic_hash": "2df80a4c00d256b10bbfc348db0dff3f"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\(app)\\invite\\[token]\\page.tsx": {
+    "mtime": 1777148676.4054189,
+    "ast_hash": "7cea145a4260c8e4b9d8cb18ffd27f45",
+    "semantic_hash": "7cea145a4260c8e4b9d8cb18ffd27f45"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\(app)\\onboarding\\page.tsx": {
+    "mtime": 1776968729.1612492,
+    "ast_hash": "cbb3594a16b4b3bd672397827d31bf25",
+    "semantic_hash": "cbb3594a16b4b3bd672397827d31bf25"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\accounts\\route.ts": {
+    "mtime": 1777147845.4217167,
+    "ast_hash": "c02e643c842ec84685a53df6a9711f10",
+    "semantic_hash": "c02e643c842ec84685a53df6a9711f10"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\accounts\\[id]\\route.ts": {
+    "mtime": 1777147845.4217167,
+    "ast_hash": "0ed9d50cb5e2351279503f097071c4e7",
+    "semantic_hash": "0ed9d50cb5e2351279503f097071c4e7"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\ai\\budget-suggestions\\route.ts": {
+    "mtime": 1776711008.3228915,
+    "ast_hash": "8dd950108b234a8703f4bc0432e836bb",
+    "semantic_hash": "8dd950108b234a8703f4bc0432e836bb"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\ai\\query\\route.ts": {
+    "mtime": 1778348928.5589082,
+    "ast_hash": "7e99d9da5bbd2c2eb77cce80e234f63e",
+    "semantic_hash": "7e99d9da5bbd2c2eb77cce80e234f63e"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\auth\\mobile\\google\\route.ts": {
+    "mtime": 1778352534.169103,
+    "ast_hash": "5de86fb3ba449b586a5ccc87e0d5a976",
+    "semantic_hash": "5de86fb3ba449b586a5ccc87e0d5a976"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\auth\\register\\route.ts": {
+    "mtime": 1777147845.4232204,
+    "ast_hash": "8a03a101d5b4a1f45e8b46c5e3f37cfc",
+    "semantic_hash": "8a03a101d5b4a1f45e8b46c5e3f37cfc"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\auth\\[...nextauth]\\route.ts": {
+    "mtime": 1776447603.4010596,
+    "ast_hash": "788c7894bc49f8839ad057edee28feda",
+    "semantic_hash": "788c7894bc49f8839ad057edee28feda"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\budgets\\route.ts": {
+    "mtime": 1776711008.3238914,
+    "ast_hash": "c5508e4d2b2a7052c9eed63bdc51cf88",
+    "semantic_hash": "c5508e4d2b2a7052c9eed63bdc51cf88"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\budgets\\[id]\\route.ts": {
+    "mtime": 1776711008.3238914,
+    "ast_hash": "9eaa2f9e36977a2c316d10ac5f6104fd",
+    "semantic_hash": "9eaa2f9e36977a2c316d10ac5f6104fd"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\categories\\route.ts": {
+    "mtime": 1777396400.1450527,
+    "ast_hash": "33656fdd71e8b404127c31f109a2755f",
+    "semantic_hash": "33656fdd71e8b404127c31f109a2755f"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\categories\\[id]\\route.ts": {
+    "mtime": 1777396418.293831,
+    "ast_hash": "43258fbb95ce9bdd1bc2bff6db6d4ce2",
+    "semantic_hash": "43258fbb95ce9bdd1bc2bff6db6d4ce2"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\dashboard\\health-score\\route.ts": {
+    "mtime": 1777063837.0952332,
+    "ast_hash": "c16c519dd7c9bf6920eb4e3ed5bc9b4c",
+    "semantic_hash": "c16c519dd7c9bf6920eb4e3ed5bc9b4c"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\dashboard\\layout\\route.ts": {
+    "mtime": 1776711008.3248913,
+    "ast_hash": "5a4cce78637f114b2f15f61b89a5ffce",
+    "semantic_hash": "5a4cce78637f114b2f15f61b89a5ffce"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\files\\route.ts": {
+    "mtime": 1777300122.6449327,
+    "ast_hash": "fed70947d8bd2fca62a5a23bd84bd66f",
+    "semantic_hash": "fed70947d8bd2fca62a5a23bd84bd66f"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\files\\[id]\\route.ts": {
+    "mtime": 1776711008.3258913,
+    "ast_hash": "ce15016d9a90aaaaad6c929dc88d3dec",
+    "semantic_hash": "ce15016d9a90aaaaad6c929dc88d3dec"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\files\\[id]\\url\\route.ts": {
+    "mtime": 1776711008.3258913,
+    "ast_hash": "ce8ac3227ff530e3dcc1ce49d630b572",
+    "semantic_hash": "ce8ac3227ff530e3dcc1ce49d630b572"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\household\\route.ts": {
+    "mtime": 1777147845.4232204,
+    "ast_hash": "a0f155743733e521f2fdcbfd24a235e2",
+    "semantic_hash": "a0f155743733e521f2fdcbfd24a235e2"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\household\\invites\\route.ts": {
+    "mtime": 1776625080.2868283,
+    "ast_hash": "5314df2c5753306c6d26afbcc1278361",
+    "semantic_hash": "5314df2c5753306c6d26afbcc1278361"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\household\\members\\route.ts": {
+    "mtime": 1776625094.995777,
+    "ast_hash": "a3492656df0085641a7437161e652281",
+    "semantic_hash": "a3492656df0085641a7437161e652281"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\household\\members\\[memberId]\\route.ts": {
+    "mtime": 1776625108.9121163,
+    "ast_hash": "998875a4426917916d4a690746c386c0",
+    "semantic_hash": "998875a4426917916d4a690746c386c0"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\insights\\ai\\route.ts": {
+    "mtime": 1778348293.5367799,
+    "ast_hash": "dbee9d5aa28172fd1ae93b74843e4777",
+    "semantic_hash": "dbee9d5aa28172fd1ae93b74843e4777"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\insights\\patterns\\route.ts": {
+    "mtime": 1777063837.096259,
+    "ast_hash": "4d1da24ab417fb4d3c6becae7957b432",
+    "semantic_hash": "4d1da24ab417fb4d3c6becae7957b432"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\insights\\predictions\\route.ts": {
+    "mtime": 1779623656.0668013,
+    "ast_hash": "67331b774c24e56fabd27a41ca9238ad",
+    "semantic_hash": "67331b774c24e56fabd27a41ca9238ad"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\insights\\rewind\\route.ts": {
+    "mtime": 1777063837.0973096,
+    "ast_hash": "0cd4062fb9c1793cbd50aa2236817065",
+    "semantic_hash": "0cd4062fb9c1793cbd50aa2236817065"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\insights\\social-comparison\\route.ts": {
+    "mtime": 1777063837.0973096,
+    "ast_hash": "279c3ce04f8d27b1abf04ee277662ed1",
+    "semantic_hash": "279c3ce04f8d27b1abf04ee277662ed1"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\insights\\spending-comparison\\route.ts": {
+    "mtime": 1777063837.0973096,
+    "ast_hash": "11d210c576a982370c27076c1b6916e2",
+    "semantic_hash": "11d210c576a982370c27076c1b6916e2"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\insights\\tradeoffs\\route.ts": {
+    "mtime": 1777063837.098818,
+    "ast_hash": "95c08b12c9aa602038c42b7c2da4da73",
+    "semantic_hash": "95c08b12c9aa602038c42b7c2da4da73"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\invite\\[token]\\route.ts": {
+    "mtime": 1776711008.3288908,
+    "ast_hash": "524845e47e3516612c9e1e7c118b60ea",
+    "semantic_hash": "524845e47e3516612c9e1e7c118b60ea"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\mobile\\dashboard\\route.ts": {
+    "mtime": 1777582136.312922,
+    "ast_hash": "72ebfda1b3d7de2134f2271df810174d",
+    "semantic_hash": "72ebfda1b3d7de2134f2271df810174d"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\notifications\\route.ts": {
+    "mtime": 1776711008.329891,
+    "ast_hash": "3f80a22348c5645c48b55f3bfeecda7d",
+    "semantic_hash": "3f80a22348c5645c48b55f3bfeecda7d"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\notifications\\[id]\\route.ts": {
+    "mtime": 1776711008.3288908,
+    "ast_hash": "4c88847cff30797d1dabfec3a158d376",
+    "semantic_hash": "4c88847cff30797d1dabfec3a158d376"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\stripe\\change-plan\\route.ts": {
+    "mtime": 1776711008.329891,
+    "ast_hash": "1f31a5c72de532d3e7b454075d92aca1",
+    "semantic_hash": "1f31a5c72de532d3e7b454075d92aca1"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\stripe\\checkout\\route.ts": {
+    "mtime": 1776711008.3308914,
+    "ast_hash": "cce19e25e09de8d31d1b57a49e4912d3",
+    "semantic_hash": "cce19e25e09de8d31d1b57a49e4912d3"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\stripe\\portal\\route.ts": {
+    "mtime": 1776711008.3308914,
+    "ast_hash": "367d8cc60f5afb8a91c9a27491d90ea9",
+    "semantic_hash": "367d8cc60f5afb8a91c9a27491d90ea9"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\stripe\\session-complete\\route.ts": {
+    "mtime": 1780083197.9426696,
+    "ast_hash": "7f8a11da7328f002666f044e46e295ab",
+    "semantic_hash": "7f8a11da7328f002666f044e46e295ab"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\stripe\\webhook\\route.ts": {
+    "mtime": 1776528315.2920797,
+    "ast_hash": "fb216b85755e3606078fb8c5b7fd65ca",
+    "semantic_hash": "fb216b85755e3606078fb8c5b7fd65ca"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\subscriptions\\route.ts": {
+    "mtime": 1777396272.210772,
+    "ast_hash": "123f3e4a381e494beb4fd457270e44f9",
+    "semantic_hash": "123f3e4a381e494beb4fd457270e44f9"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\subscriptions\\[id]\\route.ts": {
+    "mtime": 1776711008.3318903,
+    "ast_hash": "445c1407cf640fc445d5605462f68ab9",
+    "semantic_hash": "445c1407cf640fc445d5605462f68ab9"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\transactions\\route.ts": {
+    "mtime": 1777147845.4242244,
+    "ast_hash": "b8f75ec41210a7ef0e3a67e098646d8a",
+    "semantic_hash": "b8f75ec41210a7ef0e3a67e098646d8a"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\transactions\\transfer\\route.ts": {
+    "mtime": 1777147845.4252243,
+    "ast_hash": "bcc7c71a84cf6529ddea1453e70f7b30",
+    "semantic_hash": "bcc7c71a84cf6529ddea1453e70f7b30"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\transactions\\voice\\route.ts": {
+    "mtime": 1778348312.0923672,
+    "ast_hash": "638d8bf25dceba7019f25c43e33c3808",
+    "semantic_hash": "638d8bf25dceba7019f25c43e33c3808"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\transactions\\[id]\\route.ts": {
+    "mtime": 1777300288.2450678,
+    "ast_hash": "3a3d68c32d6b8f45761a433a63bdf565",
+    "semantic_hash": "3a3d68c32d6b8f45761a433a63bdf565"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\user\\avatar\\route.ts": {
+    "mtime": 1776885263.6078224,
+    "ast_hash": "39563ef223e8039100eb4d189f62de3f",
+    "semantic_hash": "39563ef223e8039100eb4d189f62de3f"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\api\\user\\complete-onboarding\\route.ts": {
+    "mtime": 1776968729.1612492,
+    "ast_hash": "017c6c8b7ab713d5d4866f5a5c5f20a8",
+    "semantic_hash": "017c6c8b7ab713d5d4866f5a5c5f20a8"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\accounts-manager.tsx": {
+    "mtime": 1777582760.7223756,
+    "ast_hash": "7f56aa7148f54d05db03fb502b66424f",
+    "semantic_hash": "7f56aa7148f54d05db03fb502b66424f"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\add-subscription-button.tsx": {
+    "mtime": 1777396298.816941,
+    "ast_hash": "60419ab6e45ded1cae53aa5517c1dfff",
+    "semantic_hash": "60419ab6e45ded1cae53aa5517c1dfff"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\add-transaction-modal.tsx": {
+    "mtime": 1777147845.426224,
+    "ast_hash": "ab12c4388411cdebddd18df8a9fdd9d2",
+    "semantic_hash": "ab12c4388411cdebddd18df8a9fdd9d2"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\avatar-upload.tsx": {
+    "mtime": 1776627789.6535745,
+    "ast_hash": "e4bd167fcaf7ebc618f960700346cab7",
+    "semantic_hash": "e4bd167fcaf7ebc618f960700346cab7"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\billing-section.tsx": {
+    "mtime": 1777147845.427224,
+    "ast_hash": "e5241ef37dce4b859bbc6c5ff838ddd8",
+    "semantic_hash": "e5241ef37dce4b859bbc6c5ff838ddd8"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\category-picker.tsx": {
+    "mtime": 1776464713.9058526,
+    "ast_hash": "a0a893fd7611349302dd486149643423",
+    "semantic_hash": "a0a893fd7611349302dd486149643423"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\category-pie-chart.tsx": {
+    "mtime": 1776680984.0688858,
+    "ast_hash": "8a2ef3c0a9ba85e7f80ec9a28aa22470",
+    "semantic_hash": "8a2ef3c0a9ba85e7f80ec9a28aa22470"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\custom-categories-section.tsx": {
+    "mtime": 1777396459.9952948,
+    "ast_hash": "ba134932d9f0223f5047aa6d36dbf942",
+    "semantic_hash": "ba134932d9f0223f5047aa6d36dbf942"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\dashboard-grid.tsx": {
+    "mtime": 1777582109.2924492,
+    "ast_hash": "aa1c6463bb9ccd514a8c0bf364ed8613",
+    "semantic_hash": "aa1c6463bb9ccd514a8c0bf364ed8613"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\edit-transaction-modal.tsx": {
+    "mtime": 1777301768.2931044,
+    "ast_hash": "4e3dc234b62aac5938c33994d567f8cd",
+    "semantic_hash": "4e3dc234b62aac5938c33994d567f8cd"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\file-delete-button.tsx": {
+    "mtime": 1777582662.0481575,
+    "ast_hash": "56a9a98c920c463a4fd0b4a71591af2a",
+    "semantic_hash": "56a9a98c920c463a4fd0b4a71591af2a"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\file-preview-modal.tsx": {
+    "mtime": 1776625677.6736598,
+    "ast_hash": "872ca6bd20dadc7ea8027141f6db8f08",
+    "semantic_hash": "872ca6bd20dadc7ea8027141f6db8f08"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\files-poller.tsx": {
+    "mtime": 1777300104.8461413,
+    "ast_hash": "146bbb78897f11baa6e4bb4ccb6ada0c",
+    "semantic_hash": "146bbb78897f11baa6e4bb4ccb6ada0c"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\files-vault.tsx": {
+    "mtime": 1777582725.1192572,
+    "ast_hash": "3708e491ef10cec2603a1dd737b2913d",
+    "semantic_hash": "3708e491ef10cec2603a1dd737b2913d"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\invite-page-client.tsx": {
+    "mtime": 1777061856.129799,
+    "ast_hash": "a6a1046c94b982fba18427deacf7a32d",
+    "semantic_hash": "a6a1046c94b982fba18427deacf7a32d"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\logo.tsx": {
+    "mtime": 1777148676.4064186,
+    "ast_hash": "031aa1bbc514b4f7b27b9bd0ce62155f",
+    "semantic_hash": "031aa1bbc514b4f7b27b9bd0ce62155f"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\members-section.tsx": {
+    "mtime": 1776625224.2240584,
+    "ast_hash": "c322f4291474482ac42d5432f0bb0a73",
+    "semantic_hash": "c322f4291474482ac42d5432f0bb0a73"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\notifications-bell.tsx": {
+    "mtime": 1779617516.7075472,
+    "ast_hash": "ece866c4b41b54a92012f1b1fa30f177",
+    "semantic_hash": "ece866c4b41b54a92012f1b1fa30f177"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\onboarding-wizard.tsx": {
+    "mtime": 1778871294.7464254,
+    "ast_hash": "cb05cda743a83ba76d7834261c41fcab",
+    "semantic_hash": "cb05cda743a83ba76d7834261c41fcab"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\pixel-pet.tsx": {
+    "mtime": 1779476781.243278,
+    "ast_hash": "19d1d54f59bdef127bd36374ae04ec76",
+    "semantic_hash": "19d1d54f59bdef127bd36374ae04ec76"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\session-provider.tsx": {
+    "mtime": 1776624368.3687298,
+    "ast_hash": "989abbb82b99294dcdce013370979351",
+    "semantic_hash": "989abbb82b99294dcdce013370979351"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\settings-form.tsx": {
+    "mtime": 1777147845.427224,
+    "ast_hash": "b09bd469b80386783790f1e60a53cb1c",
+    "semantic_hash": "b09bd469b80386783790f1e60a53cb1c"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\sidebar.tsx": {
+    "mtime": 1779476130.4600284,
+    "ast_hash": "4678fe0df394da9070e858ddfc70afce",
+    "semantic_hash": "4678fe0df394da9070e858ddfc70afce"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\spending-trend-chart.tsx": {
+    "mtime": 1776627360.668776,
+    "ast_hash": "843aca8bccd76425782b7677ddb57b41",
+    "semantic_hash": "843aca8bccd76425782b7677ddb57b41"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\subscription-card.tsx": {
+    "mtime": 1777582674.1054492,
+    "ast_hash": "b95b7fd91081277cf430fe16ab9109ec",
+    "semantic_hash": "b95b7fd91081277cf430fe16ab9109ec"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\transactions-table.tsx": {
+    "mtime": 1777582094.095555,
+    "ast_hash": "f4d5b63268e585ad1e64e58cfbb77cab",
+    "semantic_hash": "f4d5b63268e585ad1e64e58cfbb77cab"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\upload-dropzone.tsx": {
+    "mtime": 1777582080.3366802,
+    "ast_hash": "0ad227e309a9a437618b3b87e26a02b1",
+    "semantic_hash": "0ad227e309a9a437618b3b87e26a02b1"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\voice-input-button.tsx": {
+    "mtime": 1777063837.1003282,
+    "ast_hash": "e2d92e9c9824d6d439c59a4d20b641d1",
+    "semantic_hash": "e2d92e9c9824d6d439c59a4d20b641d1"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\widgets\\account-balances-widget.tsx": {
+    "mtime": 1776676344.8025446,
+    "ast_hash": "f89a661562b1a4f7329dc2fc20789825",
+    "semantic_hash": "f89a661562b1a4f7329dc2fc20789825"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\widgets\\ai-insights-widget.tsx": {
+    "mtime": 1776713202.7907767,
+    "ast_hash": "7e9deb2ad18ecdc24d07335a7b19c445",
+    "semantic_hash": "7e9deb2ad18ecdc24d07335a7b19c445"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\widgets\\budget-widget.tsx": {
+    "mtime": 1776682721.939421,
+    "ast_hash": "0d95a3637a5e0164ecc362da998254e7",
+    "semantic_hash": "0d95a3637a5e0164ecc362da998254e7"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\widgets\\category-breakdown-widget.tsx": {
+    "mtime": 1777582130.449618,
+    "ast_hash": "9adb0e5d0d6b7fd5c02b3d6ce87fcd56",
+    "semantic_hash": "9adb0e5d0d6b7fd5c02b3d6ce87fcd56"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\widgets\\category-pie-widget.tsx": {
+    "mtime": 1776623817.6951904,
+    "ast_hash": "e4ad725b25075627161fd40ce30c7111",
+    "semantic_hash": "e4ad725b25075627161fd40ce30c7111"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\widgets\\files-count-widget.tsx": {
+    "mtime": 1776531127.307543,
+    "ast_hash": "fbf896a01be0817e436c1eaa73ee7e25",
+    "semantic_hash": "fbf896a01be0817e436c1eaa73ee7e25"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\widgets\\financial-rewind-widget.tsx": {
+    "mtime": 1777063837.1003282,
+    "ast_hash": "b9bb55d4b947bf3100c9d069230a2aad",
+    "semantic_hash": "b9bb55d4b947bf3100c9d069230a2aad"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\widgets\\health-score-widget.tsx": {
+    "mtime": 1777063837.1003282,
+    "ast_hash": "8f2fdac1b154363ccf02779598deeaee",
+    "semantic_hash": "8f2fdac1b154363ccf02779598deeaee"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\widgets\\money-card-widget.tsx": {
+    "mtime": 1777396258.2780669,
+    "ast_hash": "3ea7f7eac20926284ac4f198689247a2",
+    "semantic_hash": "3ea7f7eac20926284ac4f198689247a2"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\widgets\\nl-query-widget.tsx": {
+    "mtime": 1776683398.8818724,
+    "ast_hash": "1b8cfb348d0a22e3ca8f2cab8212ca39",
+    "semantic_hash": "1b8cfb348d0a22e3ca8f2cab8212ca39"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\widgets\\pattern-insights-widget.tsx": {
+    "mtime": 1777063837.1018386,
+    "ast_hash": "6fe66db21c4493ed655d86d827033ede",
+    "semantic_hash": "6fe66db21c4493ed655d86d827033ede"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\widgets\\recent-transactions-widget.tsx": {
+    "mtime": 1777396220.1499972,
+    "ast_hash": "5a3beef8ec3e4432547da94b296a13cf",
+    "semantic_hash": "5a3beef8ec3e4432547da94b296a13cf"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\widgets\\savings-rate-widget.tsx": {
+    "mtime": 1776627372.0806656,
+    "ast_hash": "0f5895be7c5402c02a61d09d3509c903",
+    "semantic_hash": "0f5895be7c5402c02a61d09d3509c903"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\widgets\\social-comparison-widget.tsx": {
+    "mtime": 1778351969.7094572,
+    "ast_hash": "ef4fa3358c4101bd1dbffb61306e9eb9",
+    "semantic_hash": "ef4fa3358c4101bd1dbffb61306e9eb9"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\widgets\\spending-insights-widget.tsx": {
+    "mtime": 1777063837.1018386,
+    "ast_hash": "c6349ceaa4473446573885ef8347ec24",
+    "semantic_hash": "c6349ceaa4473446573885ef8347ec24"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\widgets\\spending-trend-widget.tsx": {
+    "mtime": 1776623781.266533,
+    "ast_hash": "7e764792aeb617db435fdf67f92032f5",
+    "semantic_hash": "7e764792aeb617db435fdf67f92032f5"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\widgets\\subscriptions-summary-widget.tsx": {
+    "mtime": 1778353872.2871356,
+    "ast_hash": "6c8b9216858d26157fb0dec30d54982d",
+    "semantic_hash": "6c8b9216858d26157fb0dec30d54982d"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\components\\widgets\\top-spending-widget.tsx": {
+    "mtime": 1777396241.8021536,
+    "ast_hash": "a0c2098acff9920c9d2e62274ed14e2f",
+    "semantic_hash": "a0c2098acff9920c9d2e62274ed14e2f"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\lib\\anomalies.ts": {
+    "mtime": 1776681974.4717467,
+    "ast_hash": "d2bc5be39e28fd1a9c98552c71346a9e",
+    "semantic_hash": "d2bc5be39e28fd1a9c98552c71346a9e"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\lib\\benchmarks.ts": {
+    "mtime": 1777063837.1018386,
+    "ast_hash": "6908d008c19a7225c1fddb6d93fd83fa",
+    "semantic_hash": "6908d008c19a7225c1fddb6d93fd83fa"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\lib\\categories.ts": {
+    "mtime": 1777582075.9111924,
+    "ast_hash": "16559c9a4acd420bbf44802c3d5e4cf3",
+    "semantic_hash": "16559c9a4acd420bbf44802c3d5e4cf3"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\lib\\merchant-normalize.ts": {
+    "mtime": 1776681957.275566,
+    "ast_hash": "8195f9033d27ffbe7108ad01c5b9389a",
+    "semantic_hash": "8195f9033d27ffbe7108ad01c5b9389a"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\lib\\stripe.ts": {
+    "mtime": 1776529126.4686625,
+    "ast_hash": "e41314325372b95be61169ad384bc420",
+    "semantic_hash": "e41314325372b95be61169ad384bc420"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\lib\\subscriptions.ts": {
+    "mtime": 1776677099.3651907,
+    "ast_hash": "ecf1539bf3ca767bd81562b8a0b5a5ca",
+    "semantic_hash": "ecf1539bf3ca767bd81562b8a0b5a5ca"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\lib\\tradeoffs.ts": {
+    "mtime": 1777063837.1018386,
+    "ast_hash": "161180b094f49d1f1ac55cc26e54ee2a",
+    "semantic_hash": "161180b094f49d1f1ac55cc26e54ee2a"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\lib\\ai\\budget-suggestions.ts": {
+    "mtime": 1778348335.389665,
+    "ast_hash": "9188321284ac196db118f98b261ec7f3",
+    "semantic_hash": "9188321284ac196db118f98b261ec7f3"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\lib\\ai\\ollama-client.ts": {
+    "mtime": 1778348913.1875107,
+    "ast_hash": "d14f04cf35fd781893b118436dcfb1cf",
+    "semantic_hash": "d14f04cf35fd781893b118436dcfb1cf"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\lib\\ai\\parser.ts": {
+    "mtime": 1778348915.6023357,
+    "ast_hash": "dc8bb651002f60dd38a6ca8c86bc341c",
+    "semantic_hash": "dc8bb651002f60dd38a6ca8c86bc341c"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\lib\\ai\\sanitize.ts": {
+    "mtime": 1776450999.3038287,
+    "ast_hash": "2cfa265f8122c132bcdb6e7de8bd64aa",
+    "semantic_hash": "2cfa265f8122c132bcdb6e7de8bd64aa"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\lib\\auth\\config.ts": {
+    "mtime": 1776804917.0364406,
+    "ast_hash": "a6e44920644f526071cebb98207b07bb",
+    "semantic_hash": "a6e44920644f526071cebb98207b07bb"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\lib\\auth\\household.ts": {
+    "mtime": 1776624881.62177,
+    "ast_hash": "32e0edd6b8a87580a48cbdd2188dd8e7",
+    "semantic_hash": "32e0edd6b8a87580a48cbdd2188dd8e7"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\lib\\auth\\session.ts": {
+    "mtime": 1776447606.019089,
+    "ast_hash": "14e3644c681f3fb86614bc39ec2c8bd3",
+    "semantic_hash": "14e3644c681f3fb86614bc39ec2c8bd3"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\lib\\storage\\index.ts": {
+    "mtime": 1776887094.7720654,
+    "ast_hash": "1a87064ad649032d4adca6a8db862ea0",
+    "semantic_hash": "1a87064ad649032d4adca6a8db862ea0"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\packages\\api-client\\package.json": {
+    "mtime": 1776448513.803463,
+    "ast_hash": "e26f41658d1dead5d7dc20cb76f979fa",
+    "semantic_hash": "e26f41658d1dead5d7dc20cb76f979fa"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\packages\\api-client\\tsconfig.json": {
+    "mtime": 1776448504.3158355,
+    "ast_hash": "b21dfb7c996c4b6a3aaa3ad3b1076eb3",
+    "semantic_hash": "b21dfb7c996c4b6a3aaa3ad3b1076eb3"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\packages\\api-client\\src\\index.ts": {
+    "mtime": 1776447344.0306864,
+    "ast_hash": "59e7e63127f4b7731642a3628dddcf0b",
+    "semantic_hash": "59e7e63127f4b7731642a3628dddcf0b"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\packages\\db\\package.json": {
+    "mtime": 1776448515.741491,
+    "ast_hash": "d7dab0c43c403dea8a801b0e6cde6af7",
+    "semantic_hash": "d7dab0c43c403dea8a801b0e6cde6af7"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\packages\\db\\tsconfig.json": {
+    "mtime": 1776448504.7399552,
+    "ast_hash": "6123ef357d091226e4bfe8b2190963b8",
+    "semantic_hash": "6123ef357d091226e4bfe8b2190963b8"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\packages\\db\\prisma\\migrations\\20260417175738_init\\migration.sql": {
+    "mtime": 1776448658.466621,
+    "ast_hash": "a1cbf3cb16e8f629e48377a6090739da",
+    "semantic_hash": "a1cbf3cb16e8f629e48377a6090739da"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\packages\\db\\prisma\\migrations\\20260417183454_add_household_currency\\migration.sql": {
+    "mtime": 1776450894.7208285,
+    "ast_hash": "96a12967b4e927b048ee975f551a5250",
+    "semantic_hash": "96a12967b4e927b048ee975f551a5250"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\packages\\db\\prisma\\migrations\\20260418165905_add_ai_insight_cache\\migration.sql": {
+    "mtime": 1776531545.5065596,
+    "ast_hash": "8c8b379ba2f9057f07baf4425e0b89a2",
+    "semantic_hash": "8c8b379ba2f9057f07baf4425e0b89a2"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\packages\\db\\prisma\\migrations\\20260419184304_add_household_invites\\migration.sql": {
+    "mtime": 1776624184.6688583,
+    "ast_hash": "9ad8ad69ad855335ca43c7c4eadcefcb",
+    "semantic_hash": "9ad8ad69ad855335ca43c7c4eadcefcb"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\packages\\db\\prisma\\migrations\\20260419190310_make_transaction_file_optional\\migration.sql": {
+    "mtime": 1776625390.1054373,
+    "ast_hash": "1f5a0113fb57e8eeff4410d357d8ecfa",
+    "semantic_hash": "1f5a0113fb57e8eeff4410d357d8ecfa"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\packages\\db\\prisma\\migrations\\20260420090144_add_financial_accounts\\migration.sql": {
+    "mtime": 1776675704.01669,
+    "ast_hash": "293351917bdeb21a88161d88e6b6d2ba",
+    "semantic_hash": "293351917bdeb21a88161d88e6b6d2ba"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\packages\\db\\prisma\\migrations\\20260420091010_add_dashboard_layout\\migration.sql": {
+    "mtime": 1776676210.8226283,
+    "ast_hash": "c4caa10d074d9e10ff254fd84df15982",
+    "semantic_hash": "c4caa10d074d9e10ff254fd84df15982"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\packages\\db\\prisma\\migrations\\20260420120000_add_budgets_and_notifications\\migration.sql": {
+    "mtime": 1776681945.1994445,
+    "ast_hash": "3ce1e505edb9eb04081803911027de71",
+    "semantic_hash": "3ce1e505edb9eb04081803911027de71"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\packages\\db\\prisma\\migrations\\20260420130000_add_ai_query_counter\\migration.sql": {
+    "mtime": 1776683334.8781645,
+    "ast_hash": "56307df89233ec8d19fc6fb99e7ab3e0",
+    "semantic_hash": "56307df89233ec8d19fc6fb99e7ab3e0"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\packages\\db\\src\\index.ts": {
+    "mtime": 1776803684.9757278,
+    "ast_hash": "e4da9e2aba6f23db3ef7c80cd5b6414c",
+    "semantic_hash": "e4da9e2aba6f23db3ef7c80cd5b6414c"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\packages\\types\\package.json": {
+    "mtime": 1776448511.1609383,
+    "ast_hash": "9d2ef7374d101179103dfadeb979ac41",
+    "semantic_hash": "9d2ef7374d101179103dfadeb979ac41"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\packages\\types\\tsconfig.json": {
+    "mtime": 1776448502.829881,
+    "ast_hash": "b21dfb7c996c4b6a3aaa3ad3b1076eb3",
+    "semantic_hash": "b21dfb7c996c4b6a3aaa3ad3b1076eb3"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\packages\\types\\src\\index.ts": {
+    "mtime": 1776683311.9008412,
+    "ast_hash": "47661bfebf825d156f8a7d0b9abcdd57",
+    "semantic_hash": "47661bfebf825d156f8a7d0b9abcdd57"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\packages\\ui\\package.json": {
+    "mtime": 1777478848.4610105,
+    "ast_hash": "f271d549a2e8815fd27a8823e17d5e63",
+    "semantic_hash": "f271d549a2e8815fd27a8823e17d5e63"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\packages\\ui\\tsconfig.json": {
+    "mtime": 1777478852.2189703,
+    "ast_hash": "1df45ecc87c6e3dffd91940ecdd8f0a8",
+    "semantic_hash": "1df45ecc87c6e3dffd91940ecdd8f0a8"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\packages\\ui\\src\\index.ts": {
+    "mtime": 1777478854.3044972,
+    "ast_hash": "eb526e5198dcf7c2bf79365fbdac9205",
+    "semantic_hash": "eb526e5198dcf7c2bf79365fbdac9205"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\packages\\ui\\src\\LogoMark.tsx": {
+    "mtime": 1777478856.6215227,
+    "ast_hash": "031aa1bbc514b4f7b27b9bd0ce62155f",
+    "semantic_hash": "031aa1bbc514b4f7b27b9bd0ce62155f"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\packages\\utils\\package.json": {
+    "mtime": 1776448512.271531,
+    "ast_hash": "74c48c3b93fe1f0f96dc997f44f55780",
+    "semantic_hash": "74c48c3b93fe1f0f96dc997f44f55780"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\packages\\utils\\tsconfig.json": {
+    "mtime": 1776448503.6343641,
+    "ast_hash": "b21dfb7c996c4b6a3aaa3ad3b1076eb3",
+    "semantic_hash": "b21dfb7c996c4b6a3aaa3ad3b1076eb3"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\packages\\utils\\src\\currency.ts": {
+    "mtime": 1776447303.003077,
+    "ast_hash": "226c60b08c2b0a447f95a2aaab39d05a",
+    "semantic_hash": "226c60b08c2b0a447f95a2aaab39d05a"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\packages\\utils\\src\\dates.ts": {
+    "mtime": 1776447306.1479185,
+    "ast_hash": "7cd75d3db3aefe331c7e5527cd864337",
+    "semantic_hash": "7cd75d3db3aefe331c7e5527cd864337"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\packages\\utils\\src\\files.ts": {
+    "mtime": 1776447309.655875,
+    "ast_hash": "f447b910c16b27a4aa62c270e0eb52ea",
+    "semantic_hash": "f447b910c16b27a4aa62c270e0eb52ea"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\packages\\utils\\src\\index.ts": {
+    "mtime": 1776447300.2991483,
+    "ast_hash": "3b8f3b11764995cbd01872612f84b927",
+    "semantic_hash": "3b8f3b11764995cbd01872612f84b927"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\scripts\\set-version.mjs": {
+    "mtime": 1778859166.7438388,
+    "ast_hash": "94f5285efd1c640ec05a86aa77d28465",
+    "semantic_hash": "94f5285efd1c640ec05a86aa77d28465"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\CLAUDE.md": {
+    "mtime": 1778347839.5766814,
+    "ast_hash": "8efae9545f2c2f5b43ed6ea313e96d3c",
+    "semantic_hash": "8efae9545f2c2f5b43ed6ea313e96d3c"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\docker-compose.yml": {
+    "mtime": 1776447681.209847,
+    "ast_hash": "642a30114d0862e360dd6102860b758e",
+    "semantic_hash": "642a30114d0862e360dd6102860b758e"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\.github\\workflows\\deploy.yml": {
+    "mtime": 1777479535.5789127,
+    "ast_hash": "1a07e3d712820f6fac9176d0fbec6465",
+    "semantic_hash": "1a07e3d712820f6fac9176d0fbec6465"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\.expo\\README.md": {
+    "mtime": 1776861387.9030805,
+    "ast_hash": "2d3a37a405a8f9ffb72ff12bdd3b0adf",
+    "semantic_hash": "2d3a37a405a8f9ffb72ff12bdd3b0adf"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\AGENTS.md": {
+    "mtime": 1776447389.2297633,
+    "ast_hash": "9e09241799026ac05be315a2f0b50055",
+    "semantic_hash": "9e09241799026ac05be315a2f0b50055"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\CLAUDE.md": {
+    "mtime": 1776447389.2297633,
+    "ast_hash": "5c27369b226fcf2be8a6cfe52224e767",
+    "semantic_hash": "5c27369b226fcf2be8a6cfe52224e767"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\README.md": {
+    "mtime": 1776447351.9956553,
+    "ast_hash": "f15aaa42d5d299d091b1171097ea56ad",
+    "semantic_hash": "f15aaa42d5d299d091b1171097ea56ad"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\landing\\public\\logo.svg": {
+    "mtime": 1777479235.9745598,
+    "ast_hash": "327811f4595d5c5f63fda08bf50ea41b",
+    "semantic_hash": "327811f4595d5c5f63fda08bf50ea41b"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\android\\app\\src\\main\\res\\drawable-hdpi\\splashscreen_logo.png": {
+    "mtime": 499162500.0,
+    "ast_hash": "ade4f271d920c553479f8359126fe71c",
+    "semantic_hash": "ade4f271d920c553479f8359126fe71c"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\android\\app\\src\\main\\res\\drawable-mdpi\\splashscreen_logo.png": {
+    "mtime": 499162500.0,
+    "ast_hash": "456a586f33d48e02adee03680b872073",
+    "semantic_hash": "456a586f33d48e02adee03680b872073"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\android\\app\\src\\main\\res\\drawable-xhdpi\\splashscreen_logo.png": {
+    "mtime": 499162500.0,
+    "ast_hash": "b151f30998a8eb180038294d96108ad3",
+    "semantic_hash": "b151f30998a8eb180038294d96108ad3"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\android\\app\\src\\main\\res\\drawable-xxhdpi\\splashscreen_logo.png": {
+    "mtime": 499162500.0,
+    "ast_hash": "456fa27f2c9de9a9bf0d8951a9609ea4",
+    "semantic_hash": "456fa27f2c9de9a9bf0d8951a9609ea4"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\android\\app\\src\\main\\res\\drawable-xxxhdpi\\splashscreen_logo.png": {
+    "mtime": 499162500.0,
+    "ast_hash": "8724a45c38b0f973ac9713ff270a40cb",
+    "semantic_hash": "8724a45c38b0f973ac9713ff270a40cb"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\android\\app\\src\\main\\res\\mipmap-hdpi\\ic_launcher.webp": {
+    "mtime": 1777151634.315,
+    "ast_hash": "17564976e232f7c1a82ead9ffc7f68f3",
+    "semantic_hash": "17564976e232f7c1a82ead9ffc7f68f3"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\android\\app\\src\\main\\res\\mipmap-hdpi\\ic_launcher_foreground.webp": {
+    "mtime": 1777151652.715,
+    "ast_hash": "41224843f971126e1fdc8df6cefc70a6",
+    "semantic_hash": "41224843f971126e1fdc8df6cefc70a6"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\android\\app\\src\\main\\res\\mipmap-hdpi\\ic_launcher_round.webp": {
+    "mtime": 1777151634.315,
+    "ast_hash": "17564976e232f7c1a82ead9ffc7f68f3",
+    "semantic_hash": "17564976e232f7c1a82ead9ffc7f68f3"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\android\\app\\src\\main\\res\\mipmap-mdpi\\ic_launcher.webp": {
+    "mtime": 1777151634.315,
+    "ast_hash": "2991409472f9703c7f2fc1ad63a6be1d",
+    "semantic_hash": "2991409472f9703c7f2fc1ad63a6be1d"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\android\\app\\src\\main\\res\\mipmap-mdpi\\ic_launcher_foreground.webp": {
+    "mtime": 1777151652.714,
+    "ast_hash": "5f36dd706f744c3b6ebe366c55f03acf",
+    "semantic_hash": "5f36dd706f744c3b6ebe366c55f03acf"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\android\\app\\src\\main\\res\\mipmap-mdpi\\ic_launcher_round.webp": {
+    "mtime": 1777151634.315,
+    "ast_hash": "2991409472f9703c7f2fc1ad63a6be1d",
+    "semantic_hash": "2991409472f9703c7f2fc1ad63a6be1d"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\android\\app\\src\\main\\res\\mipmap-xhdpi\\ic_launcher.webp": {
+    "mtime": 1777151634.319,
+    "ast_hash": "89b0c91db653c13b584958e8f6fb7aa9",
+    "semantic_hash": "89b0c91db653c13b584958e8f6fb7aa9"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\android\\app\\src\\main\\res\\mipmap-xhdpi\\ic_launcher_foreground.webp": {
+    "mtime": 1777151652.716,
+    "ast_hash": "1015010f7754906c18cda92fe1cc19b6",
+    "semantic_hash": "1015010f7754906c18cda92fe1cc19b6"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\android\\app\\src\\main\\res\\mipmap-xhdpi\\ic_launcher_round.webp": {
+    "mtime": 1777151634.319,
+    "ast_hash": "89b0c91db653c13b584958e8f6fb7aa9",
+    "semantic_hash": "89b0c91db653c13b584958e8f6fb7aa9"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\android\\app\\src\\main\\res\\mipmap-xxhdpi\\ic_launcher.webp": {
+    "mtime": 1777151634.324,
+    "ast_hash": "689114521994062413645866147cb5d4",
+    "semantic_hash": "689114521994062413645866147cb5d4"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\android\\app\\src\\main\\res\\mipmap-xxhdpi\\ic_launcher_foreground.webp": {
+    "mtime": 1777151652.717,
+    "ast_hash": "0e9bd5cf93cb9f711f58ee90d789dbf4",
+    "semantic_hash": "0e9bd5cf93cb9f711f58ee90d789dbf4"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\android\\app\\src\\main\\res\\mipmap-xxhdpi\\ic_launcher_round.webp": {
+    "mtime": 1777151634.324,
+    "ast_hash": "689114521994062413645866147cb5d4",
+    "semantic_hash": "689114521994062413645866147cb5d4"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\android\\app\\src\\main\\res\\mipmap-xxxhdpi\\ic_launcher.webp": {
+    "mtime": 1777151634.33,
+    "ast_hash": "32c720b29c47be46cd3497a92cd113ea",
+    "semantic_hash": "32c720b29c47be46cd3497a92cd113ea"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\android\\app\\src\\main\\res\\mipmap-xxxhdpi\\ic_launcher_foreground.webp": {
+    "mtime": 1777151652.722,
+    "ast_hash": "5f47cb6aec18a188c5ea0e47194cd32b",
+    "semantic_hash": "5f47cb6aec18a188c5ea0e47194cd32b"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\android\\app\\src\\main\\res\\mipmap-xxxhdpi\\ic_launcher_round.webp": {
+    "mtime": 1777151634.331,
+    "ast_hash": "32c720b29c47be46cd3497a92cd113ea",
+    "semantic_hash": "32c720b29c47be46cd3497a92cd113ea"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\assets\\adaptive-icon.png": {
+    "mtime": 1777150323.792,
+    "ast_hash": "d2b8a152bc1ea1c1d32ce01cffb02eb0",
+    "semantic_hash": "d2b8a152bc1ea1c1d32ce01cffb02eb0"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\assets\\icon.png": {
+    "mtime": 1777149302.848,
+    "ast_hash": "50862c6285451e2c5121f59cb804e5a0",
+    "semantic_hash": "50862c6285451e2c5121f59cb804e5a0"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\mobile\\ios\\mobile\\Images.xcassets\\SplashScreenLegacy.imageset\\SplashScreenLegacy.png": {
+    "mtime": 499162500.0,
+    "ast_hash": "124d103128049fe0cbf74aec6fdf70f0",
+    "semantic_hash": "124d103128049fe0cbf74aec6fdf70f0"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\main\\res\\drawable\\splash.png": {
+    "mtime": 1776857933.1614344,
+    "ast_hash": "acc976d4a36479233371a53021525c0c",
+    "semantic_hash": "acc976d4a36479233371a53021525c0c"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\main\\res\\drawable-land-hdpi\\splash.png": {
+    "mtime": 1776857933.155787,
+    "ast_hash": "f7a80786dd355bd39014e58027aa6e19",
+    "semantic_hash": "f7a80786dd355bd39014e58027aa6e19"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\main\\res\\drawable-land-mdpi\\splash.png": {
+    "mtime": 1776857933.1562936,
+    "ast_hash": "acc976d4a36479233371a53021525c0c",
+    "semantic_hash": "acc976d4a36479233371a53021525c0c"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\main\\res\\drawable-land-xhdpi\\splash.png": {
+    "mtime": 1776857933.1568093,
+    "ast_hash": "b8c72969bc1f78aab71a76035360d4af",
+    "semantic_hash": "b8c72969bc1f78aab71a76035360d4af"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\main\\res\\drawable-land-xxhdpi\\splash.png": {
+    "mtime": 1776857933.1573281,
+    "ast_hash": "f87e988387b07d843905f38b084929fb",
+    "semantic_hash": "f87e988387b07d843905f38b084929fb"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\main\\res\\drawable-land-xxxhdpi\\splash.png": {
+    "mtime": 1776857933.157842,
+    "ast_hash": "055a69553b16b0bf5f72094a2e459fc7",
+    "semantic_hash": "055a69553b16b0bf5f72094a2e459fc7"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\main\\res\\drawable-port-hdpi\\splash.png": {
+    "mtime": 1776857933.1583493,
+    "ast_hash": "5eb10d16c81338abe8bbc033d49638a8",
+    "semantic_hash": "5eb10d16c81338abe8bbc033d49638a8"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\main\\res\\drawable-port-mdpi\\splash.png": {
+    "mtime": 1776857933.1588633,
+    "ast_hash": "d855a76a5070c8e6fcfd83a27549bdce",
+    "semantic_hash": "d855a76a5070c8e6fcfd83a27549bdce"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\main\\res\\drawable-port-xhdpi\\splash.png": {
+    "mtime": 1776857933.1593719,
+    "ast_hash": "df100b2a36bdb98b711cca58941728de",
+    "semantic_hash": "df100b2a36bdb98b711cca58941728de"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\main\\res\\drawable-port-xxhdpi\\splash.png": {
+    "mtime": 1776857933.159887,
+    "ast_hash": "2c1b668364e815256f67b71dcdfa4d6e",
+    "semantic_hash": "2c1b668364e815256f67b71dcdfa4d6e"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\main\\res\\drawable-port-xxxhdpi\\splash.png": {
+    "mtime": 1776857933.1603937,
+    "ast_hash": "b5b1b22b59abe686c1df0d74a423d034",
+    "semantic_hash": "b5b1b22b59abe686c1df0d74a423d034"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\main\\res\\mipmap-hdpi\\ic_launcher.png": {
+    "mtime": 1776857933.1629674,
+    "ast_hash": "1956941339dd5fe36d5c66601c89a08d",
+    "semantic_hash": "1956941339dd5fe36d5c66601c89a08d"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\main\\res\\mipmap-hdpi\\ic_launcher_foreground.png": {
+    "mtime": 1776857933.1634738,
+    "ast_hash": "73b1e06d769fa08a9c3b8328cc15fd75",
+    "semantic_hash": "73b1e06d769fa08a9c3b8328cc15fd75"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\main\\res\\mipmap-hdpi\\ic_launcher_round.png": {
+    "mtime": 1776857933.1639874,
+    "ast_hash": "f43e5674865a00186dd76183cf1f2f8e",
+    "semantic_hash": "f43e5674865a00186dd76183cf1f2f8e"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\main\\res\\mipmap-mdpi\\ic_launcher.png": {
+    "mtime": 1776857933.164495,
+    "ast_hash": "7ed1b3739b83215d0c4a0b4a7f2dcab4",
+    "semantic_hash": "7ed1b3739b83215d0c4a0b4a7f2dcab4"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\main\\res\\mipmap-mdpi\\ic_launcher_foreground.png": {
+    "mtime": 1776857933.1650217,
+    "ast_hash": "5b77e8aec8b17eed320a97567c7cb8bf",
+    "semantic_hash": "5b77e8aec8b17eed320a97567c7cb8bf"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\main\\res\\mipmap-mdpi\\ic_launcher_round.png": {
+    "mtime": 1776857933.1650217,
+    "ast_hash": "a49547a32c7d9b529af607b033811d81",
+    "semantic_hash": "a49547a32c7d9b529af607b033811d81"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\main\\res\\mipmap-xhdpi\\ic_launcher.png": {
+    "mtime": 1776857933.1655283,
+    "ast_hash": "5689511ee4e41a367d0342f37ac48bdf",
+    "semantic_hash": "5689511ee4e41a367d0342f37ac48bdf"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\main\\res\\mipmap-xhdpi\\ic_launcher_foreground.png": {
+    "mtime": 1776857933.1660483,
+    "ast_hash": "15cdded29b9877ac98c5931024c5da5d",
+    "semantic_hash": "15cdded29b9877ac98c5931024c5da5d"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\main\\res\\mipmap-xhdpi\\ic_launcher_round.png": {
+    "mtime": 1776857933.166559,
+    "ast_hash": "c890fa4af62a63486d5dea62441ce7ab",
+    "semantic_hash": "c890fa4af62a63486d5dea62441ce7ab"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\main\\res\\mipmap-xxhdpi\\ic_launcher.png": {
+    "mtime": 1776857933.1670833,
+    "ast_hash": "a3285eeaedda8201f04e7737b9df8421",
+    "semantic_hash": "a3285eeaedda8201f04e7737b9df8421"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\main\\res\\mipmap-xxhdpi\\ic_launcher_foreground.png": {
+    "mtime": 1776857933.1675916,
+    "ast_hash": "4e9584ecc16d1fc75afb798688ce576f",
+    "semantic_hash": "4e9584ecc16d1fc75afb798688ce576f"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\main\\res\\mipmap-xxhdpi\\ic_launcher_round.png": {
+    "mtime": 1776857933.1675916,
+    "ast_hash": "14cde87848553e24d7106f56eb8ceb6f",
+    "semantic_hash": "14cde87848553e24d7106f56eb8ceb6f"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\main\\res\\mipmap-xxxhdpi\\ic_launcher.png": {
+    "mtime": 1776857933.1681051,
+    "ast_hash": "9e029293ab1ae8e3a6a7b7d0b7177e46",
+    "semantic_hash": "9e029293ab1ae8e3a6a7b7d0b7177e46"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\main\\res\\mipmap-xxxhdpi\\ic_launcher_foreground.png": {
+    "mtime": 1776857933.1686141,
+    "ast_hash": "ed3696b7c52d9747411a475dbe3fa34a",
+    "semantic_hash": "ed3696b7c52d9747411a475dbe3fa34a"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\android\\app\\src\\main\\res\\mipmap-xxxhdpi\\ic_launcher_round.png": {
+    "mtime": 1776857933.169129,
+    "ast_hash": "85addb4159ecd3f76f02fbacd5ec86de",
+    "semantic_hash": "85addb4159ecd3f76f02fbacd5ec86de"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\app\\icon.svg": {
+    "mtime": 1777148676.4044151,
+    "ast_hash": "327811f4595d5c5f63fda08bf50ea41b",
+    "semantic_hash": "327811f4595d5c5f63fda08bf50ea41b"
+  },
+  "C:\\Users\\vtoto\\Desktop\\Expensable\\apps\\web\\public\\logo.svg": {
+    "mtime": 1777148676.4074192,
+    "ast_hash": "327811f4595d5c5f63fda08bf50ea41b",
+    "semantic_hash": "327811f4595d5c5f63fda08bf50ea41b"
+  }
+}

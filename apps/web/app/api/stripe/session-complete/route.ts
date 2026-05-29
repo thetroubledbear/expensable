@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@expensable/db"
 import { getStripe } from "@/lib/stripe"
+import { auth } from "@/lib/auth/config"
 import type Stripe from "stripe"
 
 function tierFromPriceId(priceId: string): "pro" | "family" | null {
@@ -10,6 +11,13 @@ function tierFromPriceId(priceId: string): "pro" | "family" | null {
 }
 
 export async function GET(req: NextRequest) {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return NextResponse.redirect(
+      `${process.env.NEXTAUTH_URL ?? "http://localhost:3000"}/login`
+    )
+  }
+
   const base = process.env.NEXTAUTH_URL ?? "http://localhost:3000"
   const sessionId = req.nextUrl.searchParams.get("session_id")
 

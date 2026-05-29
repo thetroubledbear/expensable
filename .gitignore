@@ -41,3 +41,6 @@ apps/web/android/local.properties
 
 # Prisma
 packages/db/generated/
+
+#else
+
