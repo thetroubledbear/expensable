@@ -211,3 +211,19 @@ Dashboard shows (current month only):
 | 3.5 | ✅ Done | Onboarding wizard — 5-step flow (web + mobile) |
 | 4 | — | Insights + Stripe subscription |
 | 5 | — | Expo mobile app |
+
+## graphify
+
+Knowledge graph at `graphify-out/` — 1484 nodes, 2017 edges, 142 communities, 44x token reduction vs raw grep.
+
+**God nodes (touch everything):** `resolveHousehold()` (92 edges), `requireAuth()` (24), `useAlert()` (19 mobile), `compilerOptions` (17 tsconfigs).
+
+**Key communities:** Auth & Household API (C3), Dashboard Widgets (C12), Onboarding Flow (C13), Mobile Auth Screens (C8), Category System (C27), AI Routes & Budgets (C29).
+
+Rules:
+- **New feature / unfamiliar area:** read `graphify-out/GRAPH_REPORT.md` first — god nodes and community structure tell you what will be affected before you touch anything.
+- **Specific question:** run `graphify query "<question>"` — returns scoped subgraph, far cheaper than grepping files.
+- **Relationship between two things:** run `graphify path "<A>" "<B>"`.
+- **Deep dive on one symbol:** run `graphify explain "<concept>"`.
+- **Never grep raw files** when `graphify-out/graph.json` exists — use the graph first.
+- After modifying code, run `graphify update .` to keep graph current (AST-only, no token cost).

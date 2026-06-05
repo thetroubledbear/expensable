@@ -44,3 +44,7 @@ packages/db/generated/
 
 #else
 
+# graphify
+graphify-out/graph.html
+graphify-out/.graphify_python
+graphify-out/cache/
