@@ -7,6 +7,7 @@ import { UploadCloud } from "lucide-react"
 import { DashboardGrid, type DashboardData } from "@/components/dashboard-grid"
 import { CATEGORY_COLOR_MAP } from "@/lib/categories"
 import { NotificationsBell } from "@/components/notifications-bell"
+import { MonthPicker } from "@/components/month-picker"
 
 function greeting() {
   const h = new Date().getHours()
@@ -24,7 +25,11 @@ function estimateMonthly(amount: number, frequency: string): number {
 
 export const dynamic = "force-dynamic"
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ month?: string }>
+}) {
   const session = await requireAuth()
 
   const membership = await resolveHousehold(session.user?.id!)
@@ -32,9 +37,17 @@ export default async function DashboardPage() {
   const hid = membership?.householdId
   const currency = membership?.household.defaultCurrency ?? "USD"
   const now = new Date()
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-  const monthName = now.toLocaleString("en", { month: "long" })
   const firstName = (session.user as { name?: string | null })?.name?.split(" ")[0] ?? "there"
+
+  // Parse ?month=YYYY-MM, default to current month
+  const { month: monthParam } = await searchParams
+  const nowKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
+  const selectedMonthKey = /^\d{4}-\d{2}$/.test(monthParam ?? "") ? monthParam! : nowKey
+  const [selYear, selMonth] = selectedMonthKey.split("-").map(Number)
+
+  const startOfMonth = new Date(selYear, selMonth - 1, 1)
+  const endOfMonth = new Date(selYear, selMonth, 0, 23, 59, 59, 999)
+  const monthName = startOfMonth.toLocaleString("en", { month: "long" })
 
   if (!hid) {
     return (
@@ -86,22 +99,22 @@ export default async function DashboardPage() {
   }
 
   const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1)
-  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-  const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59)
-  const lastMonthName = new Date(now.getFullYear(), now.getMonth() - 1, 1).toLocaleString("en", { month: "long" })
+  const startOfPrevMonth = new Date(selYear, selMonth - 2, 1)
+  const endOfPrevMonth = new Date(selYear, selMonth - 1, 0, 23, 59, 59, 999)
+  const lastMonthName = startOfPrevMonth.toLocaleString("en", { month: "long" })
 
   const [moneyOut, moneyIn, recentTxRaw, topMerchantsRaw, subs, prevMonthAgg, trendTx, catTotals, financialAccounts, acctCredits, acctDebits] =
     await Promise.all([
       db.transaction.aggregate({
-        where: { householdId: hid, type: "debit", date: { gte: startOfMonth } },
+        where: { householdId: hid, type: "debit", date: { gte: startOfMonth, lte: endOfMonth } },
         _sum: { amount: true },
       }),
       db.transaction.aggregate({
-        where: { householdId: hid, type: "credit", date: { gte: startOfMonth } },
+        where: { householdId: hid, type: "credit", date: { gte: startOfMonth, lte: endOfMonth } },
         _sum: { amount: true },
       }),
       db.transaction.findMany({
-        where: { householdId: hid },
+        where: { householdId: hid, date: { gte: startOfMonth, lte: endOfMonth } },
         orderBy: { date: "desc" },
         take: 8,
       }),
@@ -110,7 +123,7 @@ export default async function DashboardPage() {
         where: {
           householdId: hid,
           type: "debit",
-          date: { gte: startOfMonth },
+          date: { gte: startOfMonth, lte: endOfMonth },
           merchantName: { not: null },
         },
         _sum: { amount: true },
@@ -124,7 +137,7 @@ export default async function DashboardPage() {
         where: {
           householdId: hid,
           type: "debit",
-          date: { gte: startOfLastMonth, lte: endOfLastMonth },
+          date: { gte: startOfPrevMonth, lte: endOfPrevMonth },
         },
         _sum: { amount: true },
       }),
@@ -134,7 +147,7 @@ export default async function DashboardPage() {
       }),
       db.transaction.groupBy({
         by: ["categoryId"],
-        where: { householdId: hid, type: "debit", date: { gte: startOfMonth } },
+        where: { householdId: hid, type: "debit", date: { gte: startOfMonth, lte: endOfMonth } },
         _sum: { amount: true },
       }),
       db.financialAccount.findMany({
@@ -254,13 +267,19 @@ export default async function DashboardPage() {
 
   return (
     <div className="p-4 sm:p-8 max-w-7xl mx-auto w-full">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-slate-900">
-          {greeting()}, {firstName}
-        </h1>
-        <p className="text-slate-500 mt-1 text-sm">
-          {membership?.household.name ?? "Your workspace"} · {monthName} overview
-        </p>
+      <div className="mb-6 flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-semibold text-slate-900">
+            {greeting()}, {firstName}
+          </h1>
+          <p className="text-slate-500 mt-1 text-sm">
+            {membership?.household.name ?? "Your workspace"} · {monthName} overview
+          </p>
+        </div>
+        <div className="flex items-center gap-3 mt-0.5">
+          <NotificationsBell />
+          <MonthPicker selectedMonth={selectedMonthKey} />
+        </div>
       </div>
       <DashboardGrid data={data} />
     </div>
